@@ -5,11 +5,12 @@ from django.conf.urls.static import static
 
 from rest_framework.routers import DefaultRouter
 
-from apps.places.viewsets import StatesViewSet
+from apps.places.viewsets import StateViewSet, CityViewSet
 
 
 router = DefaultRouter()
-router.register('state', StatesViewSet)
+router.register('state', StateViewSet)
+router.register('city', CityViewSet)
 
 
 urlpatterns = [

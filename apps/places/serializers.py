@@ -3,6 +3,13 @@ from rest_framework import serializers
 from .models import State, City
 
 
+class StateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = State
+        fields = ('pk', 'name')
+
+
 class CitySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -10,9 +17,10 @@ class CitySerializer(serializers.ModelSerializer):
         fields = ('pk', 'name')
 
 
-class StateSerializer(serializers.ModelSerializer):
-    cities = CitySerializer(many=True)
+class CityWithStateSerializer(serializers.ModelSerializer):
+
+    state = StateSerializer()
 
     class Meta:
-        model = State
-        fields = ('pk', 'name', 'cities')
+        model = City
+        fields = ('pk', 'name', 'state')
