@@ -78,7 +78,8 @@ class RideBookingStatus(object):
 class RideBooking(CreatedUpdatedMixin):
     ride = models.ForeignKey(
         'Ride',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name='bookings')
     client = models.ForeignKey(
         'accounts.User',
         on_delete=models.CASCADE)
