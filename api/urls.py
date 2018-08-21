@@ -6,15 +6,17 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 
 from apps.places.viewsets import StateViewSet, CityViewSet
+from apps.accounts.views import MyView
 
 
 router = DefaultRouter()
-router.register('state', StateViewSet)
-router.register('city', CityViewSet)
+router.register('places/state', StateViewSet)
+router.register('places/city', CityViewSet)
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/my/', MyView.as_view()),
 ] + router.urls
 
 if settings.DEBUG:
