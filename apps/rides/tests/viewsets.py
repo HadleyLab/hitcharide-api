@@ -4,16 +4,15 @@ from django.utils import timezone
 from api.tests import APITestCase
 
 from apps.places.factories import CityFactory
-from apps.rides.factories import CarFactory, RideFactory
-from apps.rides.models import Ride, Car, RidePoint
+from apps.rides.factories import CarFactory, RideFactory, RideBookingFactory
+from apps.rides.models import Ride, Car
 
 
 class RideViewSetTest(APITestCase):
     def setUp(self):
+        super(RideViewSetTest, self).setUp()
         self.city1 = CityFactory.create()
         self.city2 = CityFactory.create()
-
-        super(RideViewSetTest, self).setUp()
         self.car = CarFactory.create(
             owner=self.user,
             brand='some',
@@ -92,3 +91,27 @@ class RideViewSetTest(APITestCase):
 
         self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0]['pk'], ride.pk)
+
+    def test_my(self):
+        pass
+
+
+class RideBookingViewSetTest(APITestCase):
+    def setUp(self):
+        super(RideBookingViewSetTest, self).setUp()
+        self.city1 = CityFactory.create()
+        self.city2 = CityFactory.create()
+
+        self.car = CarFactory.create(
+            owner=self.user,
+            brand='some',
+            model='car',
+            number_of_sits=5)
+
+        self.booking = RideBookingFactory.create(
+            ride=RideFactory.create(car=self.car),
+            client=self.user)
+
+    def test_list_unauthorized(self):
+        resp = self.client.get('/rides/ride/', format='json')
+        self.assertForbidden(resp)

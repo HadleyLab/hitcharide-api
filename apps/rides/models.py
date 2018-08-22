@@ -94,3 +94,6 @@ class RideBooking(CreatedUpdatedMixin):
             self.client,
             self.ride,
             self.get_status_display())
+
+    class Meta:
+        unique_together = ('ride', 'client')
