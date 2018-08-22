@@ -63,3 +63,32 @@ class RideViewSetTest(APITestCase):
         self.assertEqual(ride.stops.all().count(), 2)
         self.assertEqual(ride.car.brand, 'another')
         self.assertEqual(Car.objects.all().count(), cars_count_before + 1)
+
+    def test_list_unauthorized(self):
+        resp = self.client.get('/rides/ride/', format='json')
+        self.assertForbidden(resp)
+
+    def test_list(self):
+        self.authenticate()
+
+        car = CarFactory.create(owner=self.user)
+        now = timezone.now()
+        tomorrow = now - timedelta(days=1)
+        yesterday = now + timedelta(days=1)
+
+        RideFactory.create(
+            start=tomorrow,
+            end=yesterday,
+            number_of_sits=5,
+            car=car)
+        ride = RideFactory.create(
+            start=yesterday,
+            end=yesterday,
+            number_of_sits=5,
+            car=car)
+
+        resp = self.client.get('/rides/ride/', format='json')
+        self.assertSuccessResponse(resp)
+
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['pk'], ride.pk)
