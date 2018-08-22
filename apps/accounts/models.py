@@ -5,6 +5,7 @@ from django.core import validators
 
 class User(AbstractUser):
     age = models.IntegerField(
+        default=20,
         validators=[
             validators.MinValueValidator(0),
             validators.MaxValueValidator(100),

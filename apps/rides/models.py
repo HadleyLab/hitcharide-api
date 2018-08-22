@@ -59,6 +59,7 @@ class RidePoint(models.Model):
         'places.City',
         on_delete=models.CASCADE)
     cost_per_sit = models.PositiveIntegerField()
+    order = models.IntegerField(default=0)
 
 
 class RideBookingStatus(object):
