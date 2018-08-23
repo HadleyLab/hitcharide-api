@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from api.tests import APITestCase
+from apps.accounts.factories import UserFactory
 
 from apps.places.factories import CityFactory
 from apps.rides.factories import CarFactory, RideFactory, RideBookingFactory
@@ -92,8 +93,42 @@ class RideViewSetTest(APITestCase):
         self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0]['pk'], ride.pk)
 
+    def test_my_unauthorized(self):
+        resp = self.client.get('/rides/ride/my/', format='json')
+        self.assertForbidden(resp)
+
     def test_my(self):
-        pass
+        self.authenticate()
+
+        car = CarFactory.create(owner=self.user)
+        now = timezone.now()
+        tomorrow = now - timedelta(days=1)
+        yesterday = now + timedelta(days=1)
+
+        my_ride_1 = RideFactory.create(
+            start=tomorrow,
+            end=yesterday,
+            number_of_sits=5,
+            car=car)
+        my_ride_2 = RideFactory.create(
+            start=yesterday,
+            end=yesterday,
+            number_of_sits=5,
+            car=car)
+
+        another_user = UserFactory.create()
+        another_car = CarFactory.create(owner=another_user)
+        RideFactory.create(
+            start=tomorrow,
+            end=yesterday,
+            number_of_sits=5,
+            car=another_car)
+
+        resp = self.client.get('/rides/ride/my/', format='json')
+        self.assertSuccessResponse(resp)
+        self.assertListEqual(
+            [my_ride_1.pk, my_ride_2.pk],
+            [ride['pk'] for ride in resp.data])
 
 
 class RideBookingViewSetTest(APITestCase):

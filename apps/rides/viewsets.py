@@ -31,12 +31,10 @@ class RideViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         queryset = super(RideViewSet, self).get_queryset()
 
-        if self.action == 'my':
-            return queryset.filter(start__gt=timezone.now())
-        elif self.action == 'destroy':
+        if self.action in ['my', 'destroy']:
             return queryset.filter(car__owner=self.request.user)
         else:
-            return queryset
+            return queryset.filter(start__gt=timezone.now())
 
     @action(methods=['GET'], detail=False)
     def my(self, request, *args, **kwargs):
