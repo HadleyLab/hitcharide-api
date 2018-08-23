@@ -143,10 +143,29 @@ class RideBookingViewSetTest(APITestCase):
             model='car',
             number_of_sits=5)
 
+        self.ride = RideFactory.create(car=self.car)
         self.booking = RideBookingFactory.create(
-            ride=RideFactory.create(car=self.car),
+            ride=self.ride,
             client=self.user)
 
     def test_list_unauthorized(self):
-        resp = self.client.get('/rides/ride/', format='json')
+        resp = self.client.get('/rides/booking/', format='json')
         self.assertForbidden(resp)
+
+    def test_list(self):
+        another_user = UserFactory.create()
+        another_booking = RideBookingFactory.create(
+            ride=self.ride,
+            client=another_user)
+
+        self.authenticate()
+        resp = self.client.get('/rides/booking/', format='json')
+        self.assertSuccessResponse(resp)
+        self.assertListEqual([self.booking.pk],
+                             [book['pk'] for book in resp.data])
+
+        self.authenticate_as(another_user.username, another_user.password)
+        resp = self.client.get('/rides/booking/', format='json')
+        self.assertSuccessResponse(resp)
+        self.assertListEqual([another_booking.pk],
+                             [book['pk'] for book in resp.data])

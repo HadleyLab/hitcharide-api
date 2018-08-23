@@ -7,14 +7,16 @@ from rest_framework.routers import DefaultRouter
 
 from apps.places.viewsets import StateViewSet, CityViewSet
 from apps.accounts.views import MyView
-from apps.rides.viewsets import CarViewSet, RideViewSet
+from apps.rides.viewsets import CarViewSet, RideViewSet, RideBookingViewSet
 
 
 router = DefaultRouter()
 router.register('places/state', StateViewSet)
 router.register('places/city', CityViewSet)
+
 router.register('rides/car', CarViewSet)
 router.register('rides/ride', RideViewSet)
+router.register('rides/booking', RideBookingViewSet)
 
 
 urlpatterns = [
