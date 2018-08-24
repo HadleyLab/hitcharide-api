@@ -12,10 +12,10 @@ from apps.accounts.factories import UserFactory
 class APITestCase(BaseAPITestCase):
     def setUp(self):
         super(APITestCase, self).setUp()
-        self.username = 'username'
+        self.username = 'user@test.test'
         self.password = 'password'
         self.user = UserFactory.create(
-            username=self.username,
+            email=self.username,
             password=self.password)
 
     def authenticate_as(self, username, password):

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # Third party apps
     'rest_framework',
     'django_filters',
+    'djoser',
 
     # Local apps
     'apps.accounts',
@@ -79,7 +80,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'api.wsgi.application'
-
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
+        'DJOSER_PASSWORD_RESET_CONFIRM_URL',
+        'web_ui/#/password/reset/confirm/{uid}/{token}'),
+    'ACTIVATION_URL': os.environ.get(
+        'DJOSER_ACTIVATION_URL',
+        'web_ui/#/activate/{uid}/{token}'),
+    'SEND_ACTIVATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases

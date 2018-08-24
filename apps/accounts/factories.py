@@ -7,7 +7,8 @@ class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
 
-    username = fuzzy.FuzzyText()
+    first_name = fuzzy.FuzzyText()
+    last_name = fuzzy.FuzzyText()
     age = fuzzy.FuzzyInteger(low=5, high=100)
     password = PostGenerationMethodCall('set_password', 'password')
     email = Sequence(lambda n: 'user{0}@example.com'.format(n))
