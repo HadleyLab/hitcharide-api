@@ -3,8 +3,9 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Car, Ride, RideBooking
-from .serializers import CarSerializer, RideSerializer, RideBookingSerializer
+from .models import Car, Ride, RideBooking, RideRequest
+from .serializers import CarSerializer, RideSerializer, \
+    RideBookingSerializer, RideRequestSerializer
 
 
 class CarViewSet(viewsets.GenericViewSet,
@@ -52,3 +53,21 @@ class RideBookingViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
+
+
+class RideRequestViewSet(viewsets.GenericViewSet,
+                         mixins.ListModelMixin,
+                         mixins.CreateModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin):
+    queryset = RideRequest.objects.all().order_by('created')
+    serializer_class = RideRequestSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        result = super(RideRequestViewSet, self).get_queryset()
+
+        if self.action in ['create', 'update', 'destroy']:
+            result = result.filter(author=self.request.user)
+
+        return result

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from drf_writable_nested import NestedCreateMixin
 
 from api.serializers import GetOrCreateMixin
-from .models import Car, Ride, RidePoint, RideBooking
+from .models import Car, Ride, RidePoint, RideBooking, RideRequest
 
 
 class CarSerializer(GetOrCreateMixin):
@@ -59,3 +59,16 @@ class RideBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = RideBooking
         fields = ('pk', 'ride', 'status')
+
+
+class RideRequestSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        if 'pk' not in validated_data:
+            validated_data['author'] = self.context['request'].user
+
+        return super(RideRequestSerializer, self).create(validated_data)
+
+    class Meta:
+        model = RideRequest
+        fields = ('pk', 'city_from', 'city_to', 'start')
