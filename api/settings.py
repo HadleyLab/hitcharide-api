@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
 
     # Third party apps
     'rest_framework',
@@ -85,12 +86,13 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': 'postgres'
     }
 }
-
-
 AUTH_USER_MODEL = 'accounts.User'
 
 
