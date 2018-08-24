@@ -67,7 +67,11 @@ class RideRequestViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         result = super(RideRequestViewSet, self).get_queryset()
 
-        if self.action in ['create', 'update', 'destroy']:
+        if self.action in ['create', 'update', 'destroy', 'my']:
             result = result.filter(author=self.request.user)
 
         return result
+
+    @action(methods=['GET'], detail=False)
+    def my(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
