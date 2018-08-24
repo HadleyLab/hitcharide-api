@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from .mixins import CreatedUpdatedMixin
 
@@ -114,3 +115,7 @@ class RideRequest(CreatedUpdatedMixin):
         on_delete=models.CASCADE,
         related_name='+')
     start = models.DateTimeField()
+
+    @property
+    def is_expired(self):
+        return self.start < timezone.now()

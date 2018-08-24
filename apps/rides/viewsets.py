@@ -69,6 +69,8 @@ class RideRequestViewSet(viewsets.GenericViewSet,
 
         if self.action in ['create', 'update', 'destroy', 'my']:
             result = result.filter(author=self.request.user)
+        else:
+            result = result.filter(start__gt=timezone.now())
 
         return result
 

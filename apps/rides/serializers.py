@@ -63,6 +63,8 @@ class RideBookingSerializer(serializers.ModelSerializer):
 
 class RideRequestSerializer(serializers.ModelSerializer):
 
+    is_expired = serializers.BooleanField(read_only=True)
+
     def create(self, validated_data):
         if 'pk' not in validated_data:
             validated_data['author'] = self.context['request'].user
@@ -71,4 +73,4 @@ class RideRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideRequest
-        fields = ('pk', 'city_from', 'city_to', 'start')
+        fields = ('pk', 'city_from', 'city_to', 'is_expired', 'start')
