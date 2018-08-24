@@ -83,7 +83,8 @@ class RideBooking(CreatedUpdatedMixin):
         related_name='bookings')
     client = models.ForeignKey(
         'accounts.User',
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name='bookings')
     status = models.CharField(
         max_length=10,
         default=RideBookingStatus.CREATED,
@@ -97,3 +98,19 @@ class RideBooking(CreatedUpdatedMixin):
 
     class Meta:
         unique_together = ('ride', 'client')
+
+
+class RideRequest(CreatedUpdatedMixin):
+    author = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.CASCADE,
+        related_name='requests')
+    city_from = models.ForeignKey(
+        'places.City',
+        on_delete=models.CASCADE,
+        related_name='+')
+    city_to = models.ForeignKey(
+        'places.City',
+        on_delete=models.CASCADE,
+        related_name='+')
+    start = models.DateTimeField()
