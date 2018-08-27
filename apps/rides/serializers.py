@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_writable_nested import NestedCreateMixin
 
-from api.serializers import GetOrCreateMixin
+from config.serializers import GetOrCreateMixin
 from .models import Car, Ride, RidePoint, RideBooking, RideRequest
 
 

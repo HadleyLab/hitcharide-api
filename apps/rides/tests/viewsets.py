@@ -1,9 +1,8 @@
 from datetime import timedelta
 from django.utils import timezone
 
-from api.tests import APITestCase
+from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
-
 from apps.places.factories import CityFactory
 from apps.rides.factories import CarFactory, RideFactory, RideBookingFactory
 from apps.rides.models import Ride, Car

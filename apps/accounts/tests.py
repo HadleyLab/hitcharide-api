@@ -1,4 +1,4 @@
-from api.tests import APITestCase
+from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
 from apps.accounts.models import User
 
