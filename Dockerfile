@@ -1,7 +1,7 @@
 FROM python:3.6-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      git libgeos-dev libgdal1-dev \
+      git libgeos-dev libgdal-dev \
   && apt-get autoremove -y \
   && rm -rf /var/lib/apt/lists/*
 
