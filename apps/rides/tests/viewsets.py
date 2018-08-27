@@ -36,7 +36,7 @@ class RideViewSetTest(APITestCase):
         data = self.get_ride_data()
         data.update({'car': {'pk': self.car.pk}})
         resp = self.client.post('/rides/ride/', data, format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_create_with_existing_car(self):
         self.authenticate()
@@ -66,7 +66,7 @@ class RideViewSetTest(APITestCase):
 
     def test_list_unauthorized(self):
         resp = self.client.get('/rides/ride/', format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_list(self):
         self.authenticate()
@@ -95,7 +95,7 @@ class RideViewSetTest(APITestCase):
 
     def test_my_unauthorized(self):
         resp = self.client.get('/rides/ride/my/', format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_my(self):
         self.authenticate()
