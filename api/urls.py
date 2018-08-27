@@ -3,7 +3,9 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from djoser import views as djoser_views
-
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import verify_jwt_token
+from rest_framework_jwt.views import refresh_jwt_token
 
 from apps.places.viewsets import StateViewSet, CityViewSet
 from apps.accounts.views import MyView
@@ -26,7 +28,11 @@ router.register('rides/request', RideRequestViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/my/', MyView.as_view(), name='account_my'),
-    # Registration
+
+    path('accounts/login/', obtain_jwt_token, name='account_jwt_login'),
+    path('accounts/verify/', verify_jwt_token, name='account_jwt_verify'),
+    path('accounts/refresh/', refresh_jwt_token, name='account_jwt_refresh'),
+
     path('accounts/register/', djoser_views.UserCreateView.as_view(),
          name='account_register'),
     path('accounts/activate/', djoser_views.ActivationView.as_view(),

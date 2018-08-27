@@ -23,6 +23,7 @@ class RegistrationTestCase(APITestCase):
         self.assertTrue(user.check_password('123'))
         self.assertEqual(user.email, 'test@test.test')
         self.assertEqual(user.username, 'test@test.test')
+        # TODO check is active!!!
 
     def test_registration_params_set(self):
         data = {
