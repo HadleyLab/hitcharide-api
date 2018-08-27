@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import dj_database_url
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -104,13 +106,7 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'NAME': 'postgres',
-        'USER': 'postgres'
-    }
+    'default': dj_database_url.config(),
 }
 AUTH_USER_MODEL = 'accounts.User'
 
