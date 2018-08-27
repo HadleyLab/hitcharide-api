@@ -23,7 +23,7 @@ class RegistrationTestCase(APITestCase):
         self.assertTrue(user.check_password('123'))
         self.assertEqual(user.email, 'test@test.test')
         self.assertEqual(user.username, 'test@test.test')
-        # TODO check is active!!!
+        self.assertEqual(user.is_active, False)
 
     def test_registration_params_set(self):
         data = {
@@ -59,3 +59,23 @@ class RegistrationTestCase(APITestCase):
 
         resp = self.client.post('/accounts/register/', data, format='json')
         self.assertBadRequest(resp)
+
+    def test_login_jwt(self):
+        resp = self.client.post('/accounts/login/', {
+            'username': self.user.username,
+            'password': self.password
+        }, format='json')
+        self.assertSuccessResponse(resp)
+        token = resp.data['token']
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION='JWT {0}'.format(token)
+        )
+
+        resp = self.client.get('/accounts/my/', format='json')
+        self.assertSuccessResponse(resp)
+
+        user = resp.data
+        self.assertEqual(user['email'], self.user.email)
+        self.assertEqual(user['first_name'], self.user.first_name)
+        self.assertEqual(user['last_name'], self.user.last_name)
