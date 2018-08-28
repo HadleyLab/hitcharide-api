@@ -18,33 +18,21 @@ class CarSerializer(GetOrCreateMixin):
         fields = ('pk', 'brand', 'model', 'number_of_sits', 'photo')
 
 
+class RidePointSerializer(GetOrCreateMixin):
+
+    class Meta:
+        model = RidePoint
+        fields = ('pk', 'city', 'cost_per_sit', 'order', 'date_time')
+
+
 class RideSerializer(NestedCreateMixin):
 
     car = CarSerializer()
-
-    def create(self, validated_data):
-        result = super(RideSerializer, self).create(validated_data)
-        self._update_many_to_many(result, self.initial_data)
-        return result
-
-    def update(self, instance, validated_data):
-        result = super(RideSerializer, self).update(instance, validated_data)
-        self._update_many_to_many(instance, self.initial_data)
-        return result
-
-    def _update_many_to_many(self, ride, data):
-        RidePoint.objects.filter(ride=ride).delete()
-        for stop in data.get('stops', []):
-            RidePoint.objects.create(
-                ride=ride,
-                stop_id=stop['stop'],
-                cost_per_sit=stop['cost_per_sit'],
-                order=stop['order'])
+    stops = RidePointSerializer(many=True)
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'start', 'end',
-                  'car', 'number_of_sits', 'description')
+        fields = ('pk', 'stops', 'car', 'number_of_sits', 'description')
 
 
 class RideBookingSerializer(serializers.ModelSerializer):

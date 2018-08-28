@@ -3,7 +3,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Car, Ride, RideBooking, RideRequest
+from .models import Car, Ride, RideBooking, RideRequest, RidePoint
 from .serializers import CarSerializer, RideSerializer, \
     RideBookingSerializer, RideRequestSerializer
 
@@ -35,7 +35,11 @@ class RideViewSet(viewsets.GenericViewSet,
         if self.action in ['my', 'destroy']:
             return queryset.filter(car__owner=self.request.user)
         else:
-            return queryset.filter(start__gt=timezone.now())
+            return queryset.filter(
+                pk__in=RidePoint.objects.filter(
+                    date_time__gt=timezone.now(),
+                    order=0).values_list('ride_id', flat=True)
+            )
 
     @action(methods=['GET'], detail=False)
     def my(self, request, *args, **kwargs):

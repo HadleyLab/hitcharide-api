@@ -27,13 +27,6 @@ class Car(models.Model):
 
 
 class Ride(CreatedUpdatedMixin):
-    stops = models.ManyToManyField(
-        'places.City',
-        verbose_name='All points of route',
-        related_name='rides',
-        through='RidePoint')
-    start = models.DateTimeField()
-    end = models.DateTimeField()
     car = models.ForeignKey(
         'Car',
         on_delete=models.CASCADE,
@@ -44,23 +37,25 @@ class Ride(CreatedUpdatedMixin):
         blank=True, null=True)
 
     def __str__(self):
+        first_stop = self.stops.first()
         return '{0} --> {1} on {2} at {3}'.format(
-            self.stops.first(),
+            first_stop,
             self.stops.last(),
             self.car,
-            self.start)
+            first_stop.date_time)
 
 
 class RidePoint(models.Model):
     ride = models.ForeignKey(
         'Ride',
         on_delete=models.CASCADE,
-        related_name='ride_stops')
-    stop = models.ForeignKey(
+        related_name='stops')
+    city = models.ForeignKey(
         'places.City',
         on_delete=models.CASCADE)
     cost_per_sit = models.PositiveIntegerField()
     order = models.IntegerField(default=0)
+    date_time = models.DateTimeField()
 
 
 class RideBookingStatus(object):
