@@ -40,7 +40,6 @@ class RegistrationTestCase(APITestCase):
             'phone': '+7 933 000 00 00',
             'first_name': 'first',
             'last_name': 'last',
-            'age': 25,
             'password': '123'
         }
 
@@ -66,3 +65,54 @@ class RegistrationTestCase(APITestCase):
         self.assertEqual(user['email'], self.user.email)
         self.assertEqual(user['first_name'], self.user.first_name)
         self.assertEqual(user['last_name'], self.user.last_name)
+
+    def test_get_my_unauthorized(self):
+        resp = self.client.get('/accounts/my/')
+        self.assertUnauthorized(resp)
+
+    def test_put_my_unauthorized(self):
+        resp = self.client.put('/accounts/my/', {
+            'phone': '+7 123 456 7890'
+        })
+        self.assertUnauthorized(resp)
+
+    def test_my(self):
+        self.authenticate()
+        resp = self.client.get('/accounts/my/')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(resp.data['pk'], self.user.pk)
+        self.assertEqual(resp.data['email'], self.user.email)
+        self.assertEqual(resp.data['first_name'], self.user.first_name)
+        self.assertEqual(resp.data['last_name'], self.user.last_name)
+
+    def test_put_my(self):
+        self.authenticate()
+        resp = self.client.put('/accounts/my/', {
+            'phone': '+71234567890',
+            'first_name': 'new first name',
+            'last_name': 'last',
+        })
+        self.assertSuccessResponse(resp)
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.phone, '+71234567890')
+        self.assertEqual(self.user.first_name, 'new first name')
+
+    def test_put_my_not_filled(self):
+        self.authenticate()
+        self.user.phone = None
+        self.user.first_name = ''
+        self.user.last_name = ''
+        self.user.save()
+
+        resp = self.client.put('/accounts/my/', {
+            'first_name': 'new first name'
+        })
+        self.assertBadRequest(resp)
+
+        resp = self.client.put('/accounts/my/', {
+            'first_name': 'new first name',
+            'last_name': 'new last name',
+            'phone': ''
+        })
+        self.assertBadRequest(resp)

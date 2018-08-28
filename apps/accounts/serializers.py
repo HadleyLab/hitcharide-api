@@ -39,4 +39,6 @@ class UserUpdateSerializer(RegisterUserSerializer):
     last_name = serializers.CharField(required=True)
 
     class Meta(RegisterUserSerializer.Meta):
-        pass
+        fields = (
+            'pk', 'phone', 'first_name', 'last_name', 'photo', 'short_desc'
+        )
