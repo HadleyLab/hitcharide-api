@@ -52,11 +52,11 @@ class RideViewSet(viewsets.GenericViewSet,
     # Wrap with transaction.atomic to rollback on nested serializer error
     @transaction.atomic
     def create(self, request, *args, **kwargs):
-        super(RideViewSet, self).create(request, *args, **kwargs)
+        return super(RideViewSet, self).create(request, *args, **kwargs)
 
     @transaction.atomic
     def update(self, request, *args, **kwargs):
-        super(RideViewSet, self).update(request, *args, **kwargs)
+        return super(RideViewSet, self).update(request, *args, **kwargs)
 
 
 class RideBookingViewSet(viewsets.GenericViewSet,
