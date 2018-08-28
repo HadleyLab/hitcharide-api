@@ -27,7 +27,7 @@ class CityPageNumberPagination(PageNumberPagination):
 
 
 class CityViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
-    queryset = City.objects.all().order_by('name')
+    queryset = City.objects.all().select_related('state').order_by('name')
     serializer_class = CityWithStateSerializer
     pagination_class = CityPageNumberPagination
     filter_backends = (SearchFilter, DjangoFilterBackend)

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from factory import DjangoModelFactory, fuzzy, \
     PostGenerationMethodCall, Sequence
 
@@ -9,6 +10,6 @@ class UserFactory(DjangoModelFactory):
 
     first_name = fuzzy.FuzzyText()
     last_name = fuzzy.FuzzyText()
-    age = fuzzy.FuzzyInteger(low=5, high=100)
+    birthday = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=1990))
     password = PostGenerationMethodCall('set_password', 'password')
     email = Sequence(lambda n: 'user{0}@example.com'.format(n))

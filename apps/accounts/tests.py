@@ -10,7 +10,6 @@ class RegistrationTestCase(APITestCase):
             'phone': '+7 933 000 00 00',
             'first_name': 'first',
             'last_name': 'last',
-            'age': 25,
             'password': '123'
         }
 
@@ -19,7 +18,6 @@ class RegistrationTestCase(APITestCase):
         user = User.objects.get(pk=resp.data['pk'])
         self.assertEqual(user.first_name, 'first')
         self.assertEqual(user.last_name, 'last')
-        self.assertEqual(user.age, 25)
         self.assertTrue(user.check_password('123'))
         self.assertEqual(user.email, 'test@test.test')
         self.assertEqual(user.username, 'test@test.test')
