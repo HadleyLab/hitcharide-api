@@ -15,5 +15,5 @@ class MyView(APIView):
         serializer = UserUpdateSerializer(
             request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        instance = serializer.save()
+        return Response(UserSerializer(instance).data)
