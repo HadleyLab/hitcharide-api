@@ -33,13 +33,15 @@ class RideViewSet(viewsets.GenericViewSet,
         queryset = super(RideViewSet, self).get_queryset()
 
         if self.action in ['my', 'destroy']:
-            return queryset.filter(car__owner=self.request.user)
-        else:
-            return queryset.filter(
+            queryset = queryset.filter(car__owner=self.request.user)
+        elif self.action == 'list':
+            queryset = queryset.filter(
                 pk__in=RidePoint.objects.filter(
                     date_time__gt=timezone.now(),
                     order=0).values_list('ride_id', flat=True)
             )
+
+        return queryset
 
     @action(methods=['GET'], detail=False)
     def my(self, request, *args, **kwargs):
@@ -73,7 +75,7 @@ class RideRequestViewSet(viewsets.GenericViewSet,
 
         if self.action in ['create', 'update', 'destroy', 'my']:
             result = result.filter(author=self.request.user)
-        else:
+        elif self.action == 'list':
             result = result.filter(start__gt=timezone.now())
 
         return result
