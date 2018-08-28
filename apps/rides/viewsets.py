@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
@@ -24,6 +25,7 @@ class CarViewSet(viewsets.GenericViewSet,
 class RideViewSet(viewsets.GenericViewSet,
                   mixins.ListModelMixin,
                   mixins.CreateModelMixin,
+                  mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin):
     queryset = Ride.objects.all()
     serializer_class = RideSerializer
@@ -46,6 +48,15 @@ class RideViewSet(viewsets.GenericViewSet,
     @action(methods=['GET'], detail=False)
     def my(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+    # Wrap with transaction.atomic to rollback on nested serializer error
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        super(RideViewSet, self).create(request, *args, **kwargs)
+
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        super(RideViewSet, self).update(request, *args, **kwargs)
 
 
 class RideBookingViewSet(viewsets.GenericViewSet,
