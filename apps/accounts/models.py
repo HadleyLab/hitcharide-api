@@ -10,6 +10,7 @@ class User(AbstractUser):
         'email address',
         unique=True)
     phone = models.CharField(
+        blank=True, null=True,
         max_length=20)
     birthday = models.DateTimeField(
         blank=True, null=True)

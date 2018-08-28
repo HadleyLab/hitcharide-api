@@ -49,6 +49,10 @@ class RideViewSetTest(APITestCase):
         data.update({'car': {'pk': self.car.pk}})
         resp = self.client.post('/rides/ride/', data, format='json')
         self.assertSuccessResponse(resp)
+        ride = Ride.objects.get(pk=resp.data['pk'])
+        self.assertEqual(ride.stops.all().count(), 2)
+        self.assertEqual(ride.car.brand, 'some')
+        self.assertEqual(ride.car.owner.pk, self.user.pk)
 
     def test_create_with_nested_car(self):
         self.authenticate()
@@ -66,6 +70,7 @@ class RideViewSetTest(APITestCase):
         ride = Ride.objects.get(pk=resp.data['pk'])
         self.assertEqual(ride.stops.all().count(), 2)
         self.assertEqual(ride.car.brand, 'another')
+        self.assertEqual(ride.car.owner.pk, self.user.pk)
         self.assertEqual(Car.objects.all().count(), cars_count_before + 1)
 
     def test_list_unauthorized(self):

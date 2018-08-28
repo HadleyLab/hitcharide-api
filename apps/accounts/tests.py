@@ -14,6 +14,7 @@ class RegistrationTestCase(APITestCase):
         }
 
         resp = self.client.post('/accounts/register/', data, format='json')
+        self.assertSuccessResponse(resp)
 
         user = User.objects.get(pk=resp.data['pk'])
         self.assertEqual(user.first_name, 'first')
@@ -23,24 +24,12 @@ class RegistrationTestCase(APITestCase):
         self.assertEqual(user.username, 'test@test.test')
         self.assertEqual(user.is_active, False)
 
-    def test_registration_params_set(self):
+    def test_registration_min_params_set(self):
         data = {
             'email': 'test@test.test',
             'password': '123',
         }
 
-        resp = self.client.post('/accounts/register/', data, format='json')
-        self.assertBadRequest(resp)
-
-        data['phone'] = '+7 933 000 00 00'
-        resp = self.client.post('/accounts/register/', data, format='json')
-        self.assertBadRequest(resp)
-
-        data['first_name'] = 'first name'
-        resp = self.client.post('/accounts/register/', data, format='json')
-        self.assertBadRequest(resp)
-
-        data['last_name'] = 'last name'
         resp = self.client.post('/accounts/register/', data, format='json')
         self.assertEqual(resp.status_code, 201)
 

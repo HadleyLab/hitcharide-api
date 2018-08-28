@@ -14,10 +14,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegisterUserSerializer(UserSerializer):
-
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
-
     def create(self, validated_data):
         password = validated_data.pop('password')
 
@@ -35,3 +31,12 @@ class RegisterUserSerializer(UserSerializer):
                 'write_only': True,
             },
         }
+
+
+class UserUpdateSerializer(RegisterUserSerializer):
+    phone = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+
+    class Meta(RegisterUserSerializer.Meta):
+        pass
