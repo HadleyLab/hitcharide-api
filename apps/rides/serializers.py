@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from drf_writable_nested import NestedCreateMixin
+from rest_framework.exceptions import ValidationError
 
 from config.serializers import GetOrCreateMixin
 from .models import Car, Ride, RidePoint, RideBooking, RideRequest
@@ -26,6 +27,13 @@ class RideSerializer(NestedCreateMixin):
 
     car = CarSerializer()
     stops = RidePointSerializer(many=True)
+
+    def validate(self, attrs):
+        user = self.context['request'].user
+        if not user.phone or not user.first_name or not user.last_name:
+            raise ValidationError('You need to fill profile to create a ride')
+
+        return super(RideSerializer, self).validate(attrs)
 
     class Meta:
         model = Ride

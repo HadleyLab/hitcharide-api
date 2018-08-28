@@ -73,6 +73,16 @@ class RideViewSetTest(APITestCase):
         self.assertEqual(ride.car.owner.pk, self.user.pk)
         self.assertEqual(Car.objects.all().count(), cars_count_before + 1)
 
+    def test_create_with_unfilled_user(self):
+        self.user.phone = None
+        self.user.save()
+        self.authenticate()
+
+        data = self.get_ride_data()
+        data.update({'car': {'pk': self.car.pk}})
+        resp = self.client.post('/rides/ride/', data, format='json')
+        self.assertBadRequest(resp)
+
     def test_list_unauthorized(self):
         resp = self.client.get('/rides/ride/', format='json')
         self.assertUnauthorized(resp)
