@@ -43,7 +43,7 @@ urlpatterns = [
          djoser_views.PasswordResetConfirmView.as_view(),
          name='account_password_confirm'),
 
-    path('accounts/social', include('social_django.urls', namespace='social')),
+    path('accounts/social/', include('social_django.urls', namespace='social')),
 ] + router.urls
 
 if settings.DEBUG:
