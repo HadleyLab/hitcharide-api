@@ -62,13 +62,13 @@ class RideViewSet(ListFactoryMixin,
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     # Wrap with transaction.atomic to rollback on nested serializer error
-    # @transaction.atomic
-    # def create(self, request, *args, **kwargs):
-    #     return super(RideViewSet, self).create(request, *args, **kwargs)
-    #
-    # @transaction.atomic
-    # def update(self, request, *args, **kwargs):
-    #     return super(RideViewSet, self).update(request, *args, **kwargs)
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        return super(RideViewSet, self).create(request, *args, **kwargs)
+
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        return super(RideViewSet, self).update(request, *args, **kwargs)
 
 
 class RideBookingViewSet(viewsets.GenericViewSet,
