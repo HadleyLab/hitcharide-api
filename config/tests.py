@@ -19,7 +19,7 @@ class APITestCase(BaseAPITestCase):
             password=self.password)
 
     def authenticate_as(self, username, password):
-        self.client.login(username=username, password=password)
+        self.assertTrue(self.client.login(username=username, password=password))
 
     def authenticate(self):
         self.authenticate_as(self.username, self.password)

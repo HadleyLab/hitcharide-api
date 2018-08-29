@@ -26,11 +26,11 @@ class RideViewSetTest(APITestCase):
             'stops': [
                 {
                     'city': self.city1.pk, 'cost_per_sit': 0,
-                    'order': 1, 'date_time': now + timedelta(days=1)
+                    'order': 0, 'date_time': now + timedelta(days=1)
                 },
                 {
                     'city': self.city2.pk, 'cost_per_sit': 100,
-                    'order': 2, 'date_time': now + timedelta(days=2)
+                    'order': 1, 'date_time': now + timedelta(days=2)
                 },
             ],
             'number_of_sits': 5
@@ -83,6 +83,32 @@ class RideViewSetTest(APITestCase):
         resp = self.client.post('/rides/ride/', data, format='json')
         self.assertBadRequest(resp)
 
+    def test_update(self):
+        self.authenticate()
+        data = self.get_ride_data()
+        data.update({'car': {'pk': self.car.pk}})
+        resp = self.client.post('/rides/ride/', data, format='json')
+        ride_pk = resp.data['pk']
+
+        city3 = CityFactory.create()
+        data['stops'][0]['city'] = city3.pk
+        data['stops'].append({
+            'city': self.city1.pk, 'cost_per_sit': 200,
+            'order': 2, 'date_time': timezone.now() + timedelta(days=2)
+        })
+        resp = self.client.put('/rides/ride/{0}/'.format(ride_pk), data,
+                               format='json')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data['stops']), 3)
+        self.assertSetEqual(
+            set([(stop['city'], stop['order']) for stop in resp.data['stops']]),
+            {
+                (city3.pk, 0),
+                (self.city2.pk, 1),
+                (self.city1.pk, 2)
+            }
+        )
+
     def test_list_unauthorized(self):
         resp = self.client.get('/rides/ride/', format='json')
         self.assertUnauthorized(resp)
@@ -122,8 +148,8 @@ class RideViewSetTest(APITestCase):
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
 
-        self.assertEqual(len(resp.data), 1)
-        self.assertEqual(resp.data[0]['pk'], ride2.pk)
+        self.assertEqual(len(resp.data['results']), 1)
+        self.assertEqual(resp.data['results'][0]['pk'], ride2.pk)
 
     def test_my_unauthorized(self):
         resp = self.client.get('/rides/ride/my/', format='json')
@@ -151,7 +177,7 @@ class RideViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertListEqual(
             [my_ride_1.pk, my_ride_2.pk],
-            [ride['pk'] for ride in resp.data])
+            [ride['pk'] for ride in resp.data['results']])
 
 
 class RideBookingViewSetTest(APITestCase):
@@ -173,10 +199,10 @@ class RideBookingViewSetTest(APITestCase):
 
     def test_list_unauthorized(self):
         resp = self.client.get('/rides/booking/', format='json')
-        self.assertForbidden(resp)
+        self.assertUnauthorized(resp)
 
     def test_list(self):
-        another_user = UserFactory.create()
+        another_user = UserFactory.create(password='password')
         another_booking = RideBookingFactory.create(
             ride=self.ride,
             client=another_user)
@@ -187,7 +213,7 @@ class RideBookingViewSetTest(APITestCase):
         self.assertListEqual([self.booking.pk],
                              [book['pk'] for book in resp.data])
 
-        self.authenticate_as(another_user.username, another_user.password)
+        self.authenticate_as(another_user.email, 'password')
         resp = self.client.get('/rides/booking/', format='json')
         self.assertSuccessResponse(resp)
         self.assertListEqual([another_booking.pk],

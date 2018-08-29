@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from drf_writable_nested import NestedCreateMixin
+from drf_writable_nested import NestedCreateMixin, NestedUpdateMixin
 from rest_framework.exceptions import ValidationError
 
 from config.serializers import GetOrCreateMixin
@@ -23,7 +23,7 @@ class RidePointSerializer(GetOrCreateMixin):
         fields = ('pk', 'city', 'cost_per_sit', 'order', 'date_time')
 
 
-class RideSerializer(NestedCreateMixin):
+class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
 
     car = CarSerializer()
     stops = RidePointSerializer(many=True)
