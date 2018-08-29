@@ -19,6 +19,9 @@ class User(AbstractUser):
         blank=True, null=True)
     short_desc = models.TextField(
         blank=True, null=True)
+    paypal_account = models.CharField(
+        max_length=150,
+        blank=True, null=True)
 
     @property
     def age(self):

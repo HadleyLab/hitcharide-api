@@ -40,5 +40,6 @@ class UserUpdateSerializer(RegisterUserSerializer):
 
     class Meta(RegisterUserSerializer.Meta):
         fields = (
-            'pk', 'phone', 'first_name', 'last_name', 'photo', 'short_desc'
+            'pk', 'phone', 'first_name', 'last_name',
+            'photo', 'short_desc', 'paypal_account'
         )

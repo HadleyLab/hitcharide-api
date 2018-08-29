@@ -98,6 +98,16 @@ class RegistrationTestCase(APITestCase):
         self.assertEqual(self.user.phone, '+71234567890')
         self.assertEqual(self.user.first_name, 'new first name')
 
+        resp = self.client.put('/accounts/my/', {
+            'phone': '+71234567890',
+            'first_name': 'new first name',
+            'last_name': 'last',
+            'paypal_account': 'teeest@test.test'
+        })
+        self.assertSuccessResponse(resp)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.paypal_account, 'teeest@test.test')
+
     def test_put_my_not_filled(self):
         self.authenticate()
         self.user.phone = None
