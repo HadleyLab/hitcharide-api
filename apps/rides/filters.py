@@ -1,4 +1,6 @@
 from datetime import datetime, time
+
+from django.db.models import Count, F
 from django.utils import timezone
 from rest_framework.filters import BaseFilterBackend
 
@@ -17,11 +19,16 @@ class RidesFilter(BaseFilterBackend):
 
         city_from = int(request.query_params.get('city_from', 0))
         if city_from:
+            # queryset = queryset.annotate(stops_count=Count('stops')).filter(
+            #     stops__city=city_from,
+            #     stops__order__lt=F('stops_count'))
+            print(str(queryset.query))
             queryset = queryset.filter(
-                pk__in=RidePoint.objects.filter(
+                pk__in=RidePoint.objects.annotate(stops_count=Count('ride__stops')).filter(
                     city_id=city_from,
-                    order=0).values_list('ride_id', flat=True)
-            )  # TODO: filter not last in this list
+                    order__lt=F('stops_count') - 1).values_list('ride_id', flat=True)
+            )  # NOTE: We need to filter not last in this list, so lets orient
+            print(str(queryset.query))
 
         city_to = int(request.query_params.get('city_to', 0))
         if city_to:

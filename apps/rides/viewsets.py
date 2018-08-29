@@ -29,7 +29,7 @@ class RideViewSet(viewsets.GenericViewSet,
                   mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin):
-    queryset = Ride.objects.all()
+    queryset = Ride.objects.all().order_by('stops__first__date_time')
     serializer_class = RideSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = DefaultPageNumberPagination

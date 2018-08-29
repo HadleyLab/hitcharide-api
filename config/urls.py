@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from djoser import views as djoser_views
@@ -42,6 +42,8 @@ urlpatterns = [
     path('accounts/password/reset/confirm/',
          djoser_views.PasswordResetConfirmView.as_view(),
          name='account_password_confirm'),
+
+    path('accounts/social', include('social_django.urls', namespace='social')),
 ] + router.urls
 
 if settings.DEBUG:
