@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from denorm import denormalized, depend_on_related
+
 from .mixins import CreatedUpdatedMixin
 
 
@@ -36,11 +38,22 @@ class Ride(CreatedUpdatedMixin):
     description = models.TextField(
         blank=True, null=True)
 
+    @denormalized(models.ForeignKey, to='RidePoint', on_delete=models.SET_NULL,
+                  related_name='+', blank=True, null=True)
+    @depend_on_related('RidePoint', foreign_key='first_stop')
+    def first_stop(self):
+        return self.stops.order_by('order').first()
+
+    @denormalized(models.ForeignKey, to='RidePoint', on_delete=models.SET_NULL,
+                  related_name='+', blank=True, null=True)
+    @depend_on_related('RidePoint', foreign_key='last_stop')
+    def last_stop(self):
+        return self.stops.order_by('order').last()
+
     def __str__(self):
-        first_stop = self.stops.first()
         return '{0} --> {1} on {2}'.format(
-            first_stop,
-            self.stops.last(),
+            self.first_stop,
+            self.last_stop,
             self.car)
 
 

@@ -88,6 +88,8 @@ class RideViewSetTest(APITestCase):
         data = self.get_ride_data()
         data.update({'car': {'pk': self.car.pk}})
         resp = self.client.post('/rides/ride/', data, format='json')
+        self.assertSuccessResponse(resp)
+
         ride_pk = resp.data['pk']
 
         city3 = CityFactory.create()
@@ -132,6 +134,7 @@ class RideViewSetTest(APITestCase):
             ride=ride1,
             date_time=yesterday,
             order=1)
+        ride1.save()
 
         ride2 = RideFactory.create(
             number_of_sits=5,
@@ -144,6 +147,7 @@ class RideViewSetTest(APITestCase):
             ride=ride2,
             date_time=yesterday,
             order=1)
+        ride2.save()
 
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)

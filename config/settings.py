@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django_filters',
     'djoser',
     'corsheaders',
+    'denorm',
     # 'social_django'
 
     # Local apps
@@ -113,12 +114,12 @@ REST_FRAMEWORK = {
 
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
-AUTHENTICATION_BACKENDS = (
- 'social_core.backends.open_id.OpenIdAuth',
- 'social_core.backends.google.GoogleOpenId',
- 'social_core.backends.google.GoogleOAuth2',
- 'django.contrib.auth.backends.ModelBackend',
-)
+# AUTHENTICATION_BACKENDS = (
+#  'social_core.backends.open_id.OpenIdAuth',
+#  'social_core.backends.google.GoogleOpenId',
+#  'social_core.backends.google.GoogleOAuth2',
+#  'django.contrib.auth.backends.ModelBackend',
+# )
 LOGIN_URL = '/accounts/my/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1034884976460-1goikg341abcv622r86it5njcvsulsfp.apps.googleusercontent.com'

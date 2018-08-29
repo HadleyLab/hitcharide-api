@@ -19,24 +19,13 @@ class RidesFilter(BaseFilterBackend):
 
         city_from = int(request.query_params.get('city_from', 0))
         if city_from:
-            # queryset = queryset.annotate(stops_count=Count('stops')).filter(
-            #     stops__city=city_from,
-            #     stops__order__lt=F('stops_count'))
-            print(str(queryset.query))
             queryset = queryset.filter(
-                pk__in=RidePoint.objects.annotate(stops_count=Count('ride__stops')).filter(
-                    city_id=city_from,
-                    order__lt=F('stops_count') - 1).values_list('ride_id', flat=True)
-            )  # NOTE: We need to filter not last in this list, so lets orient
-            print(str(queryset.query))
+                stops__city_id=city_from).exclude(last_stop__city_id=city_from)
 
         city_to = int(request.query_params.get('city_to', 0))
         if city_to:
             queryset = queryset.filter(
-                pk__in=RidePoint.objects.filter(
-                    city_id=city_to,
-                    order__gt=0).values_list('ride_id', flat=True)
-            )
+                stops__city_id=city_to).exclude(first_stop__city_id=city_to)
 
         ride_date = request.query_params.get('date', '')
         if ride_date:
