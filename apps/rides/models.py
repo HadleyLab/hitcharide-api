@@ -38,11 +38,10 @@ class Ride(CreatedUpdatedMixin):
 
     def __str__(self):
         first_stop = self.stops.first()
-        return '{0} --> {1} on {2} at {3}'.format(
+        return '{0} --> {1} on {2}'.format(
             first_stop,
             self.stops.last(),
-            self.car,
-            first_stop.date_time)
+            self.car)
 
 
 class RidePoint(models.Model):
@@ -56,6 +55,9 @@ class RidePoint(models.Model):
     cost_per_sit = models.PositiveIntegerField()
     order = models.IntegerField(default=0)
     date_time = models.DateTimeField()
+
+    def __str__(self):
+        return '{0} : {1}'.format(self.city, self.date_time)
 
 
 class RideBookingStatus(object):

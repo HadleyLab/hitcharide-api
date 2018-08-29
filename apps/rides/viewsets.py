@@ -4,6 +4,8 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
+from config.pagination import DefaultPageNumberPagination
+from .filters import RidesFilter
 from .models import Car, Ride, RideBooking, RideRequest, RidePoint
 from .serializers import CarSerializer, RideSerializer, \
     RideBookingSerializer, RideRequestSerializer
@@ -30,12 +32,20 @@ class RideViewSet(viewsets.GenericViewSet,
     queryset = Ride.objects.all()
     serializer_class = RideSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = DefaultPageNumberPagination
+    filter_backends = (RidesFilter,)
 
     def get_queryset(self):
         queryset = super(RideViewSet, self).get_queryset()
 
         if self.action in ['my', 'destroy']:
             queryset = queryset.filter(car__owner=self.request.user)
+        elif self.action == 'booked':
+            queryset = queryset.filter(
+                pk__in=RideBooking.objects.filter(
+                    client=self.request.user
+                ).values_list('ride_id', flat=True)
+            )
         elif self.action == 'list':
             queryset = queryset.filter(
                 pk__in=RidePoint.objects.filter(
@@ -47,6 +57,10 @@ class RideViewSet(viewsets.GenericViewSet,
 
     @action(methods=['GET'], detail=False)
     def my(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    @action(methods=['GET'], detail=False)
+    def booked(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
     # Wrap with transaction.atomic to rollback on nested serializer error
