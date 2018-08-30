@@ -91,6 +91,17 @@ TEMPLATES = [
     },
 ]
 
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis')
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
+}
+
 WSGI_APPLICATION = 'config.wsgi.application'
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
