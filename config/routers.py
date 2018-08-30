@@ -21,6 +21,8 @@ class RootView(APIRootView):
             'account_password_reset', request=request)
         data['accounts/password/reset/confirm'] = reverse(
             'account_password_confirm', request=request)
+        data['accounts/validate_phone'] = reverse('account_validate_phone',
+                                                  request=request)
 
         return Response(data)
 
