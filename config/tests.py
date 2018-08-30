@@ -15,6 +15,8 @@ class APITestCase(BaseAPITestCase):
         self.username = 'user@test.test'
         self.password = 'password'
         self.user = UserFactory.create(
+            phone='12345678900',
+            is_phone_validated=True,
             email=self.username,
             password=self.password)
 

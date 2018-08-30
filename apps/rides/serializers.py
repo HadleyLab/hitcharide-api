@@ -30,8 +30,10 @@ class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
 
     def validate(self, attrs):
         user = self.context['request'].user
-        if not user.phone or not user.first_name or not user.last_name:
-            raise ValidationError('You need to fill profile to create a ride')
+        if not user.phone or not user.first_name or not user.last_name or \
+                not user.is_phone_validated:
+            raise ValidationError('You need to fill profile and validate '
+                                  'the phone to create a ride')
 
         return super(RideSerializer, self).validate(attrs)
 

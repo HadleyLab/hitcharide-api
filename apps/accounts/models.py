@@ -13,6 +13,8 @@ class User(AbstractUser):
         unique=True)
     phone = PhoneField(
         blank=True, null=True)
+    is_phone_validated = models.BooleanField(
+        default=False)
     birthday = models.DateTimeField(
         blank=True, null=True)
     photo = models.ImageField(
