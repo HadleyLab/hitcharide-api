@@ -6,12 +6,17 @@ services:
     ports:
     - 5432:5432
 
+  redis:
+    image: redis:3-alpine
+
   api:
     build: .
     command: python ./manage.py runserver 0.0.0.0:8000
     depends_on:
     - db
+    - redis
     ports:
     - 8000:8000
     environment:
       DATABASE_URL: postgis://postgres@db/postgres
+      REDIS_URL: redis://redis
