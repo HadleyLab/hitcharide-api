@@ -44,7 +44,7 @@ urlpatterns = [
          name='account_password_confirm'),
 
     path('accounts/rest/', include('rest_framework.urls')),
-    path('accounts/social/', include('social_django.urls', namespace='social')),
+    path('accounts/social/', include('rest_framework_social_oauth2.urls')),
 ] + router.urls
 
 if settings.DEBUG:
