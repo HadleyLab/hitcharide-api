@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 
 from config.pagination import DefaultPageNumberPagination
-from .filters import RidesFilter
+from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
 from .models import Car, Ride, RideBooking, RideRequest
 from .serializers import CarSerializer, RideSerializer, \
@@ -34,7 +34,7 @@ class RideViewSet(ListFactoryMixin,
     serializer_class = RideSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = DefaultPageNumberPagination
-    filter_backends = (RidesFilter,)
+    filter_backends = (RidesListFilter,)
 
     def get_queryset(self):
         queryset = super(RideViewSet, self).get_queryset()
@@ -49,11 +49,13 @@ class RideViewSet(ListFactoryMixin,
             first_stop__date_time__gt=timezone.now())
         return self.list_factory(queryset)(request, *args, **kwargs)
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=False,
+            filter_backends=(MyRidesFilter, RidesListFilter))
     def my(self, request, *args, **kwargs):
         return self.list_factory(self.get_queryset())(request, *args, **kwargs)
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=False,
+            filter_backends=(MyRidesFilter, RidesListFilter))
     def booked(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
             pk__in=RideBooking.objects.filter(

@@ -1,22 +1,13 @@
 from datetime import datetime, time
 
-from django.db.models import Count, F
 from django.utils import timezone
 from rest_framework.filters import BaseFilterBackend
 
 from .models import RidePoint
 
 
-class RidesFilter(BaseFilterBackend):
+class RidesListFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
-        past = bool(request.query_params.get('past', 0))
-        if past:
-            queryset = queryset.filter(
-                pk__in=RidePoint.objects.filter(
-                    date_time__lt=timezone.now(),
-                    order=0).values_list('ride_id', flat=True)
-            )
-
         city_from = int(request.query_params.get('city_from', 0))
         if city_from:
             queryset = queryset.filter(
@@ -37,5 +28,15 @@ class RidesFilter(BaseFilterBackend):
                         datetime.combine(ride_date.date(), time.max)
                     )).values_list('ride_id', flat=True)
             )
+
+        return queryset
+
+
+class MyRidesFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        past = bool(request.query_params.get('past', 0))
+        if past:
+            queryset = queryset.filter(
+                first_stop__date_time__lt=timezone.now())
 
         return queryset

@@ -2,4 +2,4 @@ from .models import RideRequest
 
 
 def inform_all_subscribers(ride):
-    pass
+    ride.stops.all().values_list('city_id').exclude()
