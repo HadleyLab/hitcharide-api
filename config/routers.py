@@ -8,9 +8,9 @@ class RootView(APIRootView):
         old_response = super(RootView, self).get(request, *args, **kwargs)
         data = old_response.data
         data['accounts/login'] = reverse('account_jwt_login', request=request)
-        data['accounts/login/facebook'] = reverse('social:begin',
-                                                  args=('google-oauth2',),
-                                                  request=request)
+        data['accounts/login/google'] = reverse('social:begin',
+                                                args=('google-oauth2',),
+                                                request=request)
         data['accounts/verify'] = reverse('account_jwt_verify', request=request)
         data['accounts/refresh'] = reverse('account_jwt_refresh',
                                            request=request)
