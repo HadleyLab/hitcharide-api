@@ -4,14 +4,15 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+from apps.accounts.fields import PhoneField
+
 
 class User(AbstractUser):
     email = models.EmailField(
         'email address',
         unique=True)
-    phone = models.CharField(
-        blank=True, null=True,
-        max_length=20)
+    phone = PhoneField(
+        blank=True, null=True)
     birthday = models.DateTimeField(
         blank=True, null=True)
     photo = models.ImageField(
