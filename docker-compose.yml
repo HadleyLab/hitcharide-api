@@ -20,3 +20,17 @@ services:
       REDIS_URL: redis://redis
     ports:
     - 8000:8000
+
+  celery:
+    build: .
+    command: celery -A config worker -B -l info
+    depends_on:
+    - db
+    - redis
+    environment:
+      DEBUG: "True"
+      DATABASE_URL: postgres://postgres:@db:5432/postgres
+      BROKER_URL: redis://redis
+      REDIS_URL: redis://redis
+      C_FORCE_ROOT: "True"
+
