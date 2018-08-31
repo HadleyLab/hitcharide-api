@@ -5,8 +5,7 @@ services:
     build: .
     volumes:
       - .:/app
-    environment:
-      DATABASE_URL: postgis://postgres@db/postgres
-      REDIS_URL: redis://redis
-      SA_GOOGLE_OAUTH2_KEY: '418852114767-9jf8m5uo43jn8qgvei06bm19rkuek8ol.apps.googleusercontent.com'
-      SA_GOOGLE_OAUTH2_SECRET: 'U9doAqQqYMDaRdahiXP8r-Em'
+
+
+    env_file:
+      - .env

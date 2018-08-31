@@ -15,5 +15,8 @@ services:
     depends_on:
     - db
     - redis
+    environment:
+      DATABASE_URL: postgis://postgres@db/postgres
+      REDIS_URL: redis://redis
     ports:
     - 8000:8000
