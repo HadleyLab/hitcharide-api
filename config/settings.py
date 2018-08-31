@@ -154,6 +154,10 @@ LOGIN_ERROR_URL = 'http://localhost:8000/#/accounts/error/'
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
 
+TWILIO_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
+
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
