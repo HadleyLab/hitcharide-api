@@ -1,7 +1,13 @@
+from django.conf import settings
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
+from social_core.utils import setting_url
+from social_django.utils import psa
 
 from .serializers import UserSerializer, UserUpdateSerializer
 from .utils import generate_and_send_sms_code, save_user_code, check_user_code
@@ -43,3 +49,22 @@ class ValidatePhoneView(APIView):
         else:
             return Response({'status': 'error', 'error': 'invalid code'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+@never_cache
+@csrf_exempt
+@psa('complete')
+def complete(request, backend, *args, **kwargs):
+    """Authentication complete view"""
+
+    # TODO: think about inactive users
+    user = request.backend.complete(*args, **kwargs)
+
+    if user:
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        url = "{0}?token={1}".format(settings.LOGIN_REDIRECT_URL, token)
+    else:
+        url = settings.LOGIN_ERROR_URL
+
+    return request.backend.strategy.redirect(url)
