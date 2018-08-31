@@ -102,6 +102,8 @@ CACHES = {
     },
 }
 
+BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis')
+
 WSGI_APPLICATION = 'config.wsgi.application'
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
