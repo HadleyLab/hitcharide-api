@@ -5,3 +5,4 @@
 /cover
 .coverage
 .env
+celerybeat-schedule*
