@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'denorm',
     'oauth2_provider',
     'social_django',
-    'rest_framework_social_oauth2',
+    # 'rest_framework_social_oauth2',
 
     # Local apps
     'apps.accounts',
@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework_social_oauth2.authentication.SocialAuthentication',
+        # 'rest_framework_social_oauth2.authentication.SocialAuthentication',
     ),
 }
 
@@ -132,7 +132,7 @@ SOCIAL_AUTH_URL_NAMESPACE = 'social'
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOpenId',
     'social_core.backends.google.GoogleOAuth2',
-    'rest_framework_social_oauth2.backends.DjangoOAuth2',
+    # 'rest_framework_social_oauth2.backends.DjangoOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 SOCIAL_AUTH_PIPELINE = (
@@ -148,10 +148,12 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-LOGIN_REDIRECT_URL = '/accounts/my/'
+LOGIN_REDIRECT_URL = 'http://localhost:8000/#/accounts/my/'
+LOGIN_ERROR_URL = 'http://localhost:8000/#/accounts/error/'
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1034884976460-1goikg341abcv622r86it5njcvsulsfp.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'ER-72MNXPRuLPVVexly8wGQl'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
+
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
