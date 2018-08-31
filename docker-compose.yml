@@ -17,6 +17,3 @@ services:
     - redis
     ports:
     - 8000:8000
-    environment:
-      DATABASE_URL: postgis://postgres@db/postgres
-      REDIS_URL: redis://redis
