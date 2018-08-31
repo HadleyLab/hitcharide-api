@@ -6,11 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
-from social_core.utils import setting_url
 from social_django.utils import psa
 
 from .serializers import UserSerializer, UserUpdateSerializer
-from .utils import generate_and_send_sms_code, save_user_code, check_user_code
+from .utils import generate_sms_code, save_user_code, check_user_code, do_sms
 
 
 class MyView(APIView):
@@ -35,7 +34,9 @@ class ValidatePhoneView(APIView):
         if not user.phone:
             return Response({'status': 'error', 'error': 'need to fill phone'},
                             status=status.HTTP_400_BAD_REQUEST)
-        code = generate_and_send_sms_code(user.phone)
+        code = generate_sms_code()
+        do_sms(user.phone,
+               'Your Hitcharide activation code is: {0}'.format(code))
         save_user_code(user.pk, code)
         return Response({'status': 'success'})
 
