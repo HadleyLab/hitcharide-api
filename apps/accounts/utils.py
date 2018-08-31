@@ -1,12 +1,6 @@
 from random import randint
 
-from django.conf import settings
 from django.core.cache import cache
-
-from twilio.rest import Client
-
-
-client = Client(settings.TWILIO_SID, settings.TWILIO_TOKEN)
 
 
 def random_digit(len):
@@ -29,7 +23,3 @@ def save_user_code(user_pk, code):
 
 def check_user_code(user_pk, code):
     return cache.get(get_user_code_key(user_pk)) == code
-
-
-def do_sms(phone, message):
-    client.messages.create(body=message, from_=settings.TWILIO_PHONE, to=phone)
