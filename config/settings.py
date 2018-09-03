@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'django.contrib.sites',
 
     # Third party apps
     'rest_framework',
@@ -49,12 +50,16 @@ INSTALLED_APPS = [
     'corsheaders',
     'denorm',
     'social_django',
+    'dbmail',
 
     # Local apps
     'apps.accounts',
     'apps.rides',
     'apps.places',
+    'apps.dbmail_templates',
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,6 +70,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -101,6 +107,11 @@ CACHES = {
 }
 
 CELERY_BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis')
+CELERY_TASK_SERIALIZER = 'pickle'  # TODO: refactor task to use json
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_ACCEPT_CONTENT = ['pickle']
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+DB_MAILER_CELERY_QUEUE = None
 
 WSGI_APPLICATION = 'config.wsgi.application'
 DJOSER = {
@@ -113,6 +124,12 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
+    },
+    'EMAIL': {
+        'activation': 'apps.dbmail_templates.email.ActivationDBMailEmail',
+        'confirmation': 'apps.dbmail_templates.email.ConfirmationDBMailEmail',
+        'password_reset':
+            'apps.dbmail_templates.email.PasswordResetDBMailEmail',
     },
 }
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
