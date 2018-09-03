@@ -47,7 +47,6 @@ urlpatterns = [
          name='account_password_confirm'),
 
     path('accounts/rest/', include('rest_framework.urls')),
-    # path('accounts/social/', include('rest_framework_social_oauth2.urls')),
     re_path(r'^accounts/social/complete/(?P<backend>[^/]+)/$',
             complete, name='complete'),
     path('accounts/social/', include('social_django.urls', namespace='social')),

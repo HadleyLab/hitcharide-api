@@ -10,7 +10,6 @@ django-denorm==1.0.0
 django-filter==2.0.0
 django-nose==1.4.5
 django-oauth-toolkit==1.2.0
-django-rest-framework-social-oauth2==1.1.0
 django-templated-mail==1.1.1
 djangorestframework==3.8.2
 djangorestframework-jwt==1.11.0
@@ -33,8 +32,6 @@ pytz==2018.5
 requests==2.19.1
 requests-oauthlib==1.0.0
 six==1.11.0
-social-auth-app-django==2.1.0
-social-auth-core==1.7.0
 text-unidecode==1.2
 urllib3==1.23
 twilio==6.16.3
