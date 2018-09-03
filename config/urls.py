@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from djoser import views as djoser_views
@@ -8,7 +8,8 @@ from rest_framework_jwt.views import verify_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
 
 from apps.places.viewsets import StateViewSet, CityViewSet
-from apps.accounts.views import MyView, ValidatePhoneView
+from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
+    ValidatePhoneView, complete
 from apps.rides.viewsets import CarViewSet, RideViewSet, \
     RideBookingViewSet, RideRequestViewSet
 
@@ -28,6 +29,9 @@ router.register('rides/request', RideRequestViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/my/', MyView.as_view(), name='account_my'),
+    path('accounts/send_phone_validation_code/',
+         SendPhoneValidationCodeView.as_view(),
+         name='account_send_phone_validation_code'),
     path('accounts/validate_phone/',
          ValidatePhoneView.as_view(),
          name='account_validate_phone'),
@@ -47,7 +51,9 @@ urlpatterns = [
          name='account_password_confirm'),
 
     path('accounts/rest/', include('rest_framework.urls')),
-    path('accounts/social/', include('rest_framework_social_oauth2.urls')),
+    re_path(r'^accounts/social/complete/(?P<backend>[^/]+)/$',
+            complete, name='complete'),
+    path('accounts/social/', include('social_django.urls', namespace='social')),
 ] + router.urls
 
 if settings.DEBUG:

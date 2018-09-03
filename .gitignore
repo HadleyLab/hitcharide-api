@@ -4,3 +4,5 @@
 *.pyc
 /cover
 .coverage
+.env
+celerybeat-schedule*

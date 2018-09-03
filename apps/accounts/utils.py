@@ -9,7 +9,7 @@ def random_digit(len):
     return randint(range_start, range_end)
 
 
-def generate_and_send_sms_code(phone):
+def generate_sms_code():
     return str(random_digit(4))
 
 

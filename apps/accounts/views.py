@@ -1,10 +1,16 @@
+from django.conf import settings
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
+from social_django.utils import psa
 
 from .serializers import UserSerializer, UserUpdateSerializer
-from .utils import generate_and_send_sms_code, save_user_code, check_user_code
+from .utils import generate_sms_code, save_user_code, check_user_code
+from .tasks import send_sms
 
 
 class MyView(APIView):
@@ -21,17 +27,25 @@ class MyView(APIView):
         return Response(UserSerializer(instance).data)
 
 
-class ValidatePhoneView(APIView):
+class SendPhoneValidationCodeView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):
+    def post(self, request):
         user = request.user
         if not user.phone:
-            return Response({'status': 'error', 'error': 'need to fill phone'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        code = generate_and_send_sms_code(user.phone)
+            return Response(
+                {'status': 'error', 'error': 'need to fill phone'},
+                status=status.HTTP_400_BAD_REQUEST)
+        code = generate_sms_code()
+        send_sms.delay(
+            phone=user.phone,
+            message='Your Hitcharide activation code is: {0}'.format(code))
         save_user_code(user.pk, code)
         return Response({'status': 'success'})
+
+
+class ValidatePhoneView(APIView):
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         user = request.user
@@ -43,3 +57,22 @@ class ValidatePhoneView(APIView):
         else:
             return Response({'status': 'error', 'error': 'invalid code'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+@never_cache
+@csrf_exempt
+@psa('complete')
+def complete(request, backend, *args, **kwargs):
+    """Authentication complete view"""
+
+    # TODO: think about inactive users
+    user = request.backend.complete(*args, **kwargs)
+
+    if user:
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+        url = "{0}?token={1}".format(settings.LOGIN_REDIRECT_URL, token)
+    else:
+        url = settings.LOGIN_ERROR_URL
+
+    return request.backend.strategy.redirect(url)
