@@ -5,17 +5,7 @@ services:
     build: .
     volumes:
       - .:/app
-    env_file:
-      - .env
 
   celery:
     volumes:
     - .:/app
-    environment:
-      DEBUG: "True"
-      DATABASE_URL: postgres://postgres:@db:5432/postgres
-      BROKER_URL: redis://redis
-      REDIS_URL: redis://redis
-      C_FORCE_ROOT: "True"
-    env_file:
-      - .env

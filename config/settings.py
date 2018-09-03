@@ -100,7 +100,7 @@ CACHES = {
     },
 }
 
-BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis')
+CELERY_BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis')
 
 WSGI_APPLICATION = 'config.wsgi.application'
 DJOSER = {

@@ -33,12 +33,13 @@ class ValidatePhoneView(APIView):
     def get(self, request):
         user = request.user
         if not user.phone:
-            return Response({'status': 'error', 'error': 'need to fill phone'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'status': 'error', 'error': 'need to fill phone'},
+                status=status.HTTP_400_BAD_REQUEST)
         code = generate_sms_code()
-        send_sms.delay(phone=user.phone,
-                       message='Your Hitcharide activation code is: {0}'
-                       .format(code))
+        send_sms.delay(
+            phone=user.phone,
+            message='Your Hitcharide activation code is: {0}'.format(code))
         save_user_code(user.pk, code)
         return Response({'status': 'success'})
 
