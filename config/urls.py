@@ -8,7 +8,8 @@ from rest_framework_jwt.views import verify_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
 
 from apps.places.viewsets import StateViewSet, CityViewSet
-from apps.accounts.views import MyView, ValidatePhoneView, complete
+from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
+    ValidatePhoneView, complete
 from apps.rides.viewsets import CarViewSet, RideViewSet, \
     RideBookingViewSet, RideRequestViewSet
 
@@ -28,6 +29,9 @@ router.register('rides/request', RideRequestViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/my/', MyView.as_view(), name='account_my'),
+    path('accounts/send_phone_validation_code/',
+         SendPhoneValidationCodeView.as_view(),
+         name='account_send_phone_validation_code'),
     path('accounts/validate_phone/',
          ValidatePhoneView.as_view(),
          name='account_validate_phone'),

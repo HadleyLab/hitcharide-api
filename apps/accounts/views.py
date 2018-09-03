@@ -27,10 +27,10 @@ class MyView(APIView):
         return Response(UserSerializer(instance).data)
 
 
-class ValidatePhoneView(APIView):
+class SendPhoneValidationCodeView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):
+    def post(self, request):
         user = request.user
         if not user.phone:
             return Response(
@@ -42,6 +42,10 @@ class ValidatePhoneView(APIView):
             message='Your Hitcharide activation code is: {0}'.format(code))
         save_user_code(user.pk, code)
         return Response({'status': 'success'})
+
+
+class ValidatePhoneView(APIView):
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         user = request.user
