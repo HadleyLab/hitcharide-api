@@ -36,3 +36,4 @@ text-unidecode==1.2
 urllib3==1.23
 twilio==6.16.3
 celery==4.2.1
+git+git://github.com/beda-software/django-db-mailer@d4bcaf8d57ac947f97b6af279c43edab188cbfb8#egg=django-db-mailer
