@@ -8,7 +8,7 @@ class DBMailEmail(BaseEmailMessage):
     In this class we overrode the send method to send mail via dbmail
     """
     def send(self, to, *args, **kwargs):
-        super(DBMailEmail, self).send()
+        # super(DBMailEmail, self).send()
         context = self.get_context_data()
         send_db_mail(self.template_name, to, context)
 
