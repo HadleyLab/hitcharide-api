@@ -50,6 +50,15 @@ class Ride(CreatedUpdatedMixin):
     def last_stop(self):
         return self.stops.order_by('order').last()
 
+    def has_bookings(self):
+        return self.bookings.count() > 0
+
+    def clients_emails(self):
+        email_list = []
+        for item in self.bookings.all():
+            email_list.append(item.client.email)
+        return email_list
+
     def __str__(self):
         return '{0} --> {1} on {2}'.format(
             self.first_stop,
