@@ -179,6 +179,7 @@ TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
 DATABASES = {
     'default': dj_database_url.config(),
 }
+DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 AUTH_USER_MODEL = 'accounts.User'
 
 
