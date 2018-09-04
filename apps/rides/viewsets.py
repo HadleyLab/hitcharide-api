@@ -74,14 +74,18 @@ class RideViewSet(ListFactoryMixin,
         return super(RideViewSet, self).update(request, *args, **kwargs)
 
     def perform_update(self, serializer):
-        # TODO: add dbmail
-        return super(RideViewSet, self).perform_update(serializer)
+        super(RideViewSet, self).perform_update(serializer)
+        instance = serializer.instance
+        if instance.has_bookings():
+            send_db_mail('ride_has_been_edited',
+                         instance.get_clients_emails(),
+                         {'ride': instance})
 
     def perform_destroy(self, instance):
         if instance.has_bookings():
             send_db_mail('ride_has_been_deleted',
-                         instance.clients_emails(),
-                         instance)
+                         instance.get_clients_emails(),
+                         {'ride': instance})
         return super(RideViewSet, self).perform_destroy(instance)
 
 
