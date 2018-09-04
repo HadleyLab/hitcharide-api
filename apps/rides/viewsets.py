@@ -3,6 +3,7 @@ from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from dbmail import send_db_mail
 
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
@@ -71,6 +72,17 @@ class RideViewSet(ListFactoryMixin,
     @transaction.atomic
     def update(self, request, *args, **kwargs):
         return super(RideViewSet, self).update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        # TODO: add dbmail
+        return super(RideViewSet, self).perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        if instance.has_bookings():
+            send_db_mail('ride_has_been_deleted',
+                         instance.clients_emails(),
+                         instance)
+        return super(RideViewSet, self).perform_destroy(instance)
 
 
 class RideBookingViewSet(viewsets.GenericViewSet,
