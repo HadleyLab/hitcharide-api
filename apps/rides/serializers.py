@@ -57,7 +57,7 @@ class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
     class Meta:
         model = Ride
         fields = ('pk', 'stops', 'car', 'from_city', 'to_city',
-                  'available_number_of_sits', 'description')
+                  'number_of_sits', 'available_number_of_sits', 'description')
 
 
 class RideBookingSerializer(serializers.ModelSerializer):
