@@ -27,6 +27,14 @@ class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
 
     car = CarSerializer()
     stops = RidePointSerializer(many=True)
+    from_city = serializers.PrimaryKeyRelatedField(
+        source='first_stop.city.pk',
+        read_only=True)
+    to_city = serializers.PrimaryKeyRelatedField(
+        source='last_stop.city.pk',
+        read_only=True
+    )
+    available_number_of_sits = serializers.SerializerMethodField()
 
     def validate(self, attrs):
         user = self.context['request'].user
@@ -37,9 +45,14 @@ class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
 
         return super(RideSerializer, self).validate(attrs)
 
+    def get_available_number_of_sits(self, obj):
+        return obj.available_number_of_sits()
+
+
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'number_of_sits', 'description')
+        fields = ('pk', 'stops', 'car', 'from_city', 'to_city',
+                  'available_number_of_sits', 'description')
 
 
 class RideBookingSerializer(serializers.ModelSerializer):
