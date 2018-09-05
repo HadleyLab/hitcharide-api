@@ -21,10 +21,12 @@ class Car(models.Model):
         upload_to='car_photos',
         blank=True, null=True)
 
+    def brand_and_model(self):
+        return '{0} {1}'.format(self.brand, self.model)
+
     def __str__(self):
-        return '{0} {1} - {2}'.format(
-            self.brand,
-            self.model,
+        return '{0} - {1}'.format(
+            self.brand_and_model(),
             self.owner.get_full_name())
 
 

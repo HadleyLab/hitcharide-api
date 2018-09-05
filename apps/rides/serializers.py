@@ -10,10 +10,15 @@ class CarSerializer(GetOrCreateMixin):
 
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
+    brand_and_model = serializers.SerializerMethodField()
+
+    def get_brand_and_model(self, obj):
+        return obj.brand_and_model()
 
     class Meta:
         model = Car
-        fields = ('pk', 'owner', 'brand', 'model', 'number_of_sits', 'photo')
+        fields = ('pk', 'owner', 'brand', 'model', 'brand_and_model',
+                  'number_of_sits', 'photo')
 
 
 class RidePointSerializer(GetOrCreateMixin):
