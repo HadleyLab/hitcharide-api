@@ -9,7 +9,8 @@ from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
 from social_django.utils import psa
 
 from .serializers import UserSerializer, UserUpdateSerializer
-from .utils import generate_sms_code, save_user_code, check_user_code
+from .utils import generate_sms_code, save_user_code, check_user_code, \
+    check_twilio_enabled
 from .tasks import send_sms
 
 
@@ -37,9 +38,12 @@ class SendPhoneValidationCodeView(APIView):
                 {'status': 'error', 'error': 'need to fill phone'},
                 status=status.HTTP_400_BAD_REQUEST)
         code = generate_sms_code()
-        send_sms.delay(
-            phone=user.phone,
-            message='Your Hitcharide activation code is: {0}'.format(code))
+        if check_twilio_enabled():
+            send_sms.delay(
+                phone=user.phone,
+                message='Your Hitcharide activation code is: {0}'.format(code))
+        else:
+            print("Activation code is: {0}".format(code))
         save_user_code(user.pk, code)
         return Response({'status': 'success'})
 
