@@ -142,7 +142,7 @@ class RideRequest(CreatedUpdatedMixin):
         return self.date_time < timezone.now()
 
 
-class ComplaintStatus(object):
+class RideComplaintStatus(object):
     NEW = 'new'
     CONSIDERED = 'considered'
     CONFIRMED = 'confirmed'
@@ -155,7 +155,7 @@ class ComplaintStatus(object):
     )
 
 
-class Complaint(models.Model):
+class RideComplaint(models.Model):
     ride = models.ForeignKey(
         'Ride',
         on_delete=models.CASCADE,
@@ -170,5 +170,5 @@ class Complaint(models.Model):
         default=timezone.now())
     status = models.CharField(
         max_length=10,
-        default=ComplaintStatus.NEW,
-        choices=ComplaintStatus.CHOICES)
+        default=RideComplaintStatus.NEW,
+        choices=RideComplaintStatus.CHOICES)

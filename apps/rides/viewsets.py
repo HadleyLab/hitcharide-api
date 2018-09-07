@@ -8,11 +8,11 @@ from dbmail import send_db_mail
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
-from .models import Car, Ride, RideBooking, RideRequest, Complaint
+from .models import Car, Ride, RideBooking, RideRequest, RideComplaint
 from .serializers import CarSerializer, RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
-    RideBookingWritableSerializer, ComplaintWritableSerializer
+    RideBookingWritableSerializer, RideComplaintWritableSerializer
 
 
 class CarViewSet(viewsets.GenericViewSet,
@@ -142,7 +142,8 @@ class RideRequestViewSet(mixins.ListModelMixin,
         return self.list(request, *args, **kwargs)
 
 
-class ComplaintViewSet(viewsets.GenericViewSet):
-    serializer_class = ComplaintWritableSerializer
-    queryset = Complaint.objects.all().order_by('date_time')
+class RideComplaintViewSet(mixins.CreateModelMixin,
+                           viewsets.GenericViewSet):
+    serializer_class = RideComplaintWritableSerializer
+    queryset = RideComplaint.objects.all().order_by('date_time')
     permission_classes = (IsAuthenticated,)

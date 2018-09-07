@@ -3,7 +3,8 @@ from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence
 
 from apps.places.factories import CityFactory
 from apps.accounts.factories import UserFactory
-from .models import Ride, Car, RideBooking, RideStop, Complaint, ComplaintStatus
+from .models import Ride, Car, RideBooking, RideStop, RideComplaint, \
+    RideComplaintStatus
 
 
 class CarFactory(DjangoModelFactory):
@@ -46,11 +47,11 @@ class RideBookingFactory(DjangoModelFactory):
         model = RideBooking
 
 
-class ComplaintFactory(DjangoModelFactory):
+class RideComplaintFactory(DjangoModelFactory):
     ride = SubFactory(RideFactory)
     user = SubFactory(UserFactory)
-    status = ComplaintStatus.NEW
+    status = RideComplaintStatus.NEW
     description = fuzzy.FuzzyText()
 
     class Meta:
-        model = Complaint
+        model = RideComplaint

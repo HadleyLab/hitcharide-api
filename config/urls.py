@@ -11,7 +11,7 @@ from apps.places.viewsets import StateViewSet, CityViewSet
 from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
     ValidatePhoneView, complete
 from apps.rides.viewsets import CarViewSet, RideViewSet, \
-    RideBookingViewSet, RideRequestViewSet, ComplaintViewSet
+    RideBookingViewSet, RideRequestViewSet, RideComplaintViewSet
 
 from .routers import Router
 
@@ -24,7 +24,7 @@ router.register('rides/car', CarViewSet)
 router.register('rides/ride', RideViewSet)
 router.register('rides/booking', RideBookingViewSet)
 router.register('rides/request', RideRequestViewSet)
-router.register('rides/complaint', ComplaintViewSet)
+router.register('rides/complaint', RideComplaintViewSet)
 
 
 urlpatterns = [
