@@ -4,6 +4,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from dbmail import send_db_mail
+from constance import config
 
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
@@ -147,3 +148,11 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
     serializer_class = RideComplaintWritableSerializer
     queryset = RideComplaint.objects.all().order_by('date_time')
     permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        super(RideComplaintViewSet, self).perform_create(serializer)
+        instance = serializer.instance
+        if config.MANAGER_EMAIL:
+            send_db_mail('new_ride_complaint',
+                         [config.MANAGER_EMAIL],
+                         {'complaint': instance})
