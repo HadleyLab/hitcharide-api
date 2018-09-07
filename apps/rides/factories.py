@@ -2,7 +2,8 @@ from django.utils import timezone
 from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence
 
 from apps.places.factories import CityFactory
-from .models import Ride, Car, RideBooking, RideStop
+from apps.accounts.factories import UserFactory
+from .models import Ride, Car, RideBooking, RideStop, Complaint, ComplaintStatus
 
 
 class CarFactory(DjangoModelFactory):
@@ -43,3 +44,13 @@ class RideBookingFactory(DjangoModelFactory):
 
     class Meta:
         model = RideBooking
+
+
+class ComplaintFactory(DjangoModelFactory):
+    ride = SubFactory(RideFactory)
+    user = SubFactory(UserFactory)
+    status = ComplaintStatus.NEW
+    description = fuzzy.FuzzyText()
+
+    class Meta:
+        model = Complaint
