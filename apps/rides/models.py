@@ -140,3 +140,35 @@ class RideRequest(CreatedUpdatedMixin):
     @property
     def is_expired(self):
         return self.date_time < timezone.now()
+
+
+class ComplaintStatus(object):
+    NEW = 'new'
+    CONSIDERED = 'considered'
+    CONFIRMED = 'confirmed'
+    DISAPPROVED = 'disapproved'
+
+    CHOICES = tuple(
+        (item, item.title()) for item in [
+            NEW, CONSIDERED, CONFIRMED, DISAPPROVED
+        ]
+    )
+
+
+class Complaint(models.Model):
+    ride = models.ForeignKey(
+        'Ride',
+        on_delete=models.CASCADE,
+        related_name='complaints')
+    user = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.PROTECT,
+        related_name='complaints')
+    description = models.TextField(
+        blank=True, null=True)
+    date_time = models.DateTimeField(
+        default=timezone.now())
+    status = models.CharField(
+        max_length=10,
+        default=ComplaintStatus.NEW,
+        choices=ComplaintStatus.CHOICES)
