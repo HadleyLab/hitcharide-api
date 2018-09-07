@@ -1,56 +1,61 @@
 from django.db import models
 from django.utils import timezone
 
-from denorm import denormalized, depend_on_related
-
 from .mixins import CreatedUpdatedMixin
 
 
 class Car(models.Model):
     owner = models.ForeignKey(
         'accounts.User',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='cars')
     brand = models.CharField(
         max_length=50)
     model = models.CharField(
         max_length=50)
-    number_of_sits = models.PositiveSmallIntegerField(
-        verbose_name='Maximum number of sits in this car')
+    number_of_seats = models.PositiveSmallIntegerField(
+        verbose_name='Maximum number of seats in this car')
     photo = models.ImageField(
         upload_to='car_photos',
         blank=True, null=True)
-
-    def brand_and_model(self):
-        return '{0} {1}'.format(self.brand, self.model)
+    color = models.CharField(
+        max_length=50)
+    license_plate = models.CharField(
+        max_length=50)
 
     def __str__(self):
-        return '{0} - {1}'.format(
-            self.brand_and_model(),
+        return '{0} {1} - {2}'.format(
+            self.brand,
+            self.model,
             self.owner.get_full_name())
 
 
 class Ride(CreatedUpdatedMixin):
     car = models.ForeignKey(
         'Car',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='rides')
-    number_of_sits = models.PositiveSmallIntegerField(
-        verbose_name='Available number of sits during ride')
+    number_of_seats = models.PositiveSmallIntegerField(
+        verbose_name='Available number of seats during ride')
     description = models.TextField(
         blank=True, null=True)
+    city_from = models.ForeignKey(
+        'places.City',
+        on_delete=models.PROTECT,
+        related_name='+')
+    city_to = models.ForeignKey(
+        'places.City',
+        on_delete=models.PROTECT,
+        related_name='+')
+    date_time = models.DateTimeField()
+    price = models.DecimalField(
+        decimal_places=2,
+        max_digits=10
+    )
 
-    @denormalized(models.ForeignKey, to='RidePoint', on_delete=models.SET_NULL,
-                  related_name='+', blank=True, null=True)
-    @depend_on_related('RidePoint', foreign_key='first_stop')
-    def first_stop(self):
-        return self.stops.order_by('order').first()
-
-    @denormalized(models.ForeignKey, to='RidePoint', on_delete=models.SET_NULL,
-                  related_name='+', blank=True, null=True)
-    @depend_on_related('RidePoint', foreign_key='last_stop')
-    def last_stop(self):
-        return self.stops.order_by('order').last()
+    @property
+    def available_number_of_seats(self):
+        return self.number_of_seats - self.get_bookings_count()
 
     def get_bookings_count(self):
         return self.bookings.count()
@@ -58,30 +63,25 @@ class Ride(CreatedUpdatedMixin):
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
 
-    def available_number_of_sits(self):
-        return self.car.number_of_sits - self.get_bookings_count()
-
     def __str__(self):
         return '{0} --> {1} on {2}'.format(
-            self.first_stop,
-            self.last_stop,
+            self.city_from,
+            self.city_to,
             self.car)
 
 
-class RidePoint(models.Model):
+class RideStop(models.Model):
     ride = models.ForeignKey(
         'Ride',
         on_delete=models.CASCADE,
         related_name='stops')
     city = models.ForeignKey(
         'places.City',
-        on_delete=models.CASCADE)
-    cost_per_sit = models.PositiveIntegerField()
+        on_delete=models.PROTECT)
     order = models.IntegerField(default=0)
-    date_time = models.DateTimeField()
 
     def __str__(self):
-        return '{0} : {1}'.format(self.city, self.date_time)
+        return self.city
 
 
 class RideBookingStatus(object):
@@ -105,7 +105,7 @@ class RideBooking(CreatedUpdatedMixin):
         related_name='bookings')
     client = models.ForeignKey(
         'accounts.User',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='bookings')
     status = models.CharField(
         max_length=10,
@@ -125,18 +125,18 @@ class RideBooking(CreatedUpdatedMixin):
 class RideRequest(CreatedUpdatedMixin):
     author = models.ForeignKey(
         'accounts.User',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='requests')
     city_from = models.ForeignKey(
         'places.City',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='+')
     city_to = models.ForeignKey(
         'places.City',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name='+')
-    start = models.DateTimeField()
+    date_time = models.DateTimeField()
 
     @property
     def is_expired(self):
-        return self.start < timezone.now()
+        return self.date_time < timezone.now()

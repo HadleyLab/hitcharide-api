@@ -1,45 +1,49 @@
 from rest_framework import serializers
-from drf_writable_nested import NestedCreateMixin, NestedUpdateMixin
+from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
-from config.serializers import GetOrCreateMixin
-from .models import Car, Ride, RidePoint, RideBooking, RideRequest
+from apps.places.serializers import CitySerializer
+from .models import Car, Ride, RideStop, RideBooking, RideRequest
 
 
-class CarSerializer(GetOrCreateMixin):
-
+class CarSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
-    brand_and_model = serializers.SerializerMethodField()
-
-    def get_brand_and_model(self, obj):
-        return obj.brand_and_model()
 
     class Meta:
         model = Car
-        fields = ('pk', 'owner', 'brand', 'model', 'brand_and_model',
-                  'number_of_sits', 'photo')
+        fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
+                  'number_of_seats', 'photo')
 
 
-class RidePointSerializer(GetOrCreateMixin):
+class RideStopDetailSerializer(serializers.ModelSerializer):
+    city = CitySerializer()
 
     class Meta:
-        model = RidePoint
-        fields = ('pk', 'city', 'cost_per_sit', 'order', 'date_time')
+        model = RideStop
+        fields = ('pk', 'city', 'order')
 
 
-class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
+class RideStopWritableSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = RideStop
+        fields = ('pk', 'city', 'order')
+
+
+class RideDetailSerializer(WritableNestedModelSerializer):
     car = CarSerializer()
-    stops = RidePointSerializer(many=True)
-    from_city = serializers.PrimaryKeyRelatedField(
-        source='first_stop.city.pk',
-        read_only=True)
-    to_city = serializers.PrimaryKeyRelatedField(
-        source='last_stop.city.pk',
-        read_only=True
-    )
-    available_number_of_sits = serializers.SerializerMethodField()
+    stops = RideStopDetailSerializer(many=True)
+
+    class Meta:
+        model = Ride
+        fields = ('pk', 'stops', 'car', 'city_from', 'city_to', 'date_time',
+                  'price', 'number_of_seats', 'available_number_of_seats',
+                  'description')
+
+
+class RideWritableSerializer(WritableNestedModelSerializer):
+    stops = RideStopWritableSerializer(many=True)
 
     def validate(self, attrs):
         user = self.context['request'].user
@@ -48,36 +52,46 @@ class RideSerializer(NestedCreateMixin, NestedUpdateMixin):
             raise ValidationError('You need to fill profile and validate '
                                   'the phone to create a ride')
 
-        return super(RideSerializer, self).validate(attrs)
-
-    def get_available_number_of_sits(self, obj):
-        return obj.available_number_of_sits()
-
+        return super(RideWritableSerializer, self).validate(attrs)
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'from_city', 'to_city',
-                  'number_of_sits', 'available_number_of_sits', 'description')
+        fields = ('pk', 'stops', 'car', 'city_from', 'city_to', 'date_time',
+                  'price', 'number_of_seats', 'description')
 
 
-class RideBookingSerializer(serializers.ModelSerializer):
-
-    ride = RideSerializer()
+class RideBookingDetailSerializer(serializers.ModelSerializer):
+    ride = RideDetailSerializer()
     status = serializers.CharField(read_only=True)
-    client = serializers.HiddenField(
-        default=serializers.CurrentUserDefault())
 
     class Meta:
         model = RideBooking
         fields = ('pk', 'client', 'ride', 'status')
 
 
-class RideRequestSerializer(serializers.ModelSerializer):
+class RideBookingWritableSerializer(serializers.ModelSerializer):
+    client = serializers.HiddenField(
+        default=serializers.CurrentUserDefault())
 
-    is_expired = serializers.BooleanField(read_only=True)
+    class Meta:
+        model = RideBooking
+        fields = ('pk', 'client', 'ride')
+
+
+class RideRequestDetailSerializer(serializers.ModelSerializer):
+    city_from = CitySerializer()
+    city_to = CitySerializer()
+
+    class Meta:
+        model = RideRequest
+        fields = ('pk', 'author', 'city_from', 'city_to', 'is_expired',
+                  'date_time')
+
+
+class RideRequestWritableSerializer(serializers.ModelSerializer):
     author = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
 
     class Meta:
         model = RideRequest
-        fields = ('pk', 'author', 'city_from', 'city_to', 'is_expired', 'start')
+        fields = ('pk', 'author', 'city_from', 'city_to', 'date_time')

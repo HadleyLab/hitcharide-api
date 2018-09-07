@@ -2,13 +2,15 @@ from django.utils import timezone
 from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence
 
 from apps.places.factories import CityFactory
-from .models import Ride, Car, RideBooking, RidePoint
+from .models import Ride, Car, RideBooking, RideStop
 
 
 class CarFactory(DjangoModelFactory):
     brand = fuzzy.FuzzyText()
     model = fuzzy.FuzzyText()
-    number_of_sits = fuzzy.FuzzyInteger(low=2, high=7)
+    color = fuzzy.FuzzyText()
+    license_plate = fuzzy.FuzzyText()
+    number_of_seats = fuzzy.FuzzyInteger(low=2, high=7)
 
     class Meta:
         model = Car
@@ -16,21 +18,24 @@ class CarFactory(DjangoModelFactory):
 
 class RideFactory(DjangoModelFactory):
     car = SubFactory(CarFactory)
-    number_of_sits = fuzzy.FuzzyInteger(low=2, high=7)
+    city_from = SubFactory(CityFactory)
+    city_to = SubFactory(CityFactory)
+    number_of_seats = fuzzy.FuzzyInteger(low=2, high=7)
+    price = fuzzy.FuzzyInteger(low=2, high=100)
+    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
+    description = fuzzy.FuzzyText()
 
     class Meta:
         model = Ride
 
 
-class RidePointFactory(DjangoModelFactory):
+class RideStopFactory(DjangoModelFactory):
     ride = SubFactory(RideFactory)
     city = SubFactory(CityFactory)
-    cost_per_sit = fuzzy.FuzzyInteger(low=2, high=100)
     order = Sequence(lambda n: n)
-    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
 
     class Meta:
-        model = RidePoint
+        model = RideStop
 
 
 class RideBookingFactory(DjangoModelFactory):

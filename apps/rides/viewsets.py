@@ -9,8 +9,10 @@ from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
 from .models import Car, Ride, RideBooking, RideRequest
-from .serializers import CarSerializer, RideSerializer, \
-    RideBookingSerializer, RideRequestSerializer
+from .serializers import CarSerializer, RideBookingDetailSerializer, \
+    RideWritableSerializer, RideDetailSerializer, \
+    RideRequestWritableSerializer, RideRequestDetailSerializer, \
+    RideBookingWritableSerializer
 
 
 class CarViewSet(viewsets.GenericViewSet,
@@ -31,11 +33,16 @@ class RideViewSet(ListFactoryMixin,
                   mixins.UpdateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin):
-    queryset = Ride.objects.all().order_by('first_stop__date_time')
-    serializer_class = RideSerializer
+    queryset = Ride.objects.all().order_by('date_time')
+    serializer_class = RideDetailSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = DefaultPageNumberPagination
     filter_backends = (RidesListFilter,)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update']:
+            return RideWritableSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         queryset = super(RideViewSet, self).get_queryset()
@@ -47,7 +54,7 @@ class RideViewSet(ListFactoryMixin,
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
-            first_stop__date_time__gt=timezone.now())
+            date_time__gt=timezone.now())
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
@@ -59,9 +66,8 @@ class RideViewSet(ListFactoryMixin,
             filter_backends=(MyRidesFilter, RidesListFilter))
     def booked(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
-            pk__in=RideBooking.objects.filter(
-                client=self.request.user
-            ).values_list('ride_id', flat=True))
+            bookings__client=request.user
+        ).distinct()
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     # Wrap with transaction.atomic to rollback on nested serializer error
@@ -89,27 +95,37 @@ class RideViewSet(ListFactoryMixin,
         return super(RideViewSet, self).perform_destroy(instance)
 
 
-class RideBookingViewSet(viewsets.GenericViewSet,
-                         mixins.ListModelMixin,
+class RideBookingViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
-                         mixins.DestroyModelMixin):
+                         mixins.DestroyModelMixin,
+                         viewsets.GenericViewSet):
     queryset = RideBooking.objects.all()
-    serializer_class = RideBookingSerializer
+    serializer_class = RideBookingDetailSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.action in ['create']:
+            return RideBookingWritableSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
 
 
-class RideRequestViewSet(viewsets.GenericViewSet,
-                         mixins.ListModelMixin,
+class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
-                         mixins.DestroyModelMixin):
+                         mixins.DestroyModelMixin,
+                         viewsets.GenericViewSet):
     queryset = RideRequest.objects.all().order_by('created')
-    serializer_class = RideRequestSerializer
+    serializer_class = RideRequestDetailSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update']:
+            return RideRequestWritableSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         result = super(RideRequestViewSet, self).get_queryset()
