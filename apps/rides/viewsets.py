@@ -11,7 +11,8 @@ from .mixins import ListFactoryMixin
 from .models import Car, Ride, RideBooking, RideRequest
 from .serializers import CarSerializer, RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
-    RideRequestWritableSerializer, RideRequestDetailSerializer
+    RideRequestWritableSerializer, RideRequestDetailSerializer, \
+    RideBookingWritableSerializer
 
 
 class CarViewSet(viewsets.GenericViewSet,
@@ -104,7 +105,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
 
     def get_serializer_class(self):
         if self.action in ['create']:
-            return RideWritableSerializer
+            return RideBookingWritableSerializer
         return self.serializer_class
 
     def get_queryset(self):

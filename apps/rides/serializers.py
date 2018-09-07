@@ -61,8 +61,15 @@ class RideWritableSerializer(WritableNestedModelSerializer):
 
 
 class RideBookingDetailSerializer(serializers.ModelSerializer):
-
     ride = RideDetailSerializer()
+    status = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = RideBooking
+        fields = ('pk', 'client', 'ride', 'status')
+
+
+class RideBookingWritableSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     client = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
