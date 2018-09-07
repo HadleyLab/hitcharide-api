@@ -70,7 +70,6 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
 
 
 class RideBookingWritableSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(read_only=True)
     client = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
 
