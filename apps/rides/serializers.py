@@ -3,7 +3,7 @@ from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
 from apps.places.serializers import CitySerializer
-from .models import Car, Ride, RideStop, RideBooking, RideRequest
+from .models import Car, Ride, RideStop, RideBooking, RideRequest, Complaint
 
 
 class CarSerializer(serializers.ModelSerializer):
@@ -96,3 +96,12 @@ class RideRequestWritableSerializer(serializers.ModelSerializer):
     class Meta:
         model = RideRequest
         fields = ('pk', 'author', 'city_from', 'city_to', 'date_time')
+
+
+class ComplaintWritableSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Complaint
+        fields = ('pk', 'user', 'car', 'description')
