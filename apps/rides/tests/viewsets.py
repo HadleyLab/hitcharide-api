@@ -5,8 +5,8 @@ from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
 from apps.places.factories import CityFactory
 from apps.rides.factories import CarFactory, RideFactory, \
-    RideBookingFactory, RideStopFactory
-from apps.rides.models import Ride, Car
+    RideBookingFactory, RideStopFactory, RideComplaintFactory
+from apps.rides.models import Ride, Car, RideComplaintStatus
 
 
 class RideViewSetTest(APITestCase):
@@ -138,6 +138,26 @@ class RideViewSetTest(APITestCase):
         self.assertSetEqual(
             {my_ride_1.pk, my_ride_2.pk},
             set([ride['pk'] for ride in resp.data['results']]))
+
+    def test_ride_complaints_create(self):
+        ride = RideFactory.create(
+            number_of_seats=5,
+            car=self.car)
+        RideBookingFactory.create(
+            ride=ride,
+            client=self.user
+        )
+
+        descr_text = 'Test text'
+        complaint = RideComplaintFactory.create(
+            ride=ride,
+            user=self.user,
+            description=descr_text
+        )
+
+        self.assertEqual(complaint.user, self.user)
+        self.assertEqual(complaint.description, descr_text)
+        self.assertEqual(complaint.status, RideComplaintStatus.NEW)
 
 
 class RideBookingViewSetTest(APITestCase):
