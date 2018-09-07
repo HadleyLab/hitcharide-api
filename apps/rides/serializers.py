@@ -75,7 +75,7 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride', 'status')
+        fields = ('pk', 'client', 'ride')
 
 
 class RideRequestDetailSerializer(serializers.ModelSerializer):
