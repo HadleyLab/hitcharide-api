@@ -1,10 +1,14 @@
+from unittest import mock
 from config.tests import APITestCase
+
 from apps.accounts.factories import UserFactory
 from apps.accounts.models import User
+from apps.main.test_utils import assert_mock_called_with
 
 
 class RegistrationTestCase(APITestCase):
-    def test_registration(self):
+    @mock.patch('apps.dbmail_templates.email.send_db_mail')
+    def test_registration(self, mock_send_db_mail):
         data = {
             'email': 'test@test.test',
             'phone': '+7 933 000 00 00',
@@ -15,6 +19,13 @@ class RegistrationTestCase(APITestCase):
 
         resp = self.client.post('/accounts/register/', data, format='json')
         self.assertSuccessResponse(resp)
+        assert_mock_called_with(
+            mock_send_db_mail,
+            'account_activate', ['test@test.test'],
+            lambda value: self.assertEqual(
+                value['user'].email,
+                'test@test.test')
+        )
 
         user = User.objects.get(pk=resp.data['pk'])
         self.assertEqual(user.first_name, 'first')
