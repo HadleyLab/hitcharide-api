@@ -27,7 +27,7 @@ SECRET_KEY = '!$z)ns!tibbq!((7o$dk*0+2tmv@44g2b+7h19wu0mz(r(-23d'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -118,10 +118,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
         'DJOSER_PASSWORD_RESET_CONFIRM_URL',
-        'web_ui/#/password/reset/confirm/{uid}/{token}'),
+        'confirm-password/{uid}/{token}'),
     'ACTIVATION_URL': os.environ.get(
         'DJOSER_ACTIVATION_URL',
-        'web_ui/#/activate/{uid}/{token}'),
+        'activate-account/{uid}/{token}'),
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
