@@ -192,8 +192,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-LOGIN_REDIRECT_URL = 'http://localhost:8000/#/accounts/my/'
-LOGIN_ERROR_URL = 'http://localhost:8000/#/accounts/error/'
+LOGIN_REDIRECT_URL = 'http://localhost:3000/#/account/my/'
+LOGIN_ERROR_URL = 'http://localhost:3000/#/account/error/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
