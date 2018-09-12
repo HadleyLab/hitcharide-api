@@ -96,6 +96,14 @@ class RideViewSet(ListFactoryMixin,
         return super(RideViewSet, self).perform_destroy(instance)
 
 
+class RideListViewSet(mixins.ListModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Ride.objects.all().order_by('date_time')
+    serializer_class = RideDetailSerializer
+    pagination_class = DefaultPageNumberPagination
+    filter_backends = (RidesListFilter,)
+
+
 class RideBookingViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.DestroyModelMixin,

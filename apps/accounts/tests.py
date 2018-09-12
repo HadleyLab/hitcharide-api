@@ -137,3 +137,15 @@ class RegistrationTestCase(APITestCase):
             'phone': ''
         })
         self.assertBadRequest(resp)
+
+    def test_update(self):
+        self.authenticate()
+        self.user.phone = '+71111111111'
+        self.user.is_phone_validated == True
+        self.user.save()
+
+        self.client.put('/accounts/my/', {
+            'phone': '+72222222222'
+        })
+
+        self.assertEqual(self.user.is_phone_validated, False)

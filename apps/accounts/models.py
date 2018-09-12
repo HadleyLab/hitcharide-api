@@ -26,6 +26,19 @@ class User(AbstractUser):
         max_length=150,
         blank=True, null=True)
 
+    __original_phone = None
+
+    def __init__(self, *args, **kwargs):
+        super(User, self).__init__(*args, **kwargs)
+        self.__original_phone = self.phone
+
+    def save(self, force_insert=False, force_update=False, *args, **kwargs):
+        if self.phone != self.__original_phone:
+            self.is_phone_validated = False
+
+        super(User, self).save(force_insert, force_update, *args, **kwargs)
+        self.__original_phone = self.phone
+
     @property
     def age(self):
         if self.birthday:
