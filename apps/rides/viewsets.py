@@ -4,15 +4,16 @@ from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from dbmail import send_db_mail
+from constance import config
 
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
-from .models import Car, Ride, RideBooking, RideRequest
+from .models import Car, Ride, RideBooking, RideRequest, RideComplaint
 from .serializers import CarSerializer, RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
-    RideBookingWritableSerializer
+    RideBookingWritableSerializer, RideComplaintWritableSerializer
 
 
 class CarViewSet(viewsets.GenericViewSet,
@@ -148,3 +149,18 @@ class RideRequestViewSet(mixins.ListModelMixin,
     @action(methods=['GET'], detail=False)
     def my(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
+
+
+class RideComplaintViewSet(mixins.CreateModelMixin,
+                           viewsets.GenericViewSet):
+    serializer_class = RideComplaintWritableSerializer
+    queryset = RideComplaint.objects.all().order_by('date_time')
+    permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        super(RideComplaintViewSet, self).perform_create(serializer)
+        instance = serializer.instance
+        if config.MANAGER_EMAIL:
+            send_db_mail('new_ride_complaint',
+                         [config.MANAGER_EMAIL],
+                         {'complaint': instance})

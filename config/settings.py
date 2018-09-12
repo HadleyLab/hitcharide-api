@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'denorm',
     'social_django',
     'dbmail',
+    'constance',
+    'constance.backends.database',
 
     # Local apps
     'apps.accounts',
@@ -139,6 +141,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.BrowsableAPIRenderer',
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
@@ -198,6 +201,12 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
 TWILIO_SID = os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
+
+
+CONSTANCE_CONFIG = {
+    'MANAGER_EMAIL': ('manager@hitcharide.com', 'Email for complaints'),
+}
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 
 # Database
