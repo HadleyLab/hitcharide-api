@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from dbmail import send_db_mail
 from constance import config
+from rest_framework.pagination import LimitOffsetPagination
 
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
@@ -100,7 +101,7 @@ class RideListViewSet(mixins.ListModelMixin,
                       viewsets.GenericViewSet):
     queryset = Ride.objects.all().order_by('date_time')
     serializer_class = RideDetailSerializer
-    pagination_class = DefaultPageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (RidesListFilter,)
 
 
