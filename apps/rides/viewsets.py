@@ -143,7 +143,7 @@ class RideRequestViewSet(mixins.ListModelMixin,
         if self.action in ['create', 'update', 'destroy', 'my']:
             result = result.filter(author=self.request.user)
         elif self.action == 'list':
-            result = result.filter(start__gt=timezone.now())
+            result = result.filter(date_time__gt=timezone.now())
 
         return result
 
