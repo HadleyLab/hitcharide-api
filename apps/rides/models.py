@@ -56,13 +56,10 @@ class Ride(CreatedUpdatedMixin):
 
     @property
     def available_number_of_seats(self):
-        return self.number_of_seats - self.get_bookings_count()
+        return self.number_of_seats - self.get_booked_seats_count()
 
-    def get_bookings_count(self):
-        booking_count = 0
-        for booking in self.bookings.all():
-            booking_count += booking.seats_count
-        return booking_count
+    def get_booked_seats_count(self):
+        return sum(self.bookings.values_list('seats_count', flat=True))
 
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
