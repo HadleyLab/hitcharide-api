@@ -3,11 +3,15 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
+import uuid
 
 from apps.accounts.fields import PhoneField
 
 
 class User(AbstractUser):
+    uuid = models.UUIDField(default=uuid.uuid4,
+                            editable=False,
+                            unique=True)
     email = models.EmailField(
         'email address',
         unique=True)
