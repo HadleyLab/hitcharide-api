@@ -2,13 +2,13 @@ from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
+from apps.accounts.serializers import UserSerializer
 from apps.places.serializers import CitySerializer, CityWithStateSerializer
 from .models import Car, Ride, RideStop, RideBooking, RideRequest, RideComplaint
 
 
 class CarSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault())
+    owner = UserSerializer()
 
     class Meta:
         model = Car
