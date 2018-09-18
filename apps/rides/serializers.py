@@ -17,7 +17,7 @@ class CarSerializer(serializers.ModelSerializer):
 
 
 class RideStopDetailSerializer(serializers.ModelSerializer):
-    city = CitySerializer()
+    city = CityWithStateSerializer()
 
     class Meta:
         model = RideStop
