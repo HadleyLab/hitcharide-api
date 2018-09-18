@@ -32,10 +32,12 @@ class RideStopWritableSerializer(serializers.ModelSerializer):
         fields = ('pk', 'city', 'order')
 
 
-class RidePassengerSerializer(UserSerializer):
+class RidePassengerSerializer(serializers.ModelSerializer):
+    client = UserSerializer()
+
     class Meta:
-        model = User
-        fields = ('uuid', 'phone', 'first_name', 'last_name')
+        model = RideBooking
+        fields = ('pk', 'client', 'seats_count')
 
 
 class RideDetailSerializer(WritableNestedModelSerializer):
@@ -43,11 +45,11 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
-    passengers = RidePassengerSerializer(many=True)
+    bookings = RidePassengerSerializer(many=True)
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'passengers', 'city_from', 'city_to', 'date_time',
+        fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to', 'date_time',
                   'price', 'number_of_seats', 'available_number_of_seats',
                   'description')
 
@@ -76,7 +78,7 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride', 'status')
+        fields = ('pk', 'client', 'ride', 'seats_count', 'status')
 
 
 class RideBookingWritableSerializer(serializers.ModelSerializer):
@@ -85,7 +87,7 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride')
+        fields = ('pk', 'client', 'ride', 'seats_count')
 
 
 class RideRequestDetailSerializer(serializers.ModelSerializer):

@@ -58,15 +58,11 @@ class Ride(CreatedUpdatedMixin):
     def available_number_of_seats(self):
         return self.number_of_seats - self.get_bookings_count()
 
-    @property
-    def passengers(self):
-        passengers__pk_list = []
-        for booking in self.bookings.all():
-            passengers__pk_list.append(booking.client.pk)
-        return User.objects.filter(pk__in=passengers__pk_list)
-
     def get_bookings_count(self):
-        return self.bookings.count()
+        booking_count = 0
+        for booking in self.bookings.all():
+            booking_count += booking.seats_count
+        return booking_count
 
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
@@ -119,6 +115,9 @@ class RideBooking(CreatedUpdatedMixin):
         max_length=10,
         default=RideBookingStatus.CREATED,
         choices=RideBookingStatus.CHOICES)
+    seats_count = models.IntegerField(
+        default=1
+    )
 
 
     def __str__(self):
@@ -164,7 +163,7 @@ class RideComplaintStatus(object):
     )
 
 
-class RideComplaint(models.Model):
+class RideComplaint(CreatedUpdatedMixin):
     ride = models.ForeignKey(
         'Ride',
         on_delete=models.CASCADE,
@@ -175,8 +174,6 @@ class RideComplaint(models.Model):
         related_name='complaints')
     description = models.TextField(
         blank=True, null=True)
-    date_time = models.DateTimeField(
-        default=timezone.now())
     status = models.CharField(
         max_length=10,
         default=RideComplaintStatus.NEW,

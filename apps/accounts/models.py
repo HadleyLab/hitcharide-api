@@ -9,9 +9,10 @@ from apps.accounts.fields import PhoneField
 
 
 class User(AbstractUser):
-    uuid = models.UUIDField(default=uuid.uuid4,
-                            editable=False,
-                            unique=True)
+    id = models.UUIDField(primary_key=True,
+                          default=uuid.uuid4,
+                          editable=False,
+                          unique=True)
     email = models.EmailField(
         'email address',
         unique=True)

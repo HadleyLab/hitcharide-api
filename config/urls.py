@@ -28,7 +28,7 @@ router.register('rides/booking', RideBookingViewSet)
 router.register('rides/request', RideRequestViewSet)
 router.register('rides/complaint', RideComplaintViewSet)
 router.register('rides/list', RideListViewSet)
-router.register('accounts/list', UserDetailViewSet)
+router.register('accounts', UserDetailViewSet)
 
 
 urlpatterns = [
