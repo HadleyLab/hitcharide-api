@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from apps.accounts.models import User
 from .mixins import CreatedUpdatedMixin
 
 
@@ -57,6 +58,13 @@ class Ride(CreatedUpdatedMixin):
     def available_number_of_seats(self):
         return self.number_of_seats - self.get_bookings_count()
 
+    @property
+    def passengers(self):
+        passengers__pk_list = []
+        for booking in self.bookings.all():
+            passengers__pk_list.append(booking.client.pk)
+        return User.objects.filter(pk__in=passengers__pk_list)
+
     def get_bookings_count(self):
         return self.bookings.count()
 
@@ -111,6 +119,7 @@ class RideBooking(CreatedUpdatedMixin):
         max_length=10,
         default=RideBookingStatus.CREATED,
         choices=RideBookingStatus.CHOICES)
+
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(

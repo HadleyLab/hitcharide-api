@@ -36,10 +36,11 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
+    passengers = UserSerializer(many=True)
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'city_from', 'city_to', 'date_time',
+        fields = ('pk', 'stops', 'car', 'passengers', 'city_from', 'city_to', 'date_time',
                   'price', 'number_of_seats', 'available_number_of_seats',
                   'description')
 
