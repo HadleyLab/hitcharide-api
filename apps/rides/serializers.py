@@ -2,6 +2,7 @@ from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
+from apps.accounts.models import User
 from apps.accounts.serializers import UserSerializer
 from apps.places.serializers import CitySerializer, CityWithStateSerializer
 from .models import Car, Ride, RideStop, RideBooking, RideRequest, RideComplaint
@@ -31,12 +32,18 @@ class RideStopWritableSerializer(serializers.ModelSerializer):
         fields = ('pk', 'city', 'order')
 
 
+class RidePassengerSerializer(UserSerializer):
+    class Meta:
+        model = User
+        fields = ('uuid', 'phone', 'first_name', 'last_name')
+
+
 class RideDetailSerializer(WritableNestedModelSerializer):
     car = CarSerializer()
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
-    passengers = UserSerializer(many=True)
+    passengers = RidePassengerSerializer(many=True)
 
     class Meta:
         model = Ride
