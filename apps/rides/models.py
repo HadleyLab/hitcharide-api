@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+from apps.accounts.models import User
 from .mixins import CreatedUpdatedMixin
 
 
@@ -55,10 +56,10 @@ class Ride(CreatedUpdatedMixin):
 
     @property
     def available_number_of_seats(self):
-        return self.number_of_seats - self.get_bookings_count()
+        return self.number_of_seats - self.get_booked_seats_count()
 
-    def get_bookings_count(self):
-        return self.bookings.count()
+    def get_booked_seats_count(self):
+        return sum(self.bookings.values_list('seats_count', flat=True))
 
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
@@ -111,6 +112,10 @@ class RideBooking(CreatedUpdatedMixin):
         max_length=10,
         default=RideBookingStatus.CREATED,
         choices=RideBookingStatus.CHOICES)
+    seats_count = models.IntegerField(
+        default=1
+    )
+
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(
@@ -155,7 +160,7 @@ class RideComplaintStatus(object):
     )
 
 
-class RideComplaint(models.Model):
+class RideComplaint(CreatedUpdatedMixin):
     ride = models.ForeignKey(
         'Ride',
         on_delete=models.CASCADE,
@@ -166,8 +171,6 @@ class RideComplaint(models.Model):
         related_name='complaints')
     description = models.TextField(
         blank=True, null=True)
-    date_time = models.DateTimeField(
-        default=timezone.now())
     status = models.CharField(
         max_length=10,
         default=RideComplaintStatus.NEW,

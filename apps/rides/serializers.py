@@ -2,13 +2,14 @@ from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
+from apps.accounts.models import User
+from apps.accounts.serializers import UserSerializer
 from apps.places.serializers import CitySerializer, CityWithStateSerializer
 from .models import Car, Ride, RideStop, RideBooking, RideRequest, RideComplaint
 
 
 class CarSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(
-        default=serializers.CurrentUserDefault())
+    owner = UserSerializer()
 
     class Meta:
         model = Car
@@ -17,7 +18,7 @@ class CarSerializer(serializers.ModelSerializer):
 
 
 class RideStopDetailSerializer(serializers.ModelSerializer):
-    city = CitySerializer()
+    city = CityWithStateSerializer()
 
     class Meta:
         model = RideStop
@@ -31,15 +32,24 @@ class RideStopWritableSerializer(serializers.ModelSerializer):
         fields = ('pk', 'city', 'order')
 
 
+class RidePassengerSerializer(serializers.ModelSerializer):
+    client = UserSerializer()
+
+    class Meta:
+        model = RideBooking
+        fields = ('pk', 'client', 'seats_count')
+
+
 class RideDetailSerializer(WritableNestedModelSerializer):
     car = CarSerializer()
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
+    bookings = RidePassengerSerializer(many=True)
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'city_from', 'city_to', 'date_time',
+        fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to', 'date_time',
                   'price', 'number_of_seats', 'available_number_of_seats',
                   'description')
 
@@ -68,7 +78,7 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride', 'status')
+        fields = ('pk', 'client', 'ride', 'seats_count', 'status')
 
 
 class RideBookingWritableSerializer(serializers.ModelSerializer):
@@ -77,7 +87,7 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride')
+        fields = ('pk', 'client', 'ride', 'seats_count')
 
 
 class RideRequestDetailSerializer(serializers.ModelSerializer):
