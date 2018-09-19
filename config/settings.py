@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'apps.rides',
     'apps.places',
     'apps.dbmail_templates',
+    'apps.cars',
 ]
 
 SITE_ID = 1

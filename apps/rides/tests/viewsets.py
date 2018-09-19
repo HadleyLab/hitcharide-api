@@ -4,9 +4,10 @@ from django.utils import timezone
 from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
 from apps.places.factories import CityFactory
-from apps.rides.factories import CarFactory, RideFactory, \
+from apps.rides.factories import RideFactory, \
     RideBookingFactory, RideStopFactory, RideComplaintFactory
-from apps.rides.models import Ride, Car, RideComplaintStatus
+from apps.cars.factories import CarFactory
+from apps.rides.models import Ride, RideComplaintStatus
 
 
 class RideViewSetTest(APITestCase):

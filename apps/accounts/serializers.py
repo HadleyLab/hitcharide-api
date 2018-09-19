@@ -1,18 +1,16 @@
 from rest_framework import serializers
 
-from apps.rides.serializers import CarSerializer
 from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    cars = CarSerializer(many=True)
 
     class Meta:
         model = User
         fields = (
             'pk', 'email', 'phone', 'first_name', 'last_name',
             'age', 'photo', 'short_desc', 'is_phone_validated',
-            'paypal_account', 'cars',
+            'paypal_account',
         )
 
 

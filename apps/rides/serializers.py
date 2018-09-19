@@ -2,19 +2,10 @@ from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
-from apps.accounts.models import User
 from apps.accounts.serializers import UserSerializer
+from apps.cars.serializers import CarSerializer
 from apps.places.serializers import CitySerializer, CityWithStateSerializer
-from .models import Car, Ride, RideStop, RideBooking, RideRequest, RideComplaint
-
-
-class CarSerializer(serializers.ModelSerializer):
-    owner = UserSerializer()
-
-    class Meta:
-        model = Car
-        fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'photo')
+from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint
 
 
 class RideStopDetailSerializer(serializers.ModelSerializer):

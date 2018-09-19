@@ -10,7 +10,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
-from .models import Car, Ride, RideBooking, RideRequest, RideComplaint
+from .models import Ride, RideBooking, RideRequest, RideComplaint
+from apps.cars.models import Car
 from .serializers import CarSerializer, RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
