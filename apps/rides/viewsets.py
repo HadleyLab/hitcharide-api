@@ -9,12 +9,13 @@ from dbmail import send_db_mail
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
+from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint
 from apps.cars.models import Car
-from .serializers import CarSerializer, RideBookingDetailSerializer, \
+from .serializers import RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
     RideBookingWritableSerializer, RideComplaintWritableSerializer
@@ -25,8 +26,13 @@ class CarViewSet(viewsets.GenericViewSet,
                  mixins.CreateModelMixin,
                  mixins.DestroyModelMixin):
     queryset = Car.objects.all()
-    serializer_class = CarSerializer
+    serializer_class = CarDetailSerializer
     permission_classes = (IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update']:
+            return CarWritableSerializer
+        return self.serializer_class
 
     def get_queryset(self):
         return super(CarViewSet, self).get_queryset().filter(

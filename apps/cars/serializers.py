@@ -5,7 +5,17 @@ from apps.accounts.serializers import UserSerializer
 from apps.cars.models import Car
 
 
-class CarSerializer(serializers.ModelSerializer):
+class CarWritableSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Car
+        fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
+                  'number_of_seats', 'photo')
+
+
+class CarDetailSerializer(serializers.ModelSerializer):
     owner = UserSerializer()
 
     class Meta:
