@@ -25,7 +25,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
 
 
 class UserWithCarsSerializer(UserSerializer):
-    cars = CarSerializer(many=True)
+    cars = CarWritableSerializer(many=True)
 
     class Meta:
         model = User

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'denorm',
     'social_django',
     'dbmail',
+
     'constance',
     'constance.backends.database',
 
