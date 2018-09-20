@@ -1,11 +1,17 @@
+import logging
 from decimal import Decimal
 
 from constance import config
 from django.db import models
+from django.db.models import signals
 from django.utils import timezone
 
 from apps.accounts.models import User
+from apps.rides.utils import ride_booking_paypal_payment
 from .mixins import CreatedUpdatedMixin
+
+
+logger = logging.getLogger()
 
 
 class Ride(CreatedUpdatedMixin, models.Model):
@@ -85,6 +91,12 @@ class RideBookingStatus(object):
     )
 
 
+def add_paypal_info(sender, instance, created, **kwargs):
+    if not instance.paypal_payment_id:
+        logger.error("HELLO")
+        ride_booking_paypal_payment(instance)
+
+
 class RideBooking(CreatedUpdatedMixin):
     ride = models.ForeignKey(
         'Ride',
@@ -114,6 +126,7 @@ class RideBooking(CreatedUpdatedMixin):
             self.client,
             self.ride,
             self.get_status_display())
+
 
     class Meta:
         unique_together = ('ride', 'client')
@@ -167,3 +180,6 @@ class RideComplaint(CreatedUpdatedMixin, models.Model):
         max_length=10,
         default=RideComplaintStatus.NEW,
         choices=RideComplaintStatus.CHOICES)
+
+
+signals.post_save.connect(receiver=add_paypal_info, sender=RideBooking)

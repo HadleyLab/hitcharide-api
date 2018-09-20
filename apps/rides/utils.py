@@ -1,4 +1,9 @@
+import logging
+
 import paypalrestsdk
+
+
+logger = logging.getLogger()
 
 
 def inform_all_subscribers(ride):
@@ -6,6 +11,7 @@ def inform_all_subscribers(ride):
 
 
 def ride_booking_paypal_payment(ride_booking):
+    ride_total = ride_booking.ride.price_with_fee
     payment = paypalrestsdk.Payment({
         "intent": "sale",
         "payer": {
@@ -18,15 +24,17 @@ def ride_booking_paypal_payment(ride_booking):
                 "items": [{
                     "name": "ride_booking",
                     "sku": "{0}".format(ride_booking.pk),
-                    "price": "{0}".format(ride_booking.ride.price_with_fee),
+                    "price": "{0}".format(ride_total),
                     "currency": "USD",
                     "quantity": 1}]},
             "amount": {
-                "total": "{0}".format(ride_booking.ride.price_with_fee),
+                "total": "{0}".format(ride_total),
                 "currency": "USD"},
             "description": "This is the payment transaction description."}]})
 
     if payment.create():
-      print("Payment created successfully")
+        logger.error("HELLO IM HERE")
+        ride_booking.paypal_payment_id = payment.id
+        ride_booking.save()
     else:
-      print(payment.error)
+        print(payment.error)

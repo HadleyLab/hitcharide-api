@@ -134,6 +134,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
             client=self.request.user)
 
 
+
 class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
