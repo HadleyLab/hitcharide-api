@@ -207,7 +207,11 @@ TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
 
 CONSTANCE_CONFIG = {
     'MANAGER_EMAIL': ('manager@hitcharide.com', 'Email for complaints'),
-    'RIDE_LIST_DAYS': (3, 'TODOWRITEADESCRIPTION')
+    'RIDE_LIST_DAYS': (3, 'WE NEED TO WRITE THE DESCRIPTION FOR THIS FIELD'),
+    'SELLER_EMAIL': (
+        'seller@hitcharide.com', 'Email for the seller PayPal account'),
+    'SYSTEM_FEE': (15, 'default value (in percent) of ride\'s fee'),
+
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
