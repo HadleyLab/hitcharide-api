@@ -37,12 +37,16 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
     bookings = RidePassengerSerializer(many=True)
+    price = serializers.SerializerMethodField()
 
     class Meta:
         model = Ride
         fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to', 'date_time',
                   'price', 'number_of_seats', 'available_number_of_seats',
                   'description')
+
+    def get_price(self, obj):
+        return obj.price_with_fee
 
 
 class RideWritableSerializer(WritableNestedModelSerializer):
@@ -61,6 +65,7 @@ class RideWritableSerializer(WritableNestedModelSerializer):
         model = Ride
         fields = ('pk', 'stops', 'car', 'city_from', 'city_to', 'date_time',
                   'price', 'number_of_seats', 'description')
+
 
 
 class RideBookingDetailSerializer(serializers.ModelSerializer):
