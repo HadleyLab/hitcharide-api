@@ -1,5 +1,6 @@
 from datetime import datetime, time
 
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework.filters import BaseFilterBackend
 
@@ -14,7 +15,8 @@ class RidesListFilter(BaseFilterBackend):
 
         city_to = int(request.query_params.get('city_to', 0))
         if city_to:
-            queryset = queryset.filter(city_to=city_to)
+            queryset = queryset.filter(
+                Q(city_to=city_to) | Q(stops__city=city_to))
 
         ride_date = request.query_params.get('date', '')
         if ride_date:

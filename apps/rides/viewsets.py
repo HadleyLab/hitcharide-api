@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import viewsets, mixins
@@ -57,7 +59,9 @@ class RideViewSet(ListFactoryMixin,
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
-            date_time__gt=timezone.now())
+            date_time__gt=timezone.now(),
+            date_time__lte=timezone.now() + timedelta(
+                days=config.RIDE_LIST_DAYS))
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,

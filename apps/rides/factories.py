@@ -1,5 +1,6 @@
 from django.utils import timezone
-from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence
+from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence, \
+    post_generation
 
 from apps.cars.factories import CarFactory
 from apps.places.factories import CityFactory
@@ -19,6 +20,19 @@ class RideFactory(DjangoModelFactory):
 
     class Meta:
         model = Ride
+
+    @post_generation
+    def stops_cities(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for i, city in enumerate(extracted):
+                RideStopFactory.create(
+                    city=city,
+                    ride=self,
+                    order=i
+                )
 
 
 class RideStopFactory(DjangoModelFactory):

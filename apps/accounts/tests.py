@@ -91,7 +91,7 @@ class RegistrationTestCase(APITestCase):
         self.authenticate()
         resp = self.client.get('/accounts/my/')
         self.assertSuccessResponse(resp)
-        self.assertEqual(resp.data['pk'], self.user.pk)
+        self.assertEqual(resp.data['pk'], str(self.user.pk))
         self.assertEqual(resp.data['email'], self.user.email)
         self.assertEqual(resp.data['first_name'], self.user.first_name)
         self.assertEqual(resp.data['last_name'], self.user.last_name)

@@ -206,6 +206,7 @@ TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
 
 CONSTANCE_CONFIG = {
     'MANAGER_EMAIL': ('manager@hitcharide.com', 'Email for complaints'),
+    'RIDE_LIST_DAYS': (3, 'TODOWRITEADESCRIPTION')
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 

@@ -93,6 +93,7 @@ class RideViewSetTest(APITestCase):
 
         car = CarFactory.create(owner=self.user)
         now = timezone.now()
+        far_future = now + timedelta(days=365)
         tomorrow = now + timedelta(days=1)
         yesterday = now - timedelta(days=1)
 
@@ -106,11 +107,50 @@ class RideViewSetTest(APITestCase):
             car=car,
             date_time=tomorrow)
 
+        ride3 = RideFactory.create(
+            number_of_seats=5,
+            car=car,
+            date_time=far_future)
+
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
 
         self.assertEqual(len(resp.data['results']), 1)
         self.assertEqual(resp.data['results'][0]['pk'], ride2.pk)
+
+    def test_list_filter_by_city_to(self):
+        self.authenticate()
+        now = timezone.now()
+        tomorrow = now + timedelta(days=1)
+
+        car = CarFactory.create(owner=self.user)
+        ride1 = RideFactory.create(
+            city_from=self.city1,
+            city_to=self.city2,
+            car=car,
+            date_time=tomorrow)
+
+        ride2 = RideFactory.create(
+            car=car,
+            date_time=tomorrow,
+            stops_cities=[self.city2])
+
+        ride3 = RideFactory.create(
+            car=car,
+            date_time=tomorrow)
+
+        resp = self.client.get(
+            '/rides/ride/', {'city_to': self.city1.pk}, format='json')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data['results']), 0)
+
+        resp = self.client.get(
+            '/rides/ride/', {'city_to': self.city2.pk}, format='json')
+        self.assertSuccessResponse(resp)
+        self.assertEqual(len(resp.data['results']), 2)
+        self.assertSetEqual(
+            {ride1.pk, ride2.pk},
+            set([ride['pk'] for ride in resp.data['results']]))
 
     def test_my_unauthorized(self):
         resp = self.client.get('/rides/ride/my/', format='json')
