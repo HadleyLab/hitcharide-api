@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+from constance import config
 from django.db import models
 from django.utils import timezone
 
@@ -5,7 +8,7 @@ from apps.accounts.models import User
 from .mixins import CreatedUpdatedMixin
 
 
-class Ride(CreatedUpdatedMixin):
+class Ride(CreatedUpdatedMixin, models.Model):
     car = models.ForeignKey(
         'cars.Car',
         on_delete=models.PROTECT,
@@ -31,6 +34,14 @@ class Ride(CreatedUpdatedMixin):
     @property
     def available_number_of_seats(self):
         return self.number_of_seats - self.get_booked_seats_count()
+
+    @property
+    def price_with_fee(self):
+        ride_price = self.price
+        system_fee = Decimal(config.SYSTEM_FEE)
+        coef = Decimal("0.01")
+        return ride_price + ride_price * (system_fee * coef)
+
 
     def get_booked_seats_count(self):
         return sum(self.bookings.values_list('seats_count', flat=True))
@@ -65,10 +76,11 @@ class RideBookingStatus(object):
     CANCELED = 'canceled'
     SUCCEED = 'succeed'
     FAILED = 'failed'
+    REFUNDED = 'refunded'
 
     CHOICES = tuple(
         (item, item.title()) for item in [
-            CREATED, PAYED, CANCELED, SUCCEED, FAILED
+            CREATED, PAYED, CANCELED, SUCCEED, FAILED, REFUNDED
         ]
     )
 
@@ -89,6 +101,12 @@ class RideBooking(CreatedUpdatedMixin):
     seats_count = models.IntegerField(
         default=1
     )
+    paypal_payment_id = models.TextField(
+        blank=True,
+        null=True)
+    paypal_approval_link = models.TextField(
+        blank=True,
+        null=True)
 
 
     def __str__(self):
@@ -101,7 +119,7 @@ class RideBooking(CreatedUpdatedMixin):
         unique_together = ('ride', 'client')
 
 
-class RideRequest(CreatedUpdatedMixin):
+class RideRequest(CreatedUpdatedMixin, models.Model):
     author = models.ForeignKey(
         'accounts.User',
         on_delete=models.PROTECT,
@@ -134,7 +152,7 @@ class RideComplaintStatus(object):
     )
 
 
-class RideComplaint(CreatedUpdatedMixin):
+class RideComplaint(CreatedUpdatedMixin, models.Model):
     ride = models.ForeignKey(
         'Ride',
         on_delete=models.CASCADE,
