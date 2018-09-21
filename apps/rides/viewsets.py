@@ -158,6 +158,23 @@ class RideBookingViewSet(mixins.ListModelMixin,
 
         return HttpResponseRedirect('fail_url')
 
+    @action(methods=['POST'], detail=True)
+    def paypal_payment_refund(self, request, *args, **kwargs):
+        ride_booking = self.get_object()
+        refund_total = ride_booking.ride.price_with_fee * \
+                       ride_booking.seats_count
+        payment = paypalrestsdk.Payment.find(ride_booking.paypal_payment_id)
+        sale_id = payment.transactions[0].related_resources[0]['sale'].id
+        sale = paypalrestsdk.Sale.find(sale_id)
+
+        refund = sale.refund({
+            "amount": {
+                "total": '{0:.2f}'.format(refund_total),
+                "currency": "USD"}})
+
+        if refund.success():
+            ride_booking.status = RideBookingStatus.REFUNDED
+
 
 class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
