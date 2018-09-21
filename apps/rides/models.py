@@ -79,22 +79,15 @@ class RideStop(models.Model):
 class RideBookingStatus(object):
     CREATED = 'created'
     PAYED = 'payed'
-    CANCELED = 'canceled'
-    SUCCEED = 'succeed'
-    FAILED = 'failed'
+    CANCELED = 'canceled' # When user cancels the ride booking
+    EXPIRED = 'expired'
     REFUNDED = 'refunded'
 
     CHOICES = tuple(
         (item, item.title()) for item in [
-            CREATED, PAYED, CANCELED, SUCCEED, FAILED, REFUNDED
+            CREATED, PAYED, CANCELED, EXPIRED, REFUNDED
         ]
     )
-
-
-def add_paypal_info(sender, instance, created, **kwargs):
-    if not instance.paypal_payment_id:
-        logger.error("HELLO")
-        ride_booking_paypal_payment(instance)
 
 
 class RideBooking(CreatedUpdatedMixin):
@@ -126,10 +119,6 @@ class RideBooking(CreatedUpdatedMixin):
             self.client,
             self.ride,
             self.get_status_display())
-
-
-    class Meta:
-        unique_together = ('ride', 'client')
 
 
 class RideRequest(CreatedUpdatedMixin, models.Model):
@@ -180,6 +169,3 @@ class RideComplaint(CreatedUpdatedMixin, models.Model):
         max_length=10,
         default=RideComplaintStatus.NEW,
         choices=RideComplaintStatus.CHOICES)
-
-
-signals.post_save.connect(receiver=add_paypal_info, sender=RideBooking)
