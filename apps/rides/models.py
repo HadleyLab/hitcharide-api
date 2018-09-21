@@ -50,7 +50,8 @@ class Ride(CreatedUpdatedMixin, models.Model):
 
 
     def get_booked_seats_count(self):
-        return sum(self.bookings.values_list('seats_count', flat=True))
+        return sum(self.bookings.filter(status=RideBookingStatus.PAYED).
+                   values_list('seats_count', flat=True))
 
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
