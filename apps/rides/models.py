@@ -42,6 +42,10 @@ class Ride(CreatedUpdatedMixin, models.Model):
         return self.number_of_seats - self.get_booked_seats_count()
 
     @property
+    def total_for_driver(self):
+        return self.get_booked_seats_count() * self.price
+
+    @property
     def price_with_fee(self):
         ride_price = self.price
         system_fee = Decimal(config.SYSTEM_FEE)
@@ -114,6 +118,9 @@ class RideBooking(CreatedUpdatedMixin):
         blank=True,
         null=True)
 
+    @property
+    def is_expired(self):
+        return (self.updated + timezone.timedelta(minutes=1)) < timezone.now()
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(
