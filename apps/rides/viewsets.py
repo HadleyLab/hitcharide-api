@@ -137,6 +137,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
 
+    @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
         ride_booking_paypal_payment(self.request, ride_booking)

@@ -1,5 +1,7 @@
 import logging
 from decimal import Decimal
+
+from dbmail import send_db_mail
 from django.urls import reverse
 from paypalrestsdk import Payment, Payout, ResourceNotFound
 
@@ -44,6 +46,9 @@ def ride_booking_paypal_payment(request, ride_booking):
         ride_booking.paypal_payment_id = payment.id
         ride_booking.paypal_approval_link = approval_link
         ride_booking.save()
+        send_db_mail('ride_client_payment_created',
+                     [ride_booking.client.email],
+                     {'booking': ride_booking})
     else:
         logger.error(payment.error)
 
