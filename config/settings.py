@@ -14,6 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import dj_database_url
+from celery.schedules import crontab
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -116,6 +117,17 @@ CELERY_TASK_SERIALIZER = 'pickle'  # TODO: refactor task to use json
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_ACCEPT_CONTENT = ['pickle']
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_BEAT_SCHEDULE = {
+    'create-payouts-for-rides': {
+        'task': 'apps.rides.tasks.create_payouts_for_rides',
+        'schedule': crontab(hour='*'),
+    },
+    'check-expired-time-of-ride-bookings': {
+        'task': 'apps.rides.tasks.check_expired_time_of_ride_bookings',
+        'schedule': crontab(minute='*'),
+    },
+}
+
 DB_MAILER_CELERY_QUEUE = None
 
 WSGI_APPLICATION = 'config.wsgi.application'
