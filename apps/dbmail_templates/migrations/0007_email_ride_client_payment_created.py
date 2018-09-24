@@ -9,6 +9,7 @@ def load_mail_template(apps, schema_editor):
         subject="The payment for the ride {{ booking.ride }} has been created",
         message="""
         <p>You're receiving this email because you need to pay for booked ride.</p>
+        <p>You can pay by this link: <a href={{ booking.paypal_approval_link }}></a>
         <p><b>There is an information about the ride:<b><br>
         <b>Car:</b> {{ booking.ride.car }}<br>
         <b>Number of sits:</b> {{ booking.ride.number_of_sits }}<br>
