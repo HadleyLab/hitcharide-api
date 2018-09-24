@@ -154,6 +154,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
             if payment.execute({"payer_id": payer_id}):
                 ride_booking.status = RideBookingStatus.PAYED
                 ride_booking.save()
+                send_db_mail('ride_client_payment_executed',
+                             [ride_booking.client.email],
+                             {'ride': ride_booking})
+
 
                 return HttpResponseRedirect('success_url')
 
