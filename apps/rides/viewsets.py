@@ -161,8 +161,6 @@ class RideBookingViewSet(mixins.ListModelMixin,
                              [ride_booking.ride.owner.email],
                              {'ride': ride_booking})
 
-
-
                 return HttpResponseRedirect('success_url')
 
         return HttpResponseRedirect('fail_url')
