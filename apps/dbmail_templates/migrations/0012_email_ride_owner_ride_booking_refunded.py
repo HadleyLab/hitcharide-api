@@ -30,7 +30,7 @@ def clean_cache(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dbmail_templates', '0011_email_ride_client_ride_booking_canceled'),
+        ('dbmail_templates', '0011_email_ride_client_ride_booking_refunded'),
     ]
 
     operations = [
