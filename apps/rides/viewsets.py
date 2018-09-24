@@ -181,6 +181,12 @@ class RideBookingViewSet(mixins.ListModelMixin,
 
         if refund.success():
             ride_booking.status = RideBookingStatus.REFUNDED
+            send_db_mail('client_ride_booking_canceled',
+                         [ride_booking.client.email],
+                         {'ride_booking': ride_booking})
+            send_db_mail('owner_ride_booking_canceled',
+                         [ride_booking.ride.owner.email],
+                         {'ride_booking': ride_booking})
 
 
 class RideRequestViewSet(mixins.ListModelMixin,
