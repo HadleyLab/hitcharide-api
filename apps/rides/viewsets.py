@@ -157,6 +157,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
                 send_db_mail('ride_client_payment_executed',
                              [ride_booking.client.email],
                              {'ride': ride_booking})
+                send_db_mail('ride_owner_payment_executed',
+                             [ride_booking.ride.owner.email],
+                             {'ride': ride_booking})
+
 
 
                 return HttpResponseRedirect('success_url')
