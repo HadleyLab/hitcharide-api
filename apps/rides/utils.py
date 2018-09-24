@@ -1,5 +1,4 @@
 import logging
-from decimal import Decimal
 
 from dbmail import send_db_mail
 from django.urls import reverse
@@ -53,29 +52,27 @@ def ride_booking_paypal_payment(request, ride_booking):
         logger.error(payment.error)
 
 
-def ride_booking_paypal_payout(ride_booking):
+def ride_payout(ride):
     payout = Payout({
         "sender_batch_header": {
-            "sender_batch_id": "ride_booking_{0}".format(ride_booking.pk),
+            "sender_batch_id": "ride_{0}".format(ride.pk),
             "email_subject": "You have a payment"
         },
         "items": [
             {
                 "recipient_type": "EMAIL",
                 "amount": {
-                    "value": float(ride_booking.ride.price),
+                    "value": '{0:.2f}'.format(ride.total_for_driver),
                     "currency": "USD"
                 },
-                "receiver": ride_booking.ride.car.owner.paypal_account,
+                "receiver": ride.car.owner.paypal_account,
                 "note": "Thank you.",
-                "sender_item_id": "ride_booking_{0}".format(ride_booking.pk)
+                "sender_item_id": "ride_{0}".format(ride.pk)
             }
         ]
     })
 
     if payout.create():
-        # TODO: We need to send email to driver
-        # TODO: Change RideBooking status
         print("payout[%s] created successfully" %
               (payout.batch_header.payout_batch_id))
     else:
