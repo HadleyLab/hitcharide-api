@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.db import transaction
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, mixins, response
 from rest_framework.decorators import action
@@ -142,9 +142,11 @@ class RideBookingViewSet(mixins.ListModelMixin,
     @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
-        ride_booking_create_payment(ride_booking, self.request)
-        serializer.data['paypal_approval_link'] = \
-            ride_booking.paypal_approval_link
+        if ride_booking_create_payment(ride_booking, self.request):
+            serializer.data['paypal_approval_link'] = \
+                ride_booking.paypal_approval_link
+            return HttpResponse(status=200)
+        return HttpResponse(status=500)
 
     @action(methods=['GET'], detail=True)
     def paypal_payment_execute(self, request, *args, **kwargs):
@@ -164,9 +166,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def paypal_payment_refund(self, request, *args, **kwargs):
         ride_booking = self.get_object()
 
-        ride_booking_refund(ride_booking)
+        if ride_booking_refund(ride_booking):
+            return HttpResponse(status=200)
 
-        return response.Response()
+        return HttpResponse(status=500)
 
 
 class RideRequestViewSet(mixins.ListModelMixin,
