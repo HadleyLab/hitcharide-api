@@ -125,7 +125,7 @@ DJOSER = {
         'confirm-password/{uid}/{token}'),
     'ACTIVATION_URL': os.environ.get(
         'DJOSER_ACTIVATION_URL',
-        'activate-account/{uid}/{token}'),
+        'account/activate/{uid}/{token}'),
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
@@ -194,8 +194,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-LOGIN_REDIRECT_URL = 'http://localhost:3000/#/account/my/'
-LOGIN_ERROR_URL = 'http://localhost:3000/#/account/error/'
+LOGIN_REDIRECT_URL = 'http://localhost:3000/#/account/social-auth-success/'
+LOGIN_ERROR_URL = 'http://localhost:3000/#/account/social-auth-error/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
