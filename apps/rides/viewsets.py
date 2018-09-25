@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.utils import timezone
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from dbmail import send_db_mail
@@ -12,7 +12,9 @@ from rest_framework.pagination import LimitOffsetPagination
 import paypalrestsdk
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
-from apps.rides.utils import ride_booking_paypal_payment
+from apps.rides.utils import ride_booking_refund, \
+    ride_booking_execute_payment, ride_booking_create_payment
+from config import settings
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
 from .mixins import ListFactoryMixin
@@ -140,7 +142,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
     @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
-        ride_booking_paypal_payment(self.request, ride_booking)
+        ride_booking_create_payment(ride_booking, self.request)
         serializer.data['paypal_approval_link'] = \
             ride_booking.paypal_approval_link
 
@@ -148,45 +150,23 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def paypal_payment_execute(self, request, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
         ride_booking = self.get_object()
-        payment = paypalrestsdk.Payment.find(ride_booking.paypal_payment_id)
+        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+            ride_pk=ride_booking.ride.pk, ride_booking_pk=ride_booking.pk)
+        success_url = '{0}?execution=success'.format(ride_booking_detail_url)
+        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
 
-        if ride_booking.status == RideBookingStatus.CREATED:
-            if payment.execute({"payer_id": payer_id}):
-                ride_booking.status = RideBookingStatus.PAYED
-                ride_booking.save()
-                send_db_mail('ride_client_payment_executed',
-                             [ride_booking.client.email],
-                             {'ride': ride_booking})
-                send_db_mail('ride_owner_payment_executed',
-                             [ride_booking.ride.owner.email],
-                             {'ride': ride_booking})
+        if ride_booking_execute_payment(payer_id, ride_booking):
+            return HttpResponseRedirect(success_url)
 
-                return HttpResponseRedirect('success_url')
-
-        return HttpResponseRedirect('fail_url')
+        return HttpResponseRedirect(fail_url)
 
     @action(methods=['POST'], detail=True)
     def paypal_payment_refund(self, request, *args, **kwargs):
         ride_booking = self.get_object()
-        refund_total = ride_booking.ride.price_with_fee * \
-                       ride_booking.seats_count
-        payment = paypalrestsdk.Payment.find(ride_booking.paypal_payment_id)
-        sale_id = payment.transactions[0].related_resources[0]['sale'].id
-        sale = paypalrestsdk.Sale.find(sale_id)
 
-        refund = sale.refund({
-            "amount": {
-                "total": '{0:.2f}'.format(refund_total),
-                "currency": "USD"}})
+        ride_booking_refund(ride_booking)
 
-        if refund.success():
-            ride_booking.status = RideBookingStatus.REFUNDED
-            send_db_mail('client_ride_booking_canceled',
-                         [ride_booking.client.email],
-                         {'ride_booking': ride_booking})
-            send_db_mail('owner_ride_booking_canceled',
-                         [ride_booking.ride.owner.email],
-                         {'ride_booking': ride_booking})
+        return response.Response()
 
 
 class RideRequestViewSet(mixins.ListModelMixin,

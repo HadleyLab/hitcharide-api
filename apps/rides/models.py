@@ -3,11 +3,9 @@ from decimal import Decimal
 
 from constance import config
 from django.db import models
-from django.db.models import signals
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.rides.utils import ride_booking_paypal_payment
 from .mixins import CreatedUpdatedMixin
 
 
@@ -35,6 +33,9 @@ class Ride(CreatedUpdatedMixin, models.Model):
     price = models.DecimalField(
         decimal_places=2,
         max_digits=10
+    )
+    completed = models.BooleanField(
+        default=False
     )
 
     @property

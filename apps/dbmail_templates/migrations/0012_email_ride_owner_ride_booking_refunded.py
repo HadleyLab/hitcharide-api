@@ -16,7 +16,7 @@ def load_mail_template(apps, schema_editor):
         </p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
-        slug="owner_ride_booking_canceled",
+        slug="owner_ride_booking_refunded",
         is_html=True,)
 
 

@@ -229,6 +229,10 @@ CONSTANCE_CONFIG = {
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 
+RIDE_BOOKING_DETAIL_URL = \
+    'http://localhost:3000/#/ride/{ride_pk}/ride_booking/{ride_booking_pk}/'
+
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 

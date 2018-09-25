@@ -6,13 +6,13 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="The payout for the ride (to owner)",
-        subject="You have a payout for the ride {{ booking.ride }}.",
+        subject="You have a payout for the ride {{ ride }}.",
         message="""
         <p>You're receiving this email because you have a payout for the ride.</p>
         <p><b>There is an information about the ride:<b><br>
-        <b>Car:</b> {{ booking.ride.car }}<br>
-        <b>Number of sits:</b> {{ booking.ride.number_of_sits }}<br>
-        <b>Description:</b> {{ booking.ride.description }}<br
+        <b>Car:</b> {{ ride.car }}<br>
+        <b>Number of sits:</b> {{ ride.number_of_sits }}<br>
+        <b>Description:</b> {{ ride.description }}<br
         </p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
