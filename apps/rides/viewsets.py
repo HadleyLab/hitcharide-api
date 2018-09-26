@@ -47,7 +47,7 @@ class RideViewSet(ListFactoryMixin,
     queryset = Ride.objects.all().order_by('date_time')
     serializer_class = RideDetailSerializer
     permission_classes = (IsAuthenticated,)
-    pagination_class = DefaultPageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (RidesListFilter,)
 
     def get_serializer_class(self):
