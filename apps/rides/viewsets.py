@@ -24,6 +24,8 @@ from .serializers import RideBookingDetailSerializer, \
 class CarViewSet(viewsets.GenericViewSet,
                  mixins.ListModelMixin,
                  mixins.CreateModelMixin,
+                 mixins.UpdateModelMixin,
+                 mixins.RetrieveModelMixin,
                  mixins.DestroyModelMixin):
     queryset = Car.objects.all()
     serializer_class = CarDetailSerializer
