@@ -24,7 +24,7 @@ test:
   script:
     - docker-compose -f docker-compose.test.yml -f docker-compose.yml up -d db redis
     - docker-compose -f docker-compose.test.yml -f docker-compose.yml run --rm wait_for
-    - docker-compose -f docker-compose.test.yml -f docker-compose.yml run --rm server sh -c 'coverage run ./manage.py test && coverage report && coverage html && chmod -R 777 /app/user/reports'
+    - docker-compose -f docker-compose.test.yml -f docker-compose.yml run --rm api sh -c 'coverage run ./manage.py test && coverage report && coverage html && chmod -R 777 /app/user/reports'
   after_script:
     - docker-compose -f docker-compose.test.yml -f docker-compose.yml down
   artifacts:
