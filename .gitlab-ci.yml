@@ -1,0 +1,48 @@
+stages:
+  - build
+  - test
+  - release
+  - cleanup
+
+
+variables:
+  DOCKER_IMAGE_BUILD: hitcharide-api:$CI_BUILD_REF
+  DOCKER_IMAGE_APP: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  DOCKER_LOGIN_USERNAME: gitlab-ci-token
+  DOCKER_LOGIN_PASSWORD: $CI_BUILD_TOKEN
+
+before_script:
+  - docker login -u $DOCKER_LOGIN_USERNAME -p $DOCKER_LOGIN_PASSWORD $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+    - docker build -t $DOCKER_IMAGE_BUILD .
+
+test:
+  stage: test
+  script:
+    - docker-compose -f docker-compose.test.yml -f docker-compose.yml up -d db redis
+    - docker-compose -f docker-compose.test.yml -f docker-compose.yml run --rm wait_for
+    - docker-compose -f docker-compose.test.yml -f docker-compose.yml run --rm server sh -c 'coverage run ./manage.py test && coverage report && coverage html && chmod -R 777 /app/user/reports'
+  after_script:
+    - docker-compose -f docker-compose.test.yml -f docker-compose.yml down
+  artifacts:
+    paths:
+    - ./reports
+
+release:
+  stage: release
+  script:
+    - docker tag $DOCKER_IMAGE_BUILD $DOCKER_IMAGE_APP
+    - docker push $DOCKER_IMAGE_APP
+  only:
+    - develop
+    - master
+
+cleanup:
+  stage: cleanup
+  script:
+  - bash -c "[ -z $(docker images -q $DOCKER_IMAGE_BUILD) ] || docker rmi $DOCKER_IMAGE_BUILD"
+  - docker images -q -f dangling=true | xargs --no-run-if-empty docker rmi
+  when: always
