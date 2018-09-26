@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.accounts.serializers import UserSerializer
 from apps.cars.serializers import CarDetailSerializer
-from apps.places.serializers import CitySerializer, CityWithStateSerializer
+from apps.places.serializers import CityWithStateSerializer
 from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint
 
 
@@ -82,8 +82,8 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
 
 class RideRequestDetailSerializer(serializers.ModelSerializer):
-    city_from = CitySerializer()
-    city_to = CitySerializer()
+    city_from = CityWithStateSerializer()
+    city_to = CityWithStateSerializer()
 
     class Meta:
         model = RideRequest
