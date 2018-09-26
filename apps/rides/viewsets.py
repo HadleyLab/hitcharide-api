@@ -112,6 +112,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideBooking.objects.all()
     serializer_class = RideBookingDetailSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
