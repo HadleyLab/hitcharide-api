@@ -128,6 +128,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
 class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
+                         mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideRequest.objects.all().order_by('created')
