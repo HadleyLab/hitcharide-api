@@ -9,9 +9,9 @@ services:
     - db
     - redis
     environment:
-      DATABASE_URL:postgres://postgres:@db:5432/postgres
-      BROKER_URL:redis://redis
-      REDIS_URL:redis://redis
+      DATABASE_URL: postgres://postgres:@db:5432/postgres
+      BROKER_URL: redis://redis
+      REDIS_URL: redis://redis
       RUN_TESTS: "True"
       IS_CI: "True"
     volumes:
