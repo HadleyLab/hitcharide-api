@@ -65,9 +65,7 @@ class RideViewSet(ListFactoryMixin,
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
-            date_time__gt=timezone.now(),
-            date_time__lte=timezone.now() + timedelta(
-                days=config.RIDE_LIST_DAYS))
+            date_time__gt=timezone.now())
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
