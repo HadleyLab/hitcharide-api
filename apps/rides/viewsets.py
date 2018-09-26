@@ -11,7 +11,7 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
 from config.pagination import DefaultPageNumberPagination
-from .filters import RidesListFilter, MyRidesFilter
+from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint
 from apps.cars.models import Car
@@ -141,7 +141,9 @@ class RideRequestViewSet(mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideRequest.objects.all().order_by('created')
     serializer_class = RideRequestDetailSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
+    filter_backends = (RequestsListFilter, )
 
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
