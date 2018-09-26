@@ -122,7 +122,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
         'DJOSER_PASSWORD_RESET_CONFIRM_URL',
-        'confirm-password/{uid}/{token}'),
+        'account/new-password/{uid}/{token}'),
     'ACTIVATION_URL': os.environ.get(
         'DJOSER_ACTIVATION_URL',
         'account/activate/{uid}/{token}'),
