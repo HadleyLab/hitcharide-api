@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import viewsets, mixins
@@ -10,7 +8,6 @@ from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
-from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint
