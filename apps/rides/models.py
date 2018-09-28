@@ -137,8 +137,7 @@ class RideBooking(CreatedUpdatedMixin):
         default=RideBookingStatus.CREATED,
         choices=RideBookingStatus.CHOICES)
     seats_count = models.IntegerField(
-        default=1
-    )
+        default=1)
     paypal_payment_id = models.TextField(
         blank=True,
         null=True)
