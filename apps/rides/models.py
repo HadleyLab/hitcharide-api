@@ -1,4 +1,3 @@
-import logging
 from decimal import Decimal
 
 from constance import config
@@ -7,9 +6,6 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from .mixins import CreatedUpdatedMixin
-
-
-logger = logging.getLogger()
 
 
 class Ride(CreatedUpdatedMixin, models.Model):
