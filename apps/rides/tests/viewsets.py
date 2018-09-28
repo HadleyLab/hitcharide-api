@@ -1,11 +1,15 @@
 from datetime import timedelta
+from unittest import mock
+
 from django.utils import timezone
 
+from apps.main.test_utils import assert_mock_called_with
 from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
 from apps.places.factories import CityFactory
 from apps.rides.factories import RideFactory, \
-    RideBookingFactory, RideStopFactory, RideComplaintFactory
+    RideBookingFactory, RideStopFactory, RideComplaintFactory, \
+    RideRequestFactory
 from apps.cars.factories import CarFactory
 from apps.rides.models import Ride, RideComplaintStatus
 
@@ -29,6 +33,13 @@ class RideViewSetTest(APITestCase):
             'date_time': timezone.now() + timedelta(days=1),
             'stops': [],
             'number_of_seats': 5
+        }
+
+    def get_ride_request_data(self):
+        return {
+            'city_from': self.city1.pk,
+            'city_to': self.city2.pk,
+            'date_time': timezone.now() + timedelta(days=1),
         }
 
     def test_create_unauthorized_forbidden(self):
@@ -58,6 +69,23 @@ class RideViewSetTest(APITestCase):
         data.update({'car': self.car.pk})
         resp = self.client.post('/rides/ride/', data, format='json')
         self.assertBadRequest(resp)
+
+    # @mock.patch('apps.dbmail_templates.email.send_db_mail')
+    # def test_create_with_existing_ride_request(self, mock_send_db_mail):
+    #     now = timezone.now()
+    #     tomorrow = now + timedelta(days=1)
+    #     self.ride = RideFactory.create(
+    #         car=self.car,
+    #         city_from = self.city1,
+    #         city_to=self.city2,
+    #         date_time=tomorrow
+    #     )
+    #     self.authenticate()
+    #     data = self.get_ride_request_data()
+    #
+    #     resp = self.client.post('/rides/request/', data, format='json')
+    #     self.assertSuccessResponse(resp)
+    #     self.assertEqual(mock_send_db_mail.call_count, 1)
 
     def test_update(self):
         self.authenticate()
@@ -115,8 +143,9 @@ class RideViewSetTest(APITestCase):
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
 
-        self.assertEqual(len(resp.data['results']), 1)
-        self.assertEqual(resp.data['results'][0]['pk'], ride2.pk)
+        self.assertEqual(len(resp.data), 2)
+        self.assertEqual(resp.data[0]['pk'], ride2.pk)
+        self.assertEqual(resp.data[1]['pk'], ride3.pk)
 
     def test_list_filter_by_city_to(self):
         self.authenticate()
@@ -142,15 +171,15 @@ class RideViewSetTest(APITestCase):
         resp = self.client.get(
             '/rides/ride/', {'city_to': self.city1.pk}, format='json')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data['results']), 0)
+        self.assertEqual(len(resp.data), 0)
 
         resp = self.client.get(
             '/rides/ride/', {'city_to': self.city2.pk}, format='json')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data['results']), 2)
+        self.assertEqual(len(resp.data), 2)
         self.assertSetEqual(
             {ride1.pk, ride2.pk},
-            set([ride['pk'] for ride in resp.data['results']]))
+            set([ride['pk'] for ride in resp.data]))
 
     def test_my_unauthorized(self):
         resp = self.client.get('/rides/ride/my/', format='json')
@@ -178,7 +207,7 @@ class RideViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertSetEqual(
             {my_ride_1.pk, my_ride_2.pk},
-            set([ride['pk'] for ride in resp.data['results']]))
+            set([ride['pk'] for ride in resp.data]))
 
     def test_ride_complaints_create(self):
         ride = RideFactory.create(

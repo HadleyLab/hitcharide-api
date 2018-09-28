@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.accounts.models import User
@@ -37,6 +38,17 @@ class Ride(CreatedUpdatedMixin):
 
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
+
+    def get_ride_requests(self):
+        stops_cities = self.stops.values_list('city', flat=True)
+
+        return RideRequest.objects.filter(
+            Q(city_to__in=stops_cities) | Q(city_to=self.city_to),
+            date_time__gte=timezone.now(),
+            city_from=self.city_from,
+            date_time__range=(self.date_time.date(),
+                              self.date_time.date() + timezone.timedelta(
+                                  days=3)))
 
     def __str__(self):
         return '{0} --> {1} on {2}'.format(
@@ -119,6 +131,12 @@ class RideRequest(CreatedUpdatedMixin):
     @property
     def is_expired(self):
         return self.date_time < timezone.now()
+
+    def __str__(self):
+        return '{0} to {1} {2}'.format(
+            self.city_from,
+            self.city_to,
+            self.date_time)
 
 
 class RideComplaintStatus(object):

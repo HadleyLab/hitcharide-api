@@ -87,6 +87,17 @@ class RideViewSet(ListFactoryMixin,
     def update(self, request, *args, **kwargs):
         return super(RideViewSet, self).update(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        super(RideViewSet, self).perform_create(serializer)
+        instance = serializer.instance
+        requests = instance.get_ride_requests()
+        if len(requests) > 0:
+            for request in requests:
+                send_db_mail('new_ride_for_ride_request',
+                             [request.author.email],
+                             {'ride': instance,
+                              'ride_request': request})
+
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
         instance = serializer.instance
