@@ -1,13 +1,9 @@
-import logging
-
 from dbmail import send_db_mail
 from django.urls import reverse
 from django_extensions import settings
 from paypalrestsdk import Payment, Payout, Sale
 
 from apps.rides.models import RideBookingStatus
-
-logger = logging.getLogger()
 
 
 def inform_all_subscribers(ride):
