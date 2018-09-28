@@ -132,6 +132,17 @@ class RideBookingViewSet(mixins.ListModelMixin,
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
 
+    def perform_create(self, serializer):
+        super(RideBookingViewSet, self).perform_create(serializer)
+        instance = serializer.instance
+
+        send_db_mail('client_booked_a_ride',
+                     [instance.client.email],
+                     {'ride': instance.ride})
+        send_db_mail('driver_somebody_booked_a_ride',
+                     [instance.ride.car.owner.email],
+                     {'ride': instance.ride})
+
 
 class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
