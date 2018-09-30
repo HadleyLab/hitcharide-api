@@ -115,10 +115,6 @@ class RideBooking(CreatedUpdatedMixin):
         blank=True,
         null=True)
 
-    @property
-    def is_expired(self):
-        return (self.updated + timezone.timedelta(minutes=1)) < timezone.now()
-
     def __str__(self):
         return '{0} on {1} ({2})'.format(
             self.client,
