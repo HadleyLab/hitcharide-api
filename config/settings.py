@@ -229,8 +229,7 @@ CONSTANCE_CONFIG = {
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 
-RIDE_BOOKING_DETAIL_URL = \
-    'http://localhost:3000/#/ride/{ride_pk}/ride_booking/{ride_booking_pk}/'
+RIDE_BOOKING_DETAIL_URL = os.environ.get('RIDE_BOOKING_DETAIL_URL')
 
 
 # Database
