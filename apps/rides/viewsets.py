@@ -1,26 +1,21 @@
-from datetime import timedelta
+import os
 
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
-from rest_framework import viewsets, mixins, response
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from dbmail import send_db_mail
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
-import paypalrestsdk
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
 from apps.rides.utils import ride_booking_refund, \
     ride_booking_execute_payment, ride_booking_create_payment
-from config import settings
-from config.pagination import DefaultPageNumberPagination
-from .filters import RidesListFilter, MyRidesFilter
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter
 from .mixins import ListFactoryMixin
-from .models import Ride, RideBooking, RideRequest, RideComplaint, \
-    RideBookingStatus
+from .models import Ride, RideBooking, RideRequest, RideComplaint
 from apps.cars.models import Car
 from .serializers import RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
@@ -144,8 +139,9 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def paypal_payment_execute(self, request, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
         ride_booking = self.get_object()
-        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
-            ride_pk=ride_booking.ride.pk, ride_booking_pk=ride_booking.pk)
+        ride_booking_detail_url = os.environ.get(
+            'RIDE_BOOKING_DETAIL_URL').format(ride_pk=ride_booking.ride.pk,
+                                              ride_booking_pk=ride_booking.pk)
 
         if ride_booking_execute_payment(payer_id, ride_booking):
             success_url = '{0}?execution=success'.format(
