@@ -48,8 +48,8 @@ def ride_booking_create_payment(ride_booking, request):
                      [ride_booking.client.email],
                      {'booking': ride_booking})
         return True
-    else:
-        return False
+
+    return False
 
 
 def ride_payout(ride):
@@ -79,8 +79,8 @@ def ride_payout(ride):
                      [ride.car.owner.email],
                      {'ride': ride})
         return True
-    else:
-        return False
+
+    return False
 
 
 def ride_booking_refund(ride_booking):
@@ -104,8 +104,8 @@ def ride_booking_refund(ride_booking):
                      [ride_booking.ride.owner.email],
                      {'ride_booking': ride_booking})
         return True
-    else:
-        return False
+
+    return False
 
 
 def ride_booking_execute_payment(payer_id, ride_booking):
