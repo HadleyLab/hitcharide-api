@@ -154,12 +154,13 @@ class RideBookingViewSet(mixins.ListModelMixin,
         ride_booking = self.get_object()
         ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
             ride_pk=ride_booking.ride.pk, ride_booking_pk=ride_booking.pk)
-        success_url = '{0}?execution=success'.format(ride_booking_detail_url)
-        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
-
+        
         if ride_booking_execute_payment(payer_id, ride_booking):
+            success_url = '{0}?execution=success'.format(
+                ride_booking_detail_url)
             return HttpResponseRedirect(success_url)
 
+        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
         return HttpResponseRedirect(fail_url)
 
     @action(methods=['POST'], detail=True)
