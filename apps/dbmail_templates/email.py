@@ -26,5 +26,5 @@ class ConfirmationDBMailEmail(DBMailEmail, ConfirmationEmail):
     template_name = 'account_confirmation'
 
 
-class PasswordResetEmail(DBMailEmail, PasswordResetEmail):
-    template_name = 'account_reset_password'
+class PasswordResetDBMailEmail(DBMailEmail, PasswordResetEmail):
+    template_name = 'account_password_reset'

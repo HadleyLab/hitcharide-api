@@ -17,6 +17,7 @@ from apps.rides.utils import ride_booking_refund, \
 from config import settings
 from config.pagination import DefaultPageNumberPagination
 from .filters import RidesListFilter, MyRidesFilter
+from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint, \
     RideBookingStatus
@@ -53,7 +54,7 @@ class RideViewSet(ListFactoryMixin,
     queryset = Ride.objects.all().order_by('date_time')
     serializer_class = RideDetailSerializer
     permission_classes = (IsAuthenticated,)
-    pagination_class = DefaultPageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (RidesListFilter,)
 
     def get_serializer_class(self):
@@ -71,9 +72,7 @@ class RideViewSet(ListFactoryMixin,
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
-            date_time__gt=timezone.now(),
-            date_time__lte=timezone.now() + timedelta(
-                days=config.RIDE_LIST_DAYS))
+            date_time__gt=timezone.now())
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
@@ -114,20 +113,13 @@ class RideViewSet(ListFactoryMixin,
         return super(RideViewSet, self).perform_destroy(instance)
 
 
-class RideListViewSet(mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
-    queryset = Ride.objects.all().order_by('date_time')
-    serializer_class = RideDetailSerializer
-    pagination_class = LimitOffsetPagination
-    filter_backends = (RidesListFilter,)
-
-
 class RideBookingViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideBooking.objects.all()
     serializer_class = RideBookingDetailSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
@@ -176,11 +168,14 @@ class RideBookingViewSet(mixins.ListModelMixin,
 class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
+                         mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideRequest.objects.all().order_by('created')
     serializer_class = RideRequestDetailSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
+    filter_backends = (RequestsListFilter, )
 
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
