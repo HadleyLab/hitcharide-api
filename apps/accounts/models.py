@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import Avg
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -53,6 +54,10 @@ class User(AbstractUser):
             return today.year - self.birthday.year - months_diff
         else:
             return None
+
+    @property
+    def rating(self):
+        return self.reviews.aggregate(rating=Avg('rating'))['rating'] or 0.0
 
 
 @receiver(pre_save, sender=User)

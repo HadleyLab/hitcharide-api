@@ -18,9 +18,13 @@ class Review(CreatedUpdatedMixin):
     author = models.ForeignKey(
         'accounts.User',
         on_delete=models.PROTECT,
-        related_name='reviews')
+        related_name='my_reviews')
     ride = models.ForeignKey(
         'rides.Ride',
+        on_delete=models.PROTECT,
+        related_name='reviews')
+    subject = models.ForeignKey(
+        'accounts.User',
         on_delete=models.PROTECT,
         related_name='reviews')
     rating = models.IntegerField(
@@ -28,8 +32,12 @@ class Review(CreatedUpdatedMixin):
             MinValueValidator(1),
             MaxValueValidator(5)
         ])
-    text = models.TextField(
+    comment = models.TextField(
         blank=True, null=True)
+
+    def __str__(self):
+        return '{0} --> {1} ({2})'.format(
+            self.author, self.subject, self.rating)
 
     class Meta:
         unique_together = ('ride', 'author')
