@@ -38,19 +38,18 @@ def ride_booking_create_payment(ride_booking, request):
             "description":
                 "This is the payment transaction for the ride booking."}]})
 
-    if payment.create():
-        approval_link = [
-            link['href'] for link in payment.links
-            if link['rel'] == 'approval_url'][0]
-        ride_booking.paypal_payment_id = payment.id
-        ride_booking.paypal_approval_link = approval_link
-        ride_booking.save()
-        send_db_mail('ride_client_payment_created',
-                     [ride_booking.client.email],
-                     {'booking': ride_booking})
-        return True
+    if not payment.create():
+        raise Exception("Cannot create a payment:\n{0}".format(payment.error))
 
-    return False
+    approval_link = [
+        link['href'] for link in payment.links
+        if link['rel'] == 'approval_url'][0]
+    ride_booking.paypal_payment_id = payment.id
+    ride_booking.paypal_approval_link = approval_link
+    ride_booking.save()
+    send_db_mail('ride_client_payment_created',
+                 [ride_booking.client.email],
+                 {'booking': ride_booking})
 
 
 def ride_payout(ride):
@@ -75,13 +74,12 @@ def ride_payout(ride):
         ]
     })
 
-    if payout.create():
-        send_db_mail('ride_payout_to_owner',
-                     [ride.car.owner.email],
-                     {'ride': ride})
-        return True
+    if not payout.create():
+        raise Exception("Cannot create a payout:\n{0}".format(payout.error))
 
-    return False
+    send_db_mail('ride_payout_to_owner',
+                 [ride.car.owner.email],
+                 {'ride': ride})
 
 
 def ride_booking_refund(ride_booking):
@@ -96,17 +94,16 @@ def ride_booking_refund(ride_booking):
             "total": '{0:.2f}'.format(refund_total),
             "currency": "USD"}})
 
-    if refund.success():
-        ride_booking.status = RideBookingStatus.REFUNDED
-        send_db_mail('client_ride_booking_canceled',
-                     [ride_booking.client.email],
-                     {'ride_booking': ride_booking})
-        send_db_mail('owner_ride_booking_canceled',
-                     [ride_booking.ride.owner.email],
-                     {'ride_booking': ride_booking})
-        return True
+    if not refund.success():
+        raise Exception("Cannot create a refund:\n{0}".format(refund.error))
 
-    return False
+    ride_booking.status = RideBookingStatus.REFUNDED
+    send_db_mail('client_ride_booking_canceled',
+                 [ride_booking.client.email],
+                 {'ride_booking': ride_booking})
+    send_db_mail('owner_ride_booking_canceled',
+                 [ride_booking.ride.owner.email],
+                 {'ride_booking': ride_booking})
 
 
 def ride_booking_execute_payment(payer_id, ride_booking):

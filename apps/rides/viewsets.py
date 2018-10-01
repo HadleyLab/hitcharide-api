@@ -128,11 +128,9 @@ class RideBookingViewSet(mixins.ListModelMixin,
     @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
-        if ride_booking_create_payment(ride_booking, self.request):
-            serializer.data['paypal_approval_link'] = \
-                ride_booking.paypal_approval_link
-            return HttpResponse(status=200)
-        return HttpResponse(status=500)
+        ride_booking_create_payment(ride_booking, self.request)
+        serializer.data['paypal_approval_link'] = \
+            ride_booking.paypal_approval_link
 
     @action(methods=['GET'], detail=True)
     def paypal_payment_execute(self, request, *args, **kwargs):
@@ -140,6 +138,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
         ride_booking = self.get_object()
         ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
             ride_pk=ride_booking.ride.pk)
+        # TODO: catch exception instead of if
         if ride_booking_execute_payment(payer_id, ride_booking):
             success_url = '{0}?execution=success'.format(
                 ride_booking_detail_url)
