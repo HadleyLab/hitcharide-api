@@ -62,7 +62,6 @@ class Ride(CreatedUpdatedMixin, models.Model):
         coef = Decimal("0.01")
         return ride_price + ride_price * (system_fee * coef)
 
-
     def get_booked_seats_count(self):
         return sum(self.bookings.filter(status=RideBookingStatus.PAYED).
                    values_list('seats_count', flat=True))
