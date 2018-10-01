@@ -12,9 +12,8 @@ def create_payouts_for_rides():
     ride_end_datetime = timezone.now() - timezone.timedelta(hours=24)
     finished_rides = Ride.objects.filter(
         completed=False,
-        date_time__lte=ride_end_datetime)
-        # TODO: fix query
-        # ride__complaints__isnull=True)
+        date_time__lte=ride_end_datetime,
+        complaints__isnull=True)
     for ride in finished_rides.all():
         ride_payout(ride)
         ride.completed = True
