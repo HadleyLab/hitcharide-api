@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from apps.rides.factories import RideFactory, RideBookingFactory, \
     RideComplaintFactory
-from apps.rides.models import RideBookingStatus
+from apps.rides.models import RideBookingStatus, RideStatus
 from apps.rides.tasks import create_payouts_for_rides
 
 
@@ -34,7 +34,7 @@ class TasksTest(TestCase):
 
         self.assertEqual(mock_ride_payout.call_count, 1)
         mock_ride_payout.assert_called_with(self.ride1)
-        self.assertTrue(self.ride1.completed)
+        self.assertEqual(self.ride1.status, RideStatus.COMPLETED)
 
     @mock.patch('apps.rides.tasks.ride_payout', autospec=True)
     def test_create_payouts_for_rides_with_complaints(
@@ -44,4 +44,4 @@ class TasksTest(TestCase):
         self.ride1.refresh_from_db()
 
         self.assertEqual(mock_ride_payout.call_count, 0)
-        self.assertFalse(self.ride1.completed)
+        self.assertEqual(self.ride1.status, RideStatus.CREATED)

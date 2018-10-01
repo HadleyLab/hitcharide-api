@@ -8,6 +8,18 @@ from apps.accounts.models import User
 from .mixins import CreatedUpdatedMixin
 
 
+class RideStatus(object):
+    CREATED = 'created'
+    COMPLETED = 'completed'
+    CANCELED = 'canceled'
+
+    CHOICES = tuple(
+        (item, item.title()) for item in [
+            CREATED, COMPLETED, CANCELED
+        ]
+    )
+
+
 class Ride(CreatedUpdatedMixin, models.Model):
     car = models.ForeignKey(
         'cars.Car',
@@ -30,9 +42,10 @@ class Ride(CreatedUpdatedMixin, models.Model):
         decimal_places=2,
         max_digits=10
     )
-    completed = models.BooleanField(
-        default=False
-    )
+    status = models.CharField(
+        max_length=10,
+        default=RideStatus.CREATED,
+        choices=RideStatus.CHOICES)
 
     @property
     def available_number_of_seats(self):

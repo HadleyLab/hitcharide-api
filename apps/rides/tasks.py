@@ -2,7 +2,7 @@ from celery import shared_task
 from django.db import transaction
 from django.utils import timezone
 
-from apps.rides.models import Ride, RideBooking, RideBookingStatus
+from apps.rides.models import Ride, RideBooking, RideBookingStatus, RideStatus
 from apps.rides.utils import ride_payout
 
 
@@ -11,12 +11,12 @@ from apps.rides.utils import ride_payout
 def create_payouts_for_rides():
     ride_end_datetime = timezone.now() - timezone.timedelta(hours=24)
     finished_rides = Ride.objects.filter(
-        completed=False,
+        status=RideStatus.CREATED,
         date_time__lte=ride_end_datetime,
         complaints__isnull=True)
     for ride in finished_rides.all():
         ride_payout(ride)
-        ride.completed = True
+        ride.status = RideStatus.COMPLETED
         ride.save()
 
 
