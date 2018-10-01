@@ -93,7 +93,6 @@ class RideViewSetTest(APITestCase):
 
         car = CarFactory.create(owner=self.user)
         now = timezone.now()
-        far_future = now + timedelta(days=365)
         tomorrow = now + timedelta(days=1)
         yesterday = now - timedelta(days=1)
 
@@ -107,16 +106,11 @@ class RideViewSetTest(APITestCase):
             car=car,
             date_time=tomorrow)
 
-        ride3 = RideFactory.create(
-            number_of_seats=5,
-            car=car,
-            date_time=far_future)
-
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
 
-        self.assertEqual(len(resp.data['results']), 1)
-        self.assertEqual(resp.data['results'][0]['pk'], ride2.pk)
+        self.assertEqual(len(resp.data), 1)
+        self.assertEqual(resp.data[0]['pk'], ride2.pk)
 
     def test_list_filter_by_city_to(self):
         self.authenticate()
@@ -142,15 +136,15 @@ class RideViewSetTest(APITestCase):
         resp = self.client.get(
             '/rides/ride/', {'city_to': self.city1.pk}, format='json')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data['results']), 0)
+        self.assertEqual(len(resp.data), 0)
 
         resp = self.client.get(
             '/rides/ride/', {'city_to': self.city2.pk}, format='json')
         self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data['results']), 2)
+        self.assertEqual(len(resp.data), 2)
         self.assertSetEqual(
             {ride1.pk, ride2.pk},
-            set([ride['pk'] for ride in resp.data['results']]))
+            set([ride['pk'] for ride in resp.data]))
 
     def test_my_unauthorized(self):
         resp = self.client.get('/rides/ride/my/', format='json')
@@ -178,7 +172,7 @@ class RideViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertSetEqual(
             {my_ride_1.pk, my_ride_2.pk},
-            set([ride['pk'] for ride in resp.data['results']]))
+            set([ride['pk'] for ride in resp.data]))
 
     def test_ride_complaints_create(self):
         ride = RideFactory.create(

@@ -46,6 +46,7 @@ class RideStopFactory(DjangoModelFactory):
 
 class RideBookingFactory(DjangoModelFactory):
     ride = SubFactory(RideFactory)
+    client = SubFactory(UserFactory)
 
     class Meta:
         model = RideBooking

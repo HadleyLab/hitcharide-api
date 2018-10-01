@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  api:
+    image: $DOCKER_IMAGE_BUILD
+    ports:
+    - 8000:8000
+    links:
+    - db
+    - redis
+    environment:
+      DATABASE_URL: postgres://postgres:@db:5432/postgres
+      BROKER_URL: redis://redis
+      REDIS_URL: redis://redis
+      RUN_TESTS: "True"
+      IS_CI: "True"
+    volumes:
+    - ./reports:/app/user/reports/unit
+
+  wait_for:
+    image: jwilder/dockerize
+    command: dockerize -wait tcp://db:5432 -wait tcp://redis:6379 -timeout 60s

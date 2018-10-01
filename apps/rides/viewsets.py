@@ -1,6 +1,6 @@
-from datetime import timedelta
-
+from django.conf import settings
 from django.db import transaction
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
@@ -10,7 +10,8 @@ from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
-from config.pagination import DefaultPageNumberPagination
+from apps.rides.utils import ride_booking_refund, \
+    ride_booking_execute_payment, ride_booking_create_payment
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
     BookingsListFilter
 from .mixins import ListFactoryMixin
@@ -125,6 +126,37 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
+
+    @transaction.atomic
+    def perform_create(self, serializer):
+        ride_booking = serializer.save()
+        ride_booking_create_payment(ride_booking, self.request)
+        serializer.data['paypal_approval_link'] = \
+            ride_booking.paypal_approval_link
+
+    @action(methods=['GET'], detail=True)
+    def paypal_payment_execute(self, request, *args, **kwargs):
+        payer_id = request.GET.get('PayerID')
+        ride_booking = self.get_object()
+        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+            ride_pk=ride_booking.ride.pk)
+        # TODO: catch exception instead of if
+        if ride_booking_execute_payment(payer_id, ride_booking):
+            success_url = '{0}?execution=success'.format(
+                ride_booking_detail_url)
+            return HttpResponseRedirect(success_url)
+
+        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
+        return HttpResponseRedirect(fail_url)
+
+    @action(methods=['POST'], detail=True)
+    def paypal_payment_refund(self, request, *args, **kwargs):
+        ride_booking = self.get_object()
+
+        if ride_booking_refund(ride_booking):
+            return HttpResponse(status=200)
+
+        return HttpResponse(status=500)
 
 
 class RideRequestViewSet(mixins.ListModelMixin,
