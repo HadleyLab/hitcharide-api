@@ -27,7 +27,7 @@ class Review(CreatedUpdatedMixin):
         'accounts.User',
         on_delete=models.PROTECT,
         related_name='reviews')
-    type = models.PositiveSmallIntegerField(
+    author_type = models.PositiveSmallIntegerField(
         choices=ReviewType.CHOICES)
     rating = models.IntegerField(
         validators=[
@@ -42,4 +42,4 @@ class Review(CreatedUpdatedMixin):
             self.author, self.subject, self.rating)
 
     class Meta:
-        unique_together = ('ride', 'author')
+        unique_together = ('ride', 'author', 'subject')

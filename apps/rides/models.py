@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.accounts.models import User
 from .mixins import CreatedUpdatedMixin
 
 
@@ -86,6 +85,15 @@ class Ride(CreatedUpdatedMixin, models.Model):
             date_time__range=(self.date_time.date(),
                               self.date_time.date() + timezone.timedelta(
                                   days=3)))
+
+    def get_rating(self):
+        result = self.reviews.aggregate(
+            rating=models.Avg('rating'),
+            count=models.Count('pk'))
+        return {
+            'value': result['rating'] or 0.0,
+            'count': result['count']
+        }
 
     def __str__(self):
         return '{0} - {1} on {2}'.format(
