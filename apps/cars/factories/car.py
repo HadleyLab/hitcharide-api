@@ -1,7 +1,6 @@
 from factory import fuzzy, post_generation
 from factory.django import DjangoModelFactory, ImageField
 
-from apps.cars.factories.car_image import CarImageFactory
 from apps.cars.models import Car
 
 
@@ -18,6 +17,8 @@ class CarFactory(DjangoModelFactory):
 
     @post_generation
     def add_images(self, create, extracted, **kwargs):
+        from .car_image import CarImageFactory
+
         if not create:
             return
 
