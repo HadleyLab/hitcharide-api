@@ -58,3 +58,16 @@ class RequestsListFilter(BaseFilterBackend):
             queryset = queryset.filter(date_time__lte=date_time_to)
 
         return queryset
+
+
+class BookingsListFilter(BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        date_time_from = request.query_params.get('date_time_from', '')
+        if date_time_from:
+            queryset = queryset.filter(ride__date_time__gte=date_time_from)
+
+        date_time_to = request.query_params.get('date_time_to', '')
+        if date_time_to:
+            queryset = queryset.filter(ride__date_time__lte=date_time_to)
+
+        return queryset
