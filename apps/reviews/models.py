@@ -27,6 +27,8 @@ class Review(CreatedUpdatedMixin):
         'accounts.User',
         on_delete=models.PROTECT,
         related_name='reviews')
+    type = models.PositiveSmallIntegerField(
+        choices=ReviewType.CHOICES)
     rating = models.IntegerField(
         validators=[
             MinValueValidator(1),
