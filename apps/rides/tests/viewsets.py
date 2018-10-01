@@ -109,7 +109,6 @@ class RideViewSetTest(APITestCase):
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
 
-        print(resp.data)
         self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0]['pk'], ride2.pk)
 
