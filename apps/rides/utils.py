@@ -1,8 +1,6 @@
-import os
-
 from dbmail import send_db_mail
+from django.conf import settings
 from django.urls import reverse
-# from django_extensions import settings
 from paypalrestsdk import Payment, Payout, Sale
 
 from apps.rides.models import RideBookingStatus
@@ -11,10 +9,11 @@ from apps.rides.models import RideBookingStatus
 def inform_all_subscribers(ride):
     ride.stops.all().values_list('city_id').exclude()
 
+
 def ride_booking_create_payment(ride_booking, request):
     ride_total = ride_booking.ride.price_with_fee * ride_booking.seats_count
-    ride_booking_detail_url = os.environ.get('RIDE_BOOKING_DETAIL_URL').format(
-        ride_pk=ride_booking.ride.pk, ride_booking_pk=ride_booking.pk)
+    ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+        ride_pk=ride_booking.ride.pk)
     payment = Payment({
         "intent": "sale",
         "payer": {
