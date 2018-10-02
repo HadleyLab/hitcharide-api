@@ -5,7 +5,11 @@ services:
     build: .
     volumes:
       - .:/app
+    env_file:
+    - .env
 
   celery:
     volumes:
     - .:/app
+    env_file:
+    - .env

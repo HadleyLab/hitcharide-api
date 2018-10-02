@@ -1,40 +1,72 @@
 from django.utils import timezone
-from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence
+from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence, \
+    post_generation
 
+from apps.cars.factories import CarFactory
 from apps.places.factories import CityFactory
-from .models import Ride, Car, RideBooking, RidePoint
-
-
-class CarFactory(DjangoModelFactory):
-    brand = fuzzy.FuzzyText()
-    model = fuzzy.FuzzyText()
-    number_of_sits = fuzzy.FuzzyInteger(low=2, high=7)
-
-    class Meta:
-        model = Car
+from apps.accounts.factories import UserFactory
+from .models import Ride, RideBooking, RideStop, RideComplaint, \
+    RideComplaintStatus, RideRequest
 
 
 class RideFactory(DjangoModelFactory):
     car = SubFactory(CarFactory)
-    number_of_sits = fuzzy.FuzzyInteger(low=2, high=7)
+    city_from = SubFactory(CityFactory)
+    city_to = SubFactory(CityFactory)
+    number_of_seats = fuzzy.FuzzyInteger(low=2, high=7)
+    price = fuzzy.FuzzyInteger(low=2, high=100)
+    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
+    description = fuzzy.FuzzyText()
 
     class Meta:
         model = Ride
 
+    @post_generation
+    def stops_cities(self, create, extracted, **kwargs):
+        if not create:
+            return
 
-class RidePointFactory(DjangoModelFactory):
+        if extracted:
+            for i, city in enumerate(extracted):
+                RideStopFactory.create(
+                    city=city,
+                    ride=self,
+                    order=i
+                )
+
+
+class RideStopFactory(DjangoModelFactory):
     ride = SubFactory(RideFactory)
     city = SubFactory(CityFactory)
-    cost_per_sit = fuzzy.FuzzyInteger(low=2, high=100)
     order = Sequence(lambda n: n)
-    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
 
     class Meta:
-        model = RidePoint
+        model = RideStop
 
 
 class RideBookingFactory(DjangoModelFactory):
     ride = SubFactory(RideFactory)
+    client = SubFactory(UserFactory)
 
     class Meta:
         model = RideBooking
+
+
+class RideComplaintFactory(DjangoModelFactory):
+    ride = SubFactory(RideFactory)
+    user = SubFactory(UserFactory)
+    status = RideComplaintStatus.NEW
+    description = fuzzy.FuzzyText()
+
+    class Meta:
+        model = RideComplaint
+
+
+class RideRequestFactory(DjangoModelFactory):
+    author = SubFactory(UserFactory)
+    city_from = SubFactory(CityFactory)
+    city_to = SubFactory(CityFactory)
+    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
+
+    class Meta:
+        model = RideRequest

@@ -7,11 +7,12 @@ from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import verify_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
 
+from apps.accounts.viewsets import UserDetailViewSet
 from apps.places.viewsets import StateViewSet, CityViewSet
 from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
     ValidatePhoneView, complete
 from apps.rides.viewsets import CarViewSet, RideViewSet, \
-    RideBookingViewSet, RideRequestViewSet
+    RideBookingViewSet, RideRequestViewSet, RideComplaintViewSet
 
 from .routers import Router
 
@@ -24,6 +25,8 @@ router.register('rides/car', CarViewSet)
 router.register('rides/ride', RideViewSet)
 router.register('rides/booking', RideBookingViewSet)
 router.register('rides/request', RideRequestViewSet)
+router.register('rides/complaint', RideComplaintViewSet)
+router.register('accounts', UserDetailViewSet)
 
 
 urlpatterns = [

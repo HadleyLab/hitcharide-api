@@ -1,10 +1,14 @@
+from unittest import mock
 from config.tests import APITestCase
+
 from apps.accounts.factories import UserFactory
 from apps.accounts.models import User
+from apps.main.test_utils import assert_mock_called_with
 
 
 class RegistrationTestCase(APITestCase):
-    def test_registration(self):
+    @mock.patch('apps.dbmail_templates.email.send_mail')
+    def test_registration(self, mock_send_mail):
         data = {
             'email': 'test@test.test',
             'phone': '+7 933 000 00 00',
@@ -15,6 +19,13 @@ class RegistrationTestCase(APITestCase):
 
         resp = self.client.post('/accounts/register/', data, format='json')
         self.assertSuccessResponse(resp)
+        assert_mock_called_with(
+            mock_send_mail,
+            'account_activate', ['test@test.test'],
+            lambda value: self.assertEqual(
+                value['user'].email,
+                'test@test.test')
+        )
 
         user = User.objects.get(pk=resp.data['pk'])
         self.assertEqual(user.first_name, 'first')
@@ -80,7 +91,7 @@ class RegistrationTestCase(APITestCase):
         self.authenticate()
         resp = self.client.get('/accounts/my/')
         self.assertSuccessResponse(resp)
-        self.assertEqual(resp.data['pk'], self.user.pk)
+        self.assertEqual(resp.data['pk'], str(self.user.pk))
         self.assertEqual(resp.data['email'], self.user.email)
         self.assertEqual(resp.data['first_name'], self.user.first_name)
         self.assertEqual(resp.data['last_name'], self.user.last_name)
@@ -126,3 +137,15 @@ class RegistrationTestCase(APITestCase):
             'phone': ''
         })
         self.assertBadRequest(resp)
+
+    def test_update(self):
+        self.authenticate()
+        self.user.phone = '+71111111111'
+        self.user.is_phone_validated == True
+        self.user.save()
+
+        self.client.put('/accounts/my/', {
+            'phone': '+72222222222'
+        })
+
+        self.assertEqual(self.user.is_phone_validated, False)
