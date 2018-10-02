@@ -143,13 +143,13 @@ BACKEND_URL = os.environ.get(
     'http://localhost:8000'
 )
 
-RIDE_DETAIL_URL = ''.join([FRONTEND_URL, '/ride/{ride_pk}/'])
+RIDE_DETAIL_URL = FRONTEND_URL + '/ride/{ride_pk}/'
 
 
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL':
-        '{0}/account/new-password/{uid}/{token}'.format(FRONTEND_URL),
-    'ACTIVATION_URL': '{0}/account/activate/{uid}/{token}'.format(FRONTEND_URL),
+        FRONTEND_URL + '/account/new-password/{uid}/{token}',
+    'ACTIVATION_URL': FRONTEND_URL + '/account/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
