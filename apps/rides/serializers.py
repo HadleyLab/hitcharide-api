@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.accounts.serializers import UserSerializer
 from apps.cars.serializers import CarDetailSerializer
-from apps.places.serializers import CitySerializer, CityWithStateSerializer
+from apps.places.serializers import CityWithStateSerializer
 from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint
 
 
@@ -40,9 +40,9 @@ class RideDetailSerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to', 'date_time',
-                  'price', 'number_of_seats', 'available_number_of_seats',
-                  'description')
+        fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to',
+                  'date_time', 'price', 'price_with_fee', 'number_of_seats',
+                  'available_number_of_seats', 'description', 'status')
 
 
 class RideWritableSerializer(WritableNestedModelSerializer):
@@ -63,13 +63,15 @@ class RideWritableSerializer(WritableNestedModelSerializer):
                   'price', 'number_of_seats', 'description')
 
 
+
 class RideBookingDetailSerializer(serializers.ModelSerializer):
     ride = RideDetailSerializer()
     status = serializers.CharField(read_only=True)
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride', 'seats_count', 'status')
+        fields = ('pk', 'client', 'ride', 'seats_count', 'status',
+                  'paypal_approval_link')
 
 
 class RideBookingWritableSerializer(serializers.ModelSerializer):
@@ -78,12 +80,13 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride', 'seats_count')
+        fields = ('pk', 'client', 'ride', 'seats_count', 'paypal_approval_link')
+        extra_kwargs = {'paypal_approval_link': {'read_only': True}}
 
 
 class RideRequestDetailSerializer(serializers.ModelSerializer):
-    city_from = CitySerializer()
-    city_to = CitySerializer()
+    city_from = CityWithStateSerializer()
+    city_to = CityWithStateSerializer()
 
     class Meta:
         model = RideRequest

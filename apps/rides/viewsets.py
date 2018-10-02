@@ -1,6 +1,6 @@
-from datetime import timedelta
-
+from django.conf import settings
 from django.db import transaction
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
@@ -10,8 +10,10 @@ from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
-from config.pagination import DefaultPageNumberPagination
-from .filters import RidesListFilter, MyRidesFilter
+from apps.rides.utils import ride_booking_refund, \
+    ride_booking_execute_payment, ride_booking_create_payment
+from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
+    BookingsListFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint
 from apps.cars.models import Car
@@ -49,7 +51,7 @@ class RideViewSet(ListFactoryMixin,
     queryset = Ride.objects.all().order_by('date_time')
     serializer_class = RideDetailSerializer
     permission_classes = (IsAuthenticated,)
-    pagination_class = DefaultPageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (RidesListFilter,)
 
     def get_serializer_class(self):
@@ -67,9 +69,7 @@ class RideViewSet(ListFactoryMixin,
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
-            date_time__gt=timezone.now(),
-            date_time__lte=timezone.now() + timedelta(
-                days=config.RIDE_LIST_DAYS))
+            date_time__gt=timezone.now())
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
@@ -110,21 +110,15 @@ class RideViewSet(ListFactoryMixin,
         return super(RideViewSet, self).perform_destroy(instance)
 
 
-class RideListViewSet(mixins.ListModelMixin,
-                      viewsets.GenericViewSet):
-    queryset = Ride.objects.all().order_by('date_time')
-    serializer_class = RideDetailSerializer
-    pagination_class = LimitOffsetPagination
-    filter_backends = (RidesListFilter,)
-
-
 class RideBookingViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideBooking.objects.all()
     serializer_class = RideBookingDetailSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
+    filter_backends = (BookingsListFilter,)
 
     def get_serializer_class(self):
         if self.action in ['create']:
@@ -135,15 +129,49 @@ class RideBookingViewSet(mixins.ListModelMixin,
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
 
+    @transaction.atomic
+    def perform_create(self, serializer):
+        ride_booking = serializer.save()
+        ride_booking_create_payment(ride_booking, self.request)
+        serializer.data['paypal_approval_link'] = \
+            ride_booking.paypal_approval_link
+
+    @action(methods=['GET'], detail=True)
+    def paypal_payment_execute(self, request, *args, **kwargs):
+        payer_id = request.GET.get('PayerID')
+        ride_booking = self.get_object()
+        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+            ride_pk=ride_booking.ride.pk)
+        # TODO: catch exception instead of if
+        if ride_booking_execute_payment(payer_id, ride_booking):
+            success_url = '{0}?execution=success'.format(
+                ride_booking_detail_url)
+            return HttpResponseRedirect(success_url)
+
+        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
+        return HttpResponseRedirect(fail_url)
+
+    @action(methods=['POST'], detail=True)
+    def paypal_payment_refund(self, request, *args, **kwargs):
+        ride_booking = self.get_object()
+
+        if ride_booking_refund(ride_booking):
+            return HttpResponse(status=200)
+
+        return HttpResponse(status=500)
+
 
 class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
+                         mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     queryset = RideRequest.objects.all().order_by('created')
     serializer_class = RideRequestDetailSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
+    filter_backends = (RequestsListFilter, )
 
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
