@@ -29,7 +29,7 @@ class RidePassengerSerializer(serializers.ModelSerializer):
     class Meta:
         model = RideBooking
         fields = ('pk', 'client', 'seats_count', 'status', 'paypal_payment_id',
-                  'paypal_approval_link')
+                  'paypal_approval_link', 'created',)
 
 
 class RideDetailSerializer(WritableNestedModelSerializer):

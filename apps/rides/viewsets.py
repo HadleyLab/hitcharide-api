@@ -134,10 +134,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
         serializer.data['paypal_approval_link'] = \
             ride_booking.paypal_approval_link
 
-    @action(methods=['GET'], detail=True)
-    def paypal_payment_execute(self, request, *args, **kwargs):
+    @action(methods=['GET'], detail=True, permission_classes=())
+    def paypal_payment_execute(self, request, pk, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
-        ride_booking = self.get_object()
+        ride_booking = RideBooking.objects.get(pk=pk)
         ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
             ride_pk=ride_booking.ride.pk)
         # TODO: catch exception instead of if
