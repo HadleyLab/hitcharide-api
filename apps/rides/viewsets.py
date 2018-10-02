@@ -5,11 +5,11 @@ from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from dbmail import send_db_mail
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
+from apps.main.utils import send_mail
 from apps.rides.utils import ride_booking_refund, \
     ride_booking_execute_payment, ride_booking_create_payment
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
@@ -92,19 +92,31 @@ class RideViewSet(ListFactoryMixin,
     def update(self, request, *args, **kwargs):
         return super(RideViewSet, self).update(request, *args, **kwargs)
 
+    def perform_create(self, serializer):
+        super(RideViewSet, self).perform_create(serializer)
+        instance = serializer.instance
+        requests = instance.get_ride_requests()
+        for request in requests:
+            send_mail('new_ride_for_ride_request',
+                      [request.author.email],
+                      {'ride': instance,
+                       'ride_request': request,
+                       'ride_url': settings.RIDE_DETAIL_URL.format(
+                           ride_pk=instance.pk)})
+
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
         instance = serializer.instance
         if instance.get_booked_seats_count():
-            send_db_mail('ride_has_been_edited',
-                         instance.get_clients_emails(),
-                         {'ride': instance})
+            send_mail('ride_has_been_edited',
+                      instance.get_clients_emails(),
+                      {'ride': instance})
 
     def perform_destroy(self, instance):
         if instance.get_booked_seats_count():
-            send_db_mail('ride_has_been_deleted',
-                         instance.get_clients_emails(),
-                         {'ride': instance})
+            send_mail('ride_has_been_deleted',
+                      instance.get_clients_emails(),
+                      {'ride': instance})
         return super(RideViewSet, self).perform_destroy(instance)
 
 
@@ -130,6 +142,14 @@ class RideBookingViewSet(mixins.ListModelMixin,
     @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
+
+        send_mail('client_booked_a_ride',
+                  [ride_booking.client.email],
+                  {'ride': ride_booking.ride})
+        send_mail('driver_somebody_booked_a_ride',
+                  [ride_booking.ride.car.owner.email],
+                  {'ride': ride_booking.ride})
+
         ride_booking_create_payment(ride_booking, self.request)
         serializer.data['paypal_approval_link'] = \
             ride_booking.paypal_approval_link
@@ -138,15 +158,15 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def paypal_payment_execute(self, request, pk, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
         ride_booking = RideBooking.objects.get(pk=pk)
-        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+        ride_detail_url = settings.RIDE_DETAIL_URL.format(
             ride_pk=ride_booking.ride.pk)
         # TODO: catch exception instead of if
         if ride_booking_execute_payment(payer_id, ride_booking):
             success_url = '{0}?execution=success'.format(
-                ride_booking_detail_url)
+                ride_detail_url)
             return HttpResponseRedirect(success_url)
 
-        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
+        fail_url = '{0}?execution=fail'.format(ride_detail_url)
         return HttpResponseRedirect(fail_url)
 
     @action(methods=['POST'], detail=True)
@@ -201,6 +221,6 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
         super(RideComplaintViewSet, self).perform_create(serializer)
         instance = serializer.instance
         if config.MANAGER_EMAIL:
-            send_db_mail('new_ride_complaint',
-                         [config.MANAGER_EMAIL],
-                         {'complaint': instance})
+            send_mail('new_ride_complaint',
+                      [config.MANAGER_EMAIL],
+                      {'complaint': instance})

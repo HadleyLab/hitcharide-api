@@ -1,11 +1,15 @@
 from datetime import timedelta
+from unittest import mock
+
 from django.utils import timezone
 
+from apps.main.test_utils import assert_mock_called_with
 from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
 from apps.places.factories import CityFactory
 from apps.rides.factories import RideFactory, \
-    RideBookingFactory, RideStopFactory, RideComplaintFactory
+    RideBookingFactory, RideStopFactory, RideComplaintFactory, \
+    RideRequestFactory
 from apps.cars.factories import CarFactory
 from apps.rides.models import Ride, RideComplaintStatus
 
@@ -29,6 +33,13 @@ class RideViewSetTest(APITestCase):
             'date_time': timezone.now() + timedelta(days=1),
             'stops': [],
             'number_of_seats': 5
+        }
+
+    def get_ride_request_data(self):
+        return {
+            'city_from': self.city1.pk,
+            'city_to': self.city2.pk,
+            'date_time': timezone.now() + timedelta(days=1),
         }
 
     def test_create_unauthorized_forbidden(self):

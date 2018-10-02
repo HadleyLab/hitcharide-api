@@ -1,6 +1,7 @@
-from dbmail import send_db_mail
 from djoser.email import ActivationEmail, ConfirmationEmail, PasswordResetEmail
 from templated_mail.mail import BaseEmailMessage
+
+from apps.main.utils import send_mail
 
 
 class DBMailEmail(BaseEmailMessage):
@@ -10,7 +11,7 @@ class DBMailEmail(BaseEmailMessage):
     def send(self, to, *args, **kwargs):
         # super(DBMailEmail, self).send()
         context = self.get_context_data()
-        send_db_mail(self.template_name, to, context)
+        send_mail(self.template_name, to, context)
 
     def get_context_data(self):
         context = super(DBMailEmail, self).get_context_data()
