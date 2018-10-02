@@ -46,7 +46,7 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     def get_has_my_reviews(self, ride):
         user = self.context['request'].user
         ride_passengers_pks = ride.bookings.filter(
-            status=RideBookingStatus.SUCCEED
+            status=RideBookingStatus.PAYED
         ).values_list('client_id', flat=True)
         ride_driver = ride.car.owner
         if ride_driver == user:
@@ -101,7 +101,7 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
     has_my_reviews = serializers.SerializerMethodField()
 
     def get_has_my_reviews(self, booking):
-        if booking.status == RideBookingStatus.SUCCEED:
+        if booking.status == RideBookingStatus.PAYED:
             return Review.objects.filter(
                 author=self.context['request'].user,
                 author_type=ReviewType.PASSENGER,

@@ -26,7 +26,7 @@ class ReviewCreateSerializer(ReviewSerializer):
         subject = attrs['subject']
 
         ride_passengers_pks = ride.bookings.filter(
-            status=RideBookingStatus.SUCCEED
+            status=RideBookingStatus.PAYED
         ).values_list('client_id', flat=True)
         ride_driver = ride.car.owner
 

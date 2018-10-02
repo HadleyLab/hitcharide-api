@@ -31,11 +31,11 @@ class ReviewViewSetTest(APITestCase):
         RideBookingFactory.create(
             ride=self.ride,
             client=self.passenger1,
-            status=RideBookingStatus.SUCCEED)
+            status=RideBookingStatus.PAYED)
         RideBookingFactory.create(
             ride=self.ride,
             client=self.passenger2,
-            status=RideBookingStatus.SUCCEED)
+            status=RideBookingStatus.PAYED)
 
     def test_create_unauthorized(self):
         resp = self.client.post('/reviews/', {
