@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone

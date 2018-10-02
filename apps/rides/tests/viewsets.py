@@ -137,9 +137,8 @@ class RideViewSetTest(APITestCase):
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
 
-        self.assertEqual(len(resp.data), 2)
+        self.assertEqual(len(resp.data), 1)
         self.assertEqual(resp.data[0]['pk'], ride2.pk)
-        self.assertEqual(resp.data[1]['pk'], ride3.pk)
 
     def test_list_filter_by_city_to(self):
         self.authenticate()
