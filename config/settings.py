@@ -232,7 +232,14 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 RIDE_BOOKING_DETAIL_URL = os.environ.get(
     'RIDE_BOOKING_DETAIL_URL',
     'http://localhost:3000/#/ride/{ride_pk}/')
-
+FRONTEND_URL = os.environ.get(
+    'FRONTEND_URL',
+    'http://localhost:3000/'
+)
+BACKEND_URL = os.environ.get(
+    'BACKEND_URL',
+    'http://localhost:8000/'
+)
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
