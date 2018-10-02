@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+from apps.reviews.models import Review, ReviewType
 from .mixins import CreatedUpdatedMixin
 
 
@@ -87,7 +88,9 @@ class Ride(CreatedUpdatedMixin, models.Model):
                                   days=3)))
 
     def get_rating(self):
-        result = self.reviews.aggregate(
+        result = self.reviews.filter(
+            author_type=ReviewType.PASSENGER
+        ).aggregate(
             rating=models.Avg('rating'),
             count=models.Count('pk'))
         return {
@@ -152,6 +155,17 @@ class RideBooking(CreatedUpdatedMixin):
     paypal_approval_link = models.TextField(
         blank=True,
         null=True)
+
+    @property
+    def rating(self):
+        review = Review.objects.filter(
+            ride=self.ride,
+            author_type=ReviewType.DRIVER,
+            subject=self.client).first()
+        if review:
+            return review.rating
+        else:
+            return 0.0
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(
