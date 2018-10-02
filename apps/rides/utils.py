@@ -53,20 +53,26 @@ def ride_booking_create_payment(ride_booking, request):
 
 
 def ride_payout(ride):
+    total_for_driver = ride.total_for_driver
+    if not total_for_driver:
+        return
+
     payout = Payout({
         "sender_batch_header": {
-            "sender_batch_id": "ride_{0}".format(ride.pk),
-            "email_subject": "You have a payment"
+            "sender_batch_id": "{0}_ride_{1}".format(
+                settings.PAYPAL_BATCH_PREFIX,
+                ride.pk),
+            "email_subject": "You have a payout"
         },
         "items": [
             {
                 "recipient_type": "EMAIL",
                 "amount": {
-                    "value": '{0:.2f}'.format(ride.total_for_driver),
+                    "value": '{0:.2f}'.format(total_for_driver),
                     "currency": "USD"
                 },
                 "receiver": ride.car.owner.paypal_account,
-                "note": "The payment for the ride {0}. Thank you.".format(
+                "note": "The payout for the ride {0}. Thank you.".format(
                     ride
                 ),
                 "sender_item_id": "ride_{0}".format(ride.pk)

@@ -121,7 +121,7 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_BEAT_SCHEDULE = {
     'create-payouts-for-rides': {
         'task': 'apps.rides.tasks.create_payouts_for_rides',
-        'schedule': crontab(hour='*'),
+        'schedule': crontab(hour='*', minute='0'),
     },
     'check-expired-time-of-ride-bookings': {
         'task': 'apps.rides.tasks.check_expired_time_of_ride_bookings',
@@ -287,3 +287,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+PAYPAL_BATCH_PREFIX = os.environ.get('PAYPAL_BATCH_PREFIX', 'production')
