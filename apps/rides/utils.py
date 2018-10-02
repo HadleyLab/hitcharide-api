@@ -3,6 +3,7 @@ from django.conf import settings
 from django.urls import reverse
 from paypalrestsdk import Payment, Payout, Sale
 
+from apps.main.utils import send_mail
 from apps.rides.models import RideBookingStatus
 
 
@@ -47,9 +48,9 @@ def ride_booking_create_payment(ride_booking, request):
     ride_booking.paypal_payment_id = payment.id
     ride_booking.paypal_approval_link = approval_link
     ride_booking.save()
-    send_db_mail('ride_client_payment_created',
-                 [ride_booking.client.email],
-                 {'booking': ride_booking})
+    send_mail('ride_client_payment_created',
+              [ride_booking.client.email],
+              {'booking': ride_booking})
 
 
 def ride_payout(ride):
@@ -83,9 +84,9 @@ def ride_payout(ride):
     if not payout.create():
         raise Exception("Cannot create a payout:\n{0}".format(payout.error))
 
-    send_db_mail('ride_payout_to_owner',
-                 [ride.car.owner.email],
-                 {'ride': ride})
+    send_mail('ride_payout_to_owner',
+              [ride.car.owner.email],
+              {'ride': ride})
 
 
 def ride_booking_refund(ride_booking):
@@ -104,12 +105,12 @@ def ride_booking_refund(ride_booking):
         raise Exception("Cannot create a refund:\n{0}".format(refund.error))
 
     ride_booking.status = RideBookingStatus.REFUNDED
-    send_db_mail('client_ride_booking_canceled',
-                 [ride_booking.client.email],
-                 {'ride_booking': ride_booking})
-    send_db_mail('owner_ride_booking_canceled',
-                 [ride_booking.ride.owner.email],
-                 {'ride_booking': ride_booking})
+    send_mail('client_ride_booking_canceled',
+              [ride_booking.client.email],
+              {'ride_booking': ride_booking})
+    send_mail('owner_ride_booking_canceled',
+              [ride_booking.ride.owner.email],
+              {'ride_booking': ride_booking})
 
 
 def ride_booking_execute_payment(payer_id, ride_booking):
@@ -119,12 +120,12 @@ def ride_booking_execute_payment(payer_id, ride_booking):
         if payment.execute({"payer_id": payer_id}):
             ride_booking.status = RideBookingStatus.PAYED
             ride_booking.save()
-            send_db_mail('ride_client_payment_executed',
-                         [ride_booking.client.email],
-                         {'ride': ride_booking})
-            send_db_mail('ride_owner_payment_executed',
-                         [ride_booking.ride.car.owner.email],
-                         {'ride': ride_booking})
+            send_mail('ride_client_payment_executed',
+                      [ride_booking.client.email],
+                      {'ride': ride_booking})
+            send_mail('ride_owner_payment_executed',
+                      [ride_booking.ride.car.owner.email],
+                      {'ride': ride_booking})
 
             return True
 

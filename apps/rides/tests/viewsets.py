@@ -70,8 +70,8 @@ class RideViewSetTest(APITestCase):
         resp = self.client.post('/rides/ride/', data, format='json')
         self.assertBadRequest(resp)
 
-    # @mock.patch('apps.dbmail_templates.email.send_db_mail')
-    # def test_create_with_existing_ride_request(self, mock_send_db_mail):
+    # @mock.patch('apps.dbmail_templates.email.send_mail')
+    # def test_create_with_existing_ride_request(self, mock_send_mail):
     #     now = timezone.now()
     #     tomorrow = now + timedelta(days=1)
     #     self.ride = RideFactory.create(
@@ -85,7 +85,7 @@ class RideViewSetTest(APITestCase):
     #
     #     resp = self.client.post('/rides/request/', data, format='json')
     #     self.assertSuccessResponse(resp)
-    #     self.assertEqual(mock_send_db_mail.call_count, 1)
+    #     self.assertEqual(mock_send_mail.call_count, 1)
 
     def test_update(self):
         self.authenticate()

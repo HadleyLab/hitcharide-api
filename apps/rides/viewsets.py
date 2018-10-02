@@ -10,6 +10,7 @@ from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
+from apps.main.utils import send_mail
 from apps.rides.utils import ride_booking_refund, \
     ride_booking_execute_payment, ride_booking_create_payment
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
@@ -98,24 +99,24 @@ class RideViewSet(ListFactoryMixin,
         requests = instance.get_ride_requests()
         if len(requests) > 0:
             for request in requests:
-                send_db_mail('new_ride_for_ride_request',
-                             [request.author.email],
-                             {'ride': instance,
-                              'ride_request': request})
+                send_mail('new_ride_for_ride_request',
+                          [request.author.email],
+                          {'ride': instance,
+                           'ride_request': request})
 
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
         instance = serializer.instance
         if instance.get_booked_seats_count():
-            send_db_mail('ride_has_been_edited',
-                         instance.get_clients_emails(),
-                         {'ride': instance})
+            send_mail('ride_has_been_edited',
+                      instance.get_clients_emails(),
+                      {'ride': instance})
 
     def perform_destroy(self, instance):
         if instance.get_booked_seats_count():
-            send_db_mail('ride_has_been_deleted',
-                         instance.get_clients_emails(),
-                         {'ride': instance})
+            send_mail('ride_has_been_deleted',
+                      instance.get_clients_emails(),
+                      {'ride': instance})
         return super(RideViewSet, self).perform_destroy(instance)
 
 
@@ -142,12 +143,12 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def perform_create(self, serializer):
         ride_booking = serializer.save()
 
-        send_db_mail('client_booked_a_ride',
-                     [ride_booking.client.email],
-                     {'ride': ride_booking.ride})
-        send_db_mail('driver_somebody_booked_a_ride',
-                     [ride_booking.ride.car.owner.email],
-                     {'ride': ride_booking.ride})
+        send_mail('client_booked_a_ride',
+                  [ride_booking.client.email],
+                  {'ride': ride_booking.ride})
+        send_mail('driver_somebody_booked_a_ride',
+                  [ride_booking.ride.car.owner.email],
+                  {'ride': ride_booking.ride})
 
         ride_booking_create_payment(ride_booking, self.request)
         serializer.data['paypal_approval_link'] = \
@@ -220,6 +221,6 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
         super(RideComplaintViewSet, self).perform_create(serializer)
         instance = serializer.instance
         if config.MANAGER_EMAIL:
-            send_db_mail('new_ride_complaint',
-                         [config.MANAGER_EMAIL],
-                         {'complaint': instance})
+            send_mail('new_ride_complaint',
+                      [config.MANAGER_EMAIL],
+                      {'complaint': instance})
