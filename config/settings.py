@@ -14,6 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import dj_database_url
+from celery.schedules import crontab
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -117,6 +118,17 @@ CELERY_TASK_SERIALIZER = 'pickle'  # TODO: refactor task to use json
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_ACCEPT_CONTENT = ['pickle']
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_BEAT_SCHEDULE = {
+    'create-payouts-for-rides': {
+        'task': 'apps.rides.tasks.create_payouts_for_rides',
+        'schedule': crontab(hour='*', minute='0'),
+    },
+    'check-expired-time-of-ride-bookings': {
+        'task': 'apps.rides.tasks.check_expired_time_of_ride_bookings',
+        'schedule': crontab(minute='*'),
+    },
+}
+
 DB_MAILER_CELERY_QUEUE = None
 
 WSGI_APPLICATION = 'config.wsgi.application'
@@ -148,6 +160,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PARSER_CLASSES': (
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
+        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
@@ -208,9 +221,17 @@ TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
 
 CONSTANCE_CONFIG = {
     'MANAGER_EMAIL': ('manager@hitcharide.com', 'Email for complaints'),
-    'RIDE_LIST_DAYS': (3, 'TODOWRITEADESCRIPTION')
+    'SELLER_EMAIL': (
+        'seller@hitcharide.com', 'Email for the seller PayPal account'),
+    'SYSTEM_FEE': (15, 'default value (in percent) of ride\'s fee'),
+
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+
+RIDE_BOOKING_DETAIL_URL = os.environ.get(
+    'RIDE_BOOKING_DETAIL_URL',
+    'http://localhost:3000/#/ride/{ride_pk}/')
 
 
 # Database
@@ -266,3 +287,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+PAYPAL_BATCH_PREFIX = os.environ.get('PAYPAL_BATCH_PREFIX', 'production')

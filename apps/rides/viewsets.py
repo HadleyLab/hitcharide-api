@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
@@ -8,7 +9,10 @@ from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
-from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter
+from apps.rides.utils import ride_booking_refund, \
+    ride_booking_execute_payment, ride_booking_create_payment
+from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
+    BookingsListFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint
 from apps.cars.models import Car
@@ -122,6 +126,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
     serializer_class = RideBookingDetailSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
+    filter_backends = (BookingsListFilter,)
 
     def get_serializer_class(self):
         if self.action in ['create']:
@@ -132,16 +137,44 @@ class RideBookingViewSet(mixins.ListModelMixin,
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user)
 
+    @transaction.atomic
     def perform_create(self, serializer):
-        super(RideBookingViewSet, self).perform_create(serializer)
-        instance = serializer.instance
+        ride_booking = serializer.save()
 
         send_db_mail('client_booked_a_ride',
-                     [instance.client.email],
-                     {'ride': instance.ride})
+                     [ride_booking.client.email],
+                     {'ride': ride_booking.ride})
         send_db_mail('driver_somebody_booked_a_ride',
-                     [instance.ride.car.owner.email],
-                     {'ride': instance.ride})
+                     [ride_booking.ride.car.owner.email],
+                     {'ride': ride_booking.ride})
+
+        ride_booking_create_payment(ride_booking, self.request)
+        serializer.data['paypal_approval_link'] = \
+            ride_booking.paypal_approval_link
+
+    @action(methods=['GET'], detail=True)
+    def paypal_payment_execute(self, request, *args, **kwargs):
+        payer_id = request.GET.get('PayerID')
+        ride_booking = self.get_object()
+        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+            ride_pk=ride_booking.ride.pk)
+        # TODO: catch exception instead of if
+        if ride_booking_execute_payment(payer_id, ride_booking):
+            success_url = '{0}?execution=success'.format(
+                ride_booking_detail_url)
+            return HttpResponseRedirect(success_url)
+
+        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
+        return HttpResponseRedirect(fail_url)
+
+    @action(methods=['POST'], detail=True)
+    def paypal_payment_refund(self, request, *args, **kwargs):
+        ride_booking = self.get_object()
+
+        if ride_booking_refund(ride_booking):
+            return HttpResponse(status=200)
+
+        return HttpResponse(status=500)
 
 
 class RideRequestViewSet(mixins.ListModelMixin,

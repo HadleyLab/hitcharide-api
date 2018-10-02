@@ -121,7 +121,6 @@ class RideViewSetTest(APITestCase):
 
         car = CarFactory.create(owner=self.user)
         now = timezone.now()
-        far_future = now + timedelta(days=365)
         tomorrow = now + timedelta(days=1)
         yesterday = now - timedelta(days=1)
 
@@ -134,11 +133,6 @@ class RideViewSetTest(APITestCase):
             number_of_seats=5,
             car=car,
             date_time=tomorrow)
-
-        ride3 = RideFactory.create(
-            number_of_seats=5,
-            car=car,
-            date_time=far_future)
 
         resp = self.client.get('/rides/ride/', format='json')
         self.assertSuccessResponse(resp)
