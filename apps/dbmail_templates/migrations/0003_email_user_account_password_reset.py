@@ -10,7 +10,7 @@ def load_mail_template(apps, schema_editor):
         message="""
         <p>You're receiving this email because you requested a password reset for your user account at {{ site_name }}.</p>
         <p>Please go to the following page and choose a new password:</p>
-        <a href="{{ frontend_url }}/{{ url }}">{{ frontend_url }}/{{ url }}</a>
+        <a href="{{ url }}">{{ url }}</a>
         <p>Your username, in case you've forgotten: <b>{{ user.get_username }}</b></p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",

@@ -5,7 +5,6 @@ from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from dbmail import send_db_mail
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -102,7 +101,8 @@ class RideViewSet(ListFactoryMixin,
                       [request.author.email],
                       {'ride': instance,
                        'ride_request': request,
-                       'ride_front_url': settings.RIDE_BOOKING_DETAIL_URL})
+                       'ride_url': settings.RIDE_DETAIL_URL.format(
+                           ride_pk=instance.pk)})
 
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
@@ -158,15 +158,15 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def paypal_payment_execute(self, request, *args, **kwargs):
         payer_id = request.GET.get('PayerID')
         ride_booking = self.get_object()
-        ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+        ride_detail_url = settings.RIDE_DETAIL_URL.format(
             ride_pk=ride_booking.ride.pk)
         # TODO: catch exception instead of if
         if ride_booking_execute_payment(payer_id, ride_booking):
             success_url = '{0}?execution=success'.format(
-                ride_booking_detail_url)
+                ride_detail_url)
             return HttpResponseRedirect(success_url)
 
-        fail_url = '{0}?execution=fail'.format(ride_booking_detail_url)
+        fail_url = '{0}?execution=fail'.format(ride_detail_url)
         return HttpResponseRedirect(fail_url)
 
     @action(methods=['POST'], detail=True)

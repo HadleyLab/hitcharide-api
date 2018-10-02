@@ -1,4 +1,3 @@
-from dbmail import send_db_mail
 from django.conf import settings
 from django.urls import reverse
 from paypalrestsdk import Payment, Payout, Sale
@@ -13,7 +12,7 @@ def inform_all_subscribers(ride):
 
 def ride_booking_create_payment(ride_booking, request):
     ride_total = ride_booking.ride.price_with_fee * ride_booking.seats_count
-    ride_booking_detail_url = settings.RIDE_BOOKING_DETAIL_URL.format(
+    ride_detail_url = settings.RIDE_DETAIL_URL.format(
         ride_pk=ride_booking.ride.pk)
     payment = Payment({
         "intent": "sale",
@@ -24,7 +23,7 @@ def ride_booking_create_payment(ride_booking, request):
                 request.build_absolute_uri(
                     reverse('ridebooking-paypal-payment-execute',
                             kwargs={'pk': ride_booking.pk})),
-            "cancel_url": ride_booking_detail_url},
+            "cancel_url": ride_detail_url},
         "transactions": [{
             "item_list": {
                 "items": [{

@@ -132,13 +132,24 @@ CELERY_BEAT_SCHEDULE = {
 DB_MAILER_CELERY_QUEUE = None
 
 WSGI_APPLICATION = 'config.wsgi.application'
+
+
+FRONTEND_URL = os.environ.get(
+    'FRONTEND_URL',
+    'http://localhost:3000'
+)
+BACKEND_URL = os.environ.get(
+    'BACKEND_URL',
+    'http://localhost:8000'
+)
+
+RIDE_DETAIL_URL = '{0}/ride/{ride_pk}/'.format(FRONTEND_URL)
+
+
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
-        'DJOSER_PASSWORD_RESET_CONFIRM_URL',
-        'account/new-password/{uid}/{token}'),
-    'ACTIVATION_URL': os.environ.get(
-        'DJOSER_ACTIVATION_URL',
-        'account/activate/{uid}/{token}'),
+    'PASSWORD_RESET_CONFIRM_URL':
+        '{0}/account/new-password/{uid}/{token}'.format(FRONTEND_URL),
+    'ACTIVATION_URL': '{0}/account/activate/{uid}/{token}'.format(FRONTEND_URL),
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
@@ -228,18 +239,6 @@ CONSTANCE_CONFIG = {
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
-
-RIDE_BOOKING_DETAIL_URL = os.environ.get(
-    'RIDE_BOOKING_DETAIL_URL',
-    'http://localhost:3000/#/ride/{ride_pk}/')
-FRONTEND_URL = os.environ.get(
-    'FRONTEND_URL',
-    'http://localhost:3000/'
-)
-BACKEND_URL = os.environ.get(
-    'BACKEND_URL',
-    'http://localhost:8000/'
-)
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases

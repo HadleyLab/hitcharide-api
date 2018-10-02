@@ -1,4 +1,3 @@
-from dbmail import send_db_mail
 from djoser.email import ActivationEmail, ConfirmationEmail, PasswordResetEmail
 from templated_mail.mail import BaseEmailMessage
 
