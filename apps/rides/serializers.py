@@ -79,7 +79,7 @@ class RideDetailSerializer(WritableNestedModelSerializer):
         fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to',
                   'date_time', 'price', 'price_with_fee', 'number_of_seats',
                   'available_number_of_seats', 'description', 'status',
-                  'has_my_reviews')
+                  'has_my_reviews', 'rating')
 
 
 class RideWritableSerializer(WritableNestedModelSerializer):
