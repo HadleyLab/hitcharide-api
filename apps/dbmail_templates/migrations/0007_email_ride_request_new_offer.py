@@ -9,7 +9,7 @@ def load_mail_template(apps, schema_editor):
         name="New ride for ride request",
         subject="You have a new ride suggest",
         message="""
-        <p>You create a ride request {{ ride_request }}</p>
+        <p>You created a ride request {{ ride_request }}</p>
         <p>There is a ride for you:</p>
         <a href="{{ ride_front_url.format(ride.pk) }}">{{ ride }}</a>
         """,
