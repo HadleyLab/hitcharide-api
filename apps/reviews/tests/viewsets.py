@@ -127,14 +127,14 @@ class ReviewViewSetTest(APITestCase):
         self.assertUnauthorized(resp)
 
     def _create_reviews(self):
-        ReviewFactory.create(
+        self.review1 = ReviewFactory.create(
             author=self.user,
             ride=self.ride,
             subject=self.passenger1,
             author_type=ReviewType.DRIVER,
             rating=3,
             comment='Always crying and smells like ....')
-        ReviewFactory.create(
+        self.review2 = ReviewFactory.create(
             author=self.user,
             ride=self.ride,
             subject=self.passenger2,
@@ -142,14 +142,14 @@ class ReviewViewSetTest(APITestCase):
             rating=5,
             comment='Nice passenger!')
 
-        ReviewFactory.create(
+        self.review3 = ReviewFactory.create(
             author=self.passenger1,
             ride=self.ride,
             subject=self.user,
             author_type=ReviewType.PASSENGER,
             rating=2,
             comment='Always screaming on me!')
-        ReviewFactory.create(
+        self.review4 = ReviewFactory.create(
             author=self.passenger2,
             ride=self.ride,
             subject=self.user,
@@ -170,12 +170,26 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.get('/reviews/?ride={0}'.format(self.ride.pk))
         self.assertSuccessResponse(resp)
         self.assertEqual(len(resp.data), 4)
-
+        self.assertSetEqual(
+            set([item['pk'] for item in resp.data]),
+            {self.review1.pk, self.review2.pk, self.review3.pk, self.review4.pk}
+        )
         self.assertEqual(self.user.rating, 3.5)
 
     def test_list_author(self):
         self._create_reviews()
         self.authenticate()
+        resp = self.client.get('/reviews/?author={0}'.format(self.user.pk))
+        self.assertEqual(len(resp.data), 2)
+        self.assertSetEqual(
+            set([item['pk'] for item in resp.data]),
+            {self.review1.pk, self.review2.pk})
 
     def test_list_subject(self):
-        pass
+        self._create_reviews()
+        self.authenticate()
+        resp = self.client.get('/reviews/?subject={0}'.format(self.user.pk))
+        self.assertEqual(len(resp.data), 2)
+        self.assertSetEqual(
+            set([item['pk'] for item in resp.data]),
+            {self.review3.pk, self.review4.pk})
