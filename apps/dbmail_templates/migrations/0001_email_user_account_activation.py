@@ -10,7 +10,7 @@ def load_mail_template(apps, schema_editor):
         message="""
         <p>You're receiving this email because you need to finish activation process on {{ site_name }}.</p>
         <p>Please go to the following page to activate account:</p>
-        <p><a href="{{ protocol }}://{{ domain }}/{{ url }}">{{ protocol }}://{{ domain }}/{{ url }}</a></p>
+        <p><a href="{{ frontend_url }}/{{ url }}">{{ frontend_url }}/{{ url }}</a></p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
         slug="account_activate",

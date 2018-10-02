@@ -102,7 +102,8 @@ class RideViewSet(ListFactoryMixin,
                 send_mail('new_ride_for_ride_request',
                           [request.author.email],
                           {'ride': instance,
-                           'ride_request': request})
+                           'ride_request': request,
+                           'ride_front_url': settings.RIDE_BOOKING_DETAIL_URL})
 
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
