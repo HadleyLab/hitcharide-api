@@ -143,7 +143,7 @@ BACKEND_URL = os.environ.get(
     'http://localhost:8000'
 )
 
-RIDE_DETAIL_URL = FRONTEND_URL + '/ride/{ride_pk}/'
+RIDE_DETAIL_URL = FRONTEND_URL + '/app/ride/{ride_pk}/'
 
 
 DJOSER = {
