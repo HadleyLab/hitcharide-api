@@ -12,7 +12,6 @@ class CarFactory(DjangoModelFactory):
     color = fuzzy.FuzzyText()
     license_plate = fuzzy.FuzzyText()
     number_of_seats = fuzzy.FuzzyInteger(low=2, high=7)
-    photo = ImageField(width=1024, height=768)
 
     class Meta:
         model = Car

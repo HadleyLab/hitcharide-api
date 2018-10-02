@@ -16,7 +16,7 @@ class CarWritableSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Car
         fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'photo', 'images')
+                  'number_of_seats', 'images')
 
 
 class CarDetailSerializer(serializers.ModelSerializer):
@@ -26,7 +26,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'photo', 'images')
+                  'number_of_seats', 'images')
 
 
 class UserWithCarsSerializer(UserSerializer):
