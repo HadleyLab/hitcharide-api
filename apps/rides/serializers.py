@@ -37,7 +37,8 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
-    bookings = RidePassengerSerializer(many=True)
+    bookings = RidePassengerSerializer(source='actual_bookings',
+                                       many=True)
 
     class Meta:
         model = Ride

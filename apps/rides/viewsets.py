@@ -15,7 +15,8 @@ from apps.rides.utils import ride_booking_refund, \
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
     BookingsListFilter
 from .mixins import ListFactoryMixin
-from .models import Ride, RideBooking, RideRequest, RideComplaint
+from .models import Ride, RideBooking, RideRequest, RideComplaint, \
+    RideBookingStatus
 from apps.cars.models import Car
 from .serializers import RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
@@ -137,7 +138,9 @@ class RideBookingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         return super(RideBookingViewSet, self).get_queryset().filter(
-            client=self.request.user)
+            client=self.request.user,
+            status__in=RideBookingStatus.ACTUAL
+        )
 
     @transaction.atomic
     def perform_create(self, serializer):

@@ -26,4 +26,4 @@ def check_expired_time_of_ride_bookings():
     RideBooking.objects.filter(
         status=RideBookingStatus.CREATED,
         created__lte=expired_datetime
-    ).update(status=RideBookingStatus.EXPIRED)
+    ).update(status=RideBookingStatus.CANCELED)

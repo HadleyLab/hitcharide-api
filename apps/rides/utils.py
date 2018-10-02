@@ -103,7 +103,7 @@ def ride_booking_refund(ride_booking):
     if not refund.success():
         raise Exception("Cannot create a refund:\n{0}".format(refund.error))
 
-    ride_booking.status = RideBookingStatus.REFUNDED
+    ride_booking.status = RideBookingStatus.CANCELED
     send_mail('client_ride_booking_canceled',
               [ride_booking.client.email],
               {'ride_booking': ride_booking})

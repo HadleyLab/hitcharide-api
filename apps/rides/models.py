@@ -63,6 +63,12 @@ class Ride(CreatedUpdatedMixin, models.Model):
         coef = Decimal("0.01")
         return ride_price + ride_price * (system_fee * coef)
 
+    @property
+    def actual_bookings(self):
+        return self.bookings.filter(
+            status__in=RideBookingStatus.ACTUAL
+        )
+
     def get_booked_seats_count(self):
         return sum(self.bookings.filter(status=RideBookingStatus.PAYED).
                    values_list('seats_count', flat=True))
@@ -105,15 +111,15 @@ class RideStop(models.Model):
 class RideBookingStatus(object):
     CREATED = 'created'
     PAYED = 'payed'
-    CANCELED = 'canceled' # When user cancels the ride booking
-    EXPIRED = 'expired'
-    REFUNDED = 'refunded'
+    CANCELED = 'canceled'
 
     CHOICES = tuple(
         (item, item.title()) for item in [
-            CREATED, PAYED, CANCELED, EXPIRED, REFUNDED
+            CREATED, PAYED, CANCELED
         ]
     )
+
+    ACTUAL = [CREATED, PAYED]
 
 
 class RideBooking(CreatedUpdatedMixin):
