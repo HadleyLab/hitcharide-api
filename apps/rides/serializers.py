@@ -5,7 +5,9 @@ from rest_framework.exceptions import ValidationError
 from apps.accounts.serializers import UserSerializer
 from apps.cars.serializers import CarDetailSerializer
 from apps.places.serializers import CityWithStateSerializer
-from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint
+from apps.reviews.models import Review, ReviewType
+from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint, \
+    RideBookingStatus
 
 
 class RideStopDetailSerializer(serializers.ModelSerializer):
@@ -39,12 +41,40 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     city_to = CityWithStateSerializer()
     bookings = RidePassengerSerializer(source='actual_bookings',
                                        many=True)
+    has_my_reviews = serializers.SerializerMethodField()
+
+    def get_has_my_reviews(self, ride):
+        user = self.context['request'].user
+        ride_passengers_pks = ride.bookings.filter(
+            status=RideBookingStatus.SUCCEED
+        ).values_list('client_id', flat=True)
+        ride_driver = ride.car.owner
+        if ride_driver == user:
+            # I am driver
+            return Review.objects.filter(
+                author=user,
+                author_type=ReviewType.DRIVER,
+                ride=ride,
+                subject_id__in=ride_passengers_pks
+            ).count() == len(ride_passengers_pks)
+        else:
+            # I am passenger
+            if user.pk in ride_passengers_pks:
+                return Review.objects.filter(
+                    author=user,
+                    author_type=ReviewType.PASSENGER,
+                    ride=ride,
+                    subject=ride_driver
+                ).exists()
+            else:
+                return False
 
     class Meta:
         model = Ride
         fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to',
                   'date_time', 'price', 'price_with_fee', 'number_of_seats',
-                  'available_number_of_seats', 'description', 'status')
+                  'available_number_of_seats', 'description', 'status',
+                  'has_my_reviews')
 
 
 class RideWritableSerializer(WritableNestedModelSerializer):
