@@ -1,10 +1,12 @@
-from factory import fuzzy, post_generation
+from factory import fuzzy, post_generation, SubFactory
 from factory.django import DjangoModelFactory, ImageField
 
+from apps.accounts.factories import UserFactory
 from apps.cars.models import Car
 
 
 class CarFactory(DjangoModelFactory):
+    owner = SubFactory(UserFactory)
     brand = fuzzy.FuzzyText()
     model = fuzzy.FuzzyText()
     color = fuzzy.FuzzyText()

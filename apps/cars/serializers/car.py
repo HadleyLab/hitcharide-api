@@ -1,3 +1,4 @@
+from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 
 from apps.accounts.models import User
@@ -7,7 +8,7 @@ from apps.cars.serializers.car_image import CarImageWritableSerializer, \
     CarImageDetailSerializer
 
 
-class CarWritableSerializer(serializers.ModelSerializer):
+class CarWritableSerializer(WritableNestedModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
     images = CarImageWritableSerializer(many=True)

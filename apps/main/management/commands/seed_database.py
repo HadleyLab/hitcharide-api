@@ -7,9 +7,9 @@ from apps.rides.factories import CarFactory, RideFactory, RideBookingFactory
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        user1 = UserFactory.create(username='user1@example.com')
-        user2 = UserFactory.create(username='user2@example.com')
-        user3 = UserFactory.create(username='user3@example.com')
+        user1 = UserFactory.create(email='user1@example.com')
+        user2 = UserFactory.create(email='user2@example.com')
+        user3 = UserFactory.create(email='user3@example.com')
 
         car = CarFactory.create(owner=user1)
 
