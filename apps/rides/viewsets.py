@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Case, When, BooleanField
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, mixins
@@ -31,7 +32,7 @@ class RideViewSet(ListFactoryMixin,
                   mixins.UpdateModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin):
-    queryset = Ride.objects.all().order_by('date_time')
+    queryset = Ride.objects.all()
     serializer_class = RideDetailSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = LimitOffsetPagination
@@ -43,7 +44,17 @@ class RideViewSet(ListFactoryMixin,
         return self.serializer_class
 
     def get_queryset(self):
-        queryset = super(RideViewSet, self).get_queryset()
+        now = timezone.now()
+        queryset = super(RideViewSet, self).get_queryset().annotate(
+            is_future=Case(
+                When(
+                    date_time__gt=now,
+                    then=True
+                ),
+                default=False,
+                output_field=BooleanField()
+            )
+        ).order_by('-is_future', 'date_time')
 
         if self.action in ['my', 'update', 'destroy']:
             queryset = queryset.filter(car__owner=self.request.user)
