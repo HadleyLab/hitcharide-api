@@ -63,7 +63,6 @@ class RideWritableSerializer(WritableNestedModelSerializer):
                   'price', 'number_of_seats', 'description')
 
 
-
 class RideBookingDetailSerializer(serializers.ModelSerializer):
     ride = RideDetailSerializer()
     status = serializers.CharField(read_only=True)
@@ -80,7 +79,8 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'ride', 'seats_count', 'paypal_approval_link')
+        fields = ('pk', 'client', 'ride', 'seats_count',
+                  'paypal_approval_link')
         extra_kwargs = {'paypal_approval_link': {'read_only': True}}
 
 

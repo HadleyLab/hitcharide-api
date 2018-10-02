@@ -93,7 +93,7 @@ class RideStop(models.Model):
 class RideBookingStatus(object):
     CREATED = 'created'
     PAYED = 'payed'
-    CANCELED = 'canceled' # When user cancels the ride booking
+    CANCELED = 'canceled'  # When user cancels the ride booking
     EXPIRED = 'expired'
     REFUNDED = 'refunded'
 
