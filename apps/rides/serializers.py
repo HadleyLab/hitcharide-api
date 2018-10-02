@@ -98,11 +98,22 @@ class RideWritableSerializer(WritableNestedModelSerializer):
 class RideBookingDetailSerializer(serializers.ModelSerializer):
     ride = RideDetailSerializer()
     status = serializers.CharField(read_only=True)
+    has_my_reviews = serializers.SerializerMethodField()
+
+    def get_has_my_reviews(self, booking):
+        if booking.status == RideBookingStatus.SUCCEED:
+            return Review.objects.filter(
+                author=self.context['request'].user,
+                author_type=ReviewType.PASSENGER,
+                ride=booking.ride,
+                subject=booking.ride.car.owner).exists()
+
+        return False
 
     class Meta:
         model = RideBooking
         fields = ('pk', 'client', 'ride', 'seats_count', 'status',
-                  'paypal_approval_link')
+                  'paypal_approval_link', 'has_my_reviews')
 
 
 class RideBookingWritableSerializer(serializers.ModelSerializer):
