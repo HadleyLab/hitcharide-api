@@ -55,9 +55,14 @@ class User(AbstractUser):
         else:
             return None
 
-    @property
-    def rating(self):
-        return self.reviews.aggregate(rating=Avg('rating'))['rating'] or 0.0
+    def get_rating(self):
+        result = self.reviews.all().aggregate(
+            rating=models.Avg('rating'),
+            count=models.Count('pk'))
+        return {
+            'value': result['rating'] or 0.0,
+            'count': result['count']
+        }
 
 
 @receiver(pre_save, sender=User)

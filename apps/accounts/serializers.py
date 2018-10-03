@@ -5,12 +5,17 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
 
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        return obj.get_rating()
+
     class Meta:
         model = User
         fields = (
             'pk', 'email', 'phone', 'first_name', 'last_name',
             'age', 'photo', 'short_desc', 'is_phone_validated',
-            'paypal_account',
+            'paypal_account', 'rating',
         )
 
 

@@ -109,7 +109,7 @@ class ReviewViewSetTest(APITestCase):
 
     def test_create_by_owner_success(self):
         self.authenticate()
-        self.assertEqual(self.passenger1.rating, 0.0)
+        self.assertEqual(self.passenger1.get_rating()['value'], 0.0)
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger1.pk,
@@ -120,7 +120,7 @@ class ReviewViewSetTest(APITestCase):
 
         review = Review.objects.get(pk=resp.data['pk'])
         self.assertEqual(review.author.pk, self.user.pk)
-        self.assertEqual(self.passenger1.rating, 5.0)
+        self.assertEqual(self.passenger1.get_rating()['value'], 5.0)
 
     def test_list_unauthorized(self):
         resp = self.client.get('/reviews/')
@@ -174,7 +174,7 @@ class ReviewViewSetTest(APITestCase):
             set([item['pk'] for item in resp.data]),
             {self.review1.pk, self.review2.pk, self.review3.pk, self.review4.pk}
         )
-        self.assertEqual(self.user.rating, 3.5)
+        self.assertEqual(self.user.get_rating()['value'], 3.5)
 
     def test_list_author(self):
         self._create_reviews()
