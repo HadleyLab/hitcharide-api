@@ -45,3 +45,6 @@ celery==4.2.1
 git+git://github.com/beda-software/djangorestframework-camel-case@a6a448360941130678b62aebed5d5d09ba1214bb#egg=djangorestframework-camel-case
 paypalrestsdk==1.13.1
 
+
+whitenoise==3.3.0
+gunicorn==19.9.0
