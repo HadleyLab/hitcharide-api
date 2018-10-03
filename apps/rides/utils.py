@@ -145,7 +145,6 @@ def ride_booking_execute_payment(payer_id, ride_booking):
 def send_ride_need_review(ride):
     driver = ride.car.owner
     send_mail('ride_review_inform_driver', [driver.email], {'ride': ride})
-
     send_mail('ride_review_inform_passenger',
               ride.get_clients_emails(RideBookingStatus.PAYED),
-              {'ride': ride})
+              {'ride': ride, 'driver': driver})
