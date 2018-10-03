@@ -28,7 +28,7 @@ SECRET_KEY = '!$z)ns!tibbq!((7o$dk*0+2tmv@44g2b+7h19wu0mz(r(-23d'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', 'api.hitcharide.us']
 
 
 # Application definition
