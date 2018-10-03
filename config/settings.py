@@ -161,6 +161,27 @@ DJOSER = {
             'apps.dbmail_templates.email.PasswordResetDBMailEmail',
     },
 }
+
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_DEBUG = os.environ.get('EMAIL_DEBUG', 'True') == 'True'
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'no-reply@hitcharide.us')
+
+POSTMARK_API_KEY = os.environ.get('POSTMARK_API_KEY')
+POSTMARK_SENDER = os.environ.get('POSTMARK_SENDER')
+
+if POSTMARK_API_KEY:
+    EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'
+    DEFAULT_FROM_EMAIL = POSTMARK_SENDER
+elif EMAIL_DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REST_FRAMEWORK = {
