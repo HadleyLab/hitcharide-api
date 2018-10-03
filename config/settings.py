@@ -220,6 +220,7 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 AUTHENTICATION_BACKENDS = (
@@ -240,8 +241,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-LOGIN_REDIRECT_URL = 'http://localhost:3000/account/social-auth-success/'
-LOGIN_ERROR_URL = 'http://localhost:3000/account/social-auth-error/'
+LOGIN_REDIRECT_URL = FRONTEND_URL + '/account/social-auth-success/'
+LOGIN_ERROR_URL = FRONTEND_URL + '/account/social-auth-error/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
