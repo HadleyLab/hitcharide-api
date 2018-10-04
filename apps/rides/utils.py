@@ -1,9 +1,10 @@
 from django.conf import settings
+from django.db import transaction
 from django.urls import reverse
 from paypalrestsdk import Payment, Payout, Sale
 
 from apps.main.utils import send_mail
-from apps.rides.models import RideBookingStatus
+from apps.rides.models import RideBookingStatus, Ride, RideBooking, RideStatus
 
 
 def inform_all_subscribers(ride):
@@ -103,13 +104,24 @@ def ride_booking_refund(ride_booking):
     if not refund.success():
         raise Exception("Cannot create a refund:\n{0}".format(refund.error))
 
-    ride_booking.status = RideBookingStatus.CANCELED
-    send_mail('client_ride_booking_refunded',
-              [ride_booking.client.email],
-              {'ride_booking': ride_booking})
-    send_mail('owner_ride_booking_refunded',
-              [ride_booking.ride.owner.email],
-              {'ride_booking': ride_booking})
+
+def cancel_ride_by_driver(ride):
+    ride_bookings = ride.bookings.filter(status__in=RideBookingStatus.ACTUAL)
+    for booking in ride_bookings:
+        if booking.status == RideBookingStatus.PAYED:
+            ride_booking_refund(booking)
+            send_mail('ride_has_been_deleted',
+                      [booking.client.email],
+                      {'ride': ride})
+
+        if booking.status == RideBookingStatus.CREATED:
+            send_mail('ride_has_been_deleted',
+                      [booking.client.email],
+                      {'ride': ride})
+        booking.status = RideBookingStatus.REVOKED
+        booking.save()
+    ride.status = RideStatus.CANCELED
+    ride.save()
 
 
 def ride_booking_execute_payment(payer_id, ride_booking):
