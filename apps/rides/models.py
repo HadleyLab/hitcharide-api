@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from constance import config
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.accounts.models import User
@@ -62,12 +63,29 @@ class Ride(CreatedUpdatedMixin, models.Model):
         coef = Decimal("0.01")
         return ride_price + ride_price * (system_fee * coef)
 
+    @property
+    def actual_bookings(self):
+        return self.bookings.filter(
+            status__in=RideBookingStatus.ACTUAL
+        )
+
     def get_booked_seats_count(self):
         return sum(self.bookings.filter(status=RideBookingStatus.PAYED).
                    values_list('seats_count', flat=True))
 
     def get_clients_emails(self):
         return [item.client.email for item in self.bookings.all()]
+
+    def get_ride_requests(self):
+        stops_cities = self.stops.values_list('city', flat=True)
+
+        return RideRequest.objects.filter(
+            Q(city_to__in=stops_cities) | Q(city_to=self.city_to),
+            date_time__gte=timezone.now(),
+            city_from=self.city_from,
+            date_time__range=(self.date_time.date(),
+                              self.date_time.date() + timezone.timedelta(
+                                  days=3)))
 
     def __str__(self):
         return '{0} --> {1} on {2}'.format(
@@ -93,15 +111,16 @@ class RideStop(models.Model):
 class RideBookingStatus(object):
     CREATED = 'created'
     PAYED = 'payed'
-    CANCELED = 'canceled'  # When user cancels the ride booking
-    EXPIRED = 'expired'
-    REFUNDED = 'refunded'
+    CANCELED = 'canceled'  # Passenger cancels
+    REVOKED = 'revoked'  # Driver cancels
 
     CHOICES = tuple(
         (item, item.title()) for item in [
-            CREATED, PAYED, CANCELED, EXPIRED, REFUNDED
+            CREATED, PAYED, CANCELED, REVOKED
         ]
     )
+
+    ACTUAL = [CREATED, PAYED]
 
 
 class RideBooking(CreatedUpdatedMixin):
@@ -152,6 +171,12 @@ class RideRequest(CreatedUpdatedMixin, models.Model):
     @property
     def is_expired(self):
         return self.date_time < timezone.now()
+
+    def __str__(self):
+        return '{0} to {1} {2}'.format(
+            self.city_from,
+            self.city_to,
+            self.date_time)
 
 
 class RideComplaintStatus(object):

@@ -12,6 +12,6 @@ def send_sms(phone, message):
         client = Client(settings.TWILIO_SID, settings.TWILIO_TOKEN)
         client.messages.create(body=message,
                                from_=settings.TWILIO_PHONE,
-                               to=phone)
+                               to='+{0}'.format(phone))
     else:
         print(message)

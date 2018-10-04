@@ -7,8 +7,8 @@ from apps.main.test_utils import assert_mock_called_with
 
 
 class RegistrationTestCase(APITestCase):
-    @mock.patch('apps.dbmail_templates.email.send_db_mail')
-    def test_registration(self, mock_send_db_mail):
+    @mock.patch('apps.dbmail_templates.email.send_mail')
+    def test_registration(self, mock_send_mail):
         data = {
             'email': 'test@test.test',
             'phone': '+7 933 000 00 00',
@@ -20,7 +20,7 @@ class RegistrationTestCase(APITestCase):
         resp = self.client.post('/accounts/register/', data, format='json')
         self.assertSuccessResponse(resp)
         assert_mock_called_with(
-            mock_send_db_mail,
+            mock_send_mail,
             'account_activate', ['test@test.test'],
             lambda value: self.assertEqual(
                 value['user'].email,

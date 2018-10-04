@@ -28,7 +28,8 @@ class RidePassengerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideBooking
-        fields = ('pk', 'client', 'seats_count')
+        fields = ('pk', 'client', 'seats_count', 'status', 'paypal_payment_id',
+                  'paypal_approval_link', 'created',)
 
 
 class RideDetailSerializer(WritableNestedModelSerializer):
@@ -36,7 +37,8 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()
-    bookings = RidePassengerSerializer(many=True)
+    bookings = RidePassengerSerializer(source='actual_bookings',
+                                       many=True)
 
     class Meta:
         model = Ride

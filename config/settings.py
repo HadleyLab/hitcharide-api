@@ -26,9 +26,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '!$z)ns!tibbq!((7o$dk*0+2tmv@44g2b+7h19wu0mz(r(-23d'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', 'api.hitcharide.us']
 
 
 # Application definition
@@ -132,13 +132,24 @@ CELERY_BEAT_SCHEDULE = {
 DB_MAILER_CELERY_QUEUE = None
 
 WSGI_APPLICATION = 'config.wsgi.application'
+
+
+FRONTEND_URL = os.environ.get(
+    'FRONTEND_URL',
+    'http://localhost:3000'
+)
+BACKEND_URL = os.environ.get(
+    'BACKEND_URL',
+    'http://localhost:8000'
+)
+
+RIDE_DETAIL_URL = FRONTEND_URL + '/app/ride/{ride_pk}/'
+
+
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': os.environ.get(
-        'DJOSER_PASSWORD_RESET_CONFIRM_URL',
-        'account/new-password/{uid}/{token}'),
-    'ACTIVATION_URL': os.environ.get(
-        'DJOSER_ACTIVATION_URL',
-        'account/activate/{uid}/{token}'),
+    'PASSWORD_RESET_CONFIRM_URL':
+        FRONTEND_URL + '/account/new-password/{uid}/{token}',
+    'ACTIVATION_URL': FRONTEND_URL + '/account/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
@@ -150,7 +161,23 @@ DJOSER = {
             'apps.dbmail_templates.email.PasswordResetDBMailEmail',
     },
 }
+
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+DEFAULT_FROM_EMAIL = os.environ.get(
+    'DEFAULT_FROM_EMAIL', 'no-reply@hitcharide.us')
+
+POSTMARK_API_KEY = os.environ.get('POSTMARK_API_KEY')
+POSTMARK_SENDER = os.environ.get('POSTMARK_SENDER')
+
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if POSTMARK_API_KEY:
+    EMAIL_BACKEND = 'postmark.django_backend.EmailBackend'
+    DEFAULT_FROM_EMAIL = POSTMARK_SENDER
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
@@ -188,6 +215,7 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 SOCIAL_AUTH_POSTGRES_JSONFIELD = True
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 AUTHENTICATION_BACKENDS = (
@@ -208,8 +236,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-LOGIN_REDIRECT_URL = 'http://localhost:3000/#/account/social-auth-success/'
-LOGIN_ERROR_URL = 'http://localhost:3000/#/account/social-auth-error/'
+LOGIN_REDIRECT_URL = FRONTEND_URL + '/account/social-auth-success/'
+LOGIN_ERROR_URL = FRONTEND_URL + '/account/social-auth-error/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
@@ -227,11 +255,6 @@ CONSTANCE_CONFIG = {
 
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
-
-
-RIDE_BOOKING_DETAIL_URL = os.environ.get(
-    'RIDE_BOOKING_DETAIL_URL',
-    'http://localhost:3000/#/ride/{ride_pk}/')
 
 
 # Database

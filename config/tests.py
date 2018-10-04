@@ -30,7 +30,7 @@ class APITestCase(BaseAPITestCase):
         if resp.status_code not in range(200, 300):
             raise self.failureException(
                 'Response status is not success. '
-                'Response data is:\n{0}'.format(resp.data))
+                'Response data is:\n{0}'.format(getattr(resp, 'data', 'None')))
 
     def assertNotAllowed(self, resp):
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

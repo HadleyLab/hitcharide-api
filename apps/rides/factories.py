@@ -6,7 +6,7 @@ from apps.cars.factories import CarFactory
 from apps.places.factories import CityFactory
 from apps.accounts.factories import UserFactory
 from .models import Ride, RideBooking, RideStop, RideComplaint, \
-    RideComplaintStatus
+    RideComplaintStatus, RideRequest
 
 
 class RideFactory(DjangoModelFactory):
@@ -60,3 +60,13 @@ class RideComplaintFactory(DjangoModelFactory):
 
     class Meta:
         model = RideComplaint
+
+
+class RideRequestFactory(DjangoModelFactory):
+    author = SubFactory(UserFactory)
+    city_from = SubFactory(CityFactory)
+    city_to = SubFactory(CityFactory)
+    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
+
+    class Meta:
+        model = RideRequest
