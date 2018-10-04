@@ -13,4 +13,4 @@ class CarImageWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CarImage
-        fields = ('pk', 'car', 'image')
+        fields = ('pk', 'image')

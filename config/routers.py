@@ -2,6 +2,8 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.routers import DefaultRouter, APIRootView
 
+from apps.cars.viewsets import CarViewSet
+
 
 class RootView(APIRootView):
     def get(self, request, *args, **kwargs):
@@ -23,6 +25,7 @@ class RootView(APIRootView):
             'account_password_confirm', request=request)
         data['accounts/validate_phone'] = reverse('account_validate_phone',
                                                   request=request)
+        data['rides/car'] = reverse('cars-list', request=request)
 
         return Response(data)
 
