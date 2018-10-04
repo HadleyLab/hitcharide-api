@@ -12,6 +12,7 @@ class CarFactory(DjangoModelFactory):
     color = fuzzy.FuzzyText()
     license_plate = fuzzy.FuzzyText()
     number_of_seats = fuzzy.FuzzyInteger(low=2, high=7)
+    production_year = fuzzy.FuzzyInteger(1970, 2018)
 
     class Meta:
         model = Car

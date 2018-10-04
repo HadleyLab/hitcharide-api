@@ -17,6 +17,8 @@ class Car(models.Model):
     license_plate = models.CharField(
         max_length=50,
         blank=True, null=True)
+    production_year = models.IntegerField(
+        blank=True, null=True)
 
     def __str__(self):
         return '{0} {1} - {2}'.format(
