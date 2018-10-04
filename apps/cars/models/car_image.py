@@ -10,5 +10,5 @@ class CarImage(CreatedUpdatedMixin):
         related_name='images'
     )
     image = models.ImageField(
-        upload_to='car_photos',
+        upload_to='car_images',
     )

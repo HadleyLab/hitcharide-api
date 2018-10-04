@@ -18,7 +18,7 @@ class CarFactory(DjangoModelFactory):
         model = Car
 
     @post_generation
-    def add_images(self, create, extracted, **kwargs):
+    def images(self, create, extracted, **kwargs):
         from .car_image import CarImageFactory
 
         if not create:
