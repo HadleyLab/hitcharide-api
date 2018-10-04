@@ -85,16 +85,16 @@ class RideViewSet(ListFactoryMixin,
         ).distinct()
         return self.list_factory(queryset)(request, *args, **kwargs)
 
-    @action(methods=['GET'], detail=True)
+    @action(methods=['POST'], detail=True, permission_classes=())
     def cancel_ride_by_driver(self, request, *args, **kwargs):
         ride = self.get_object()
         if request.user == ride.car.owner:
-            if cancel_ride_by_driver(ride):
-                return HttpResponse(status=200)
+            cancel_ride_by_driver(ride)
+            return HttpResponse(status=200)
 
-        return HttpResponse(status=500)
+        return HttpResponse(status=403)
 
-        # Wrap with transaction.atomic to rollback on nested serializer error
+    # Wrap with transaction.atomic to rollback on nested serializer error
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         return super(RideViewSet, self).create(request, *args, **kwargs)

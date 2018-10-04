@@ -111,11 +111,12 @@ class RideStop(models.Model):
 class RideBookingStatus(object):
     CREATED = 'created'
     PAYED = 'payed'
-    CANCELED = 'canceled'
+    CANCELED = 'canceled'  # Passenger cancels
+    REVOKED = 'revoked'  # Driver cancels
 
     CHOICES = tuple(
         (item, item.title()) for item in [
-            CREATED, PAYED, CANCELED
+            CREATED, PAYED, CANCELED, REVOKED
         ]
     )
 

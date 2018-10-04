@@ -11,7 +11,8 @@ from apps.rides.factories import RideFactory, \
     RideBookingFactory, RideStopFactory, RideComplaintFactory, \
     RideRequestFactory
 from apps.cars.factories import CarFactory
-from apps.rides.models import Ride, RideComplaintStatus
+from apps.rides.models import Ride, RideComplaintStatus, RideStatus, \
+    RideBookingStatus
 
 
 class RideViewSetTest(APITestCase):
@@ -204,6 +205,41 @@ class RideViewSetTest(APITestCase):
         self.assertEqual(complaint.user, self.user)
         self.assertEqual(complaint.description, descr_text)
         self.assertEqual(complaint.status, RideComplaintStatus.NEW)
+
+    @mock.patch('apps.rides.utils.ride_booking_refund', autospec=True)
+    def test_cancel_ride_by_driver(self, mock_ride_booking_refund):
+        self.authenticate()
+        ride = RideFactory.create(
+            number_of_seats=5,
+            car=self.car)
+        booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user)
+        payed_booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.PAYED)
+        canceled_booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.CANCELED)
+
+        self.assertEqual(ride.status, RideStatus.CREATED)
+        resp = self.client.post(
+            '/rides/ride/{0}/cancel_ride_by_driver/'.format(ride.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(mock_ride_booking_refund.call_count, 1)
+        mock_ride_booking_refund.assert_called_with(payed_booking)
+
+        booking.refresh_from_db()
+        payed_booking.refresh_from_db()
+        canceled_booking.refresh_from_db()
+        ride.refresh_from_db()
+
+        self.assertEqual(booking.status, RideBookingStatus.REVOKED)
+        self.assertEqual(payed_booking.status, RideBookingStatus.REVOKED)
+        self.assertEqual(canceled_booking.status, RideBookingStatus.CANCELED)
+        self.assertEqual(ride.status, RideStatus.CANCELED)
 
 
 class RideBookingViewSetTest(APITestCase):
