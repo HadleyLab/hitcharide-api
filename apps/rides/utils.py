@@ -104,7 +104,7 @@ def ride_booking_refund(ride_booking):
     if not refund.success():
         raise Exception("Cannot create a refund:\n{0}".format(refund.error))
 
-@transaction.atomic
+
 def cancel_ride_by_driver(ride):
     ride_bookings = ride.bookings.filter(status__in=RideBookingStatus.ACTUAL)
     for booking in ride_bookings:
@@ -122,6 +122,7 @@ def cancel_ride_by_driver(ride):
         booking.save()
     ride.status = RideStatus.CANCELED
     ride.save()
+
 
 def ride_booking_execute_payment(payer_id, ride_booking):
     payment = Payment.find(ride_booking.paypal_payment_id)

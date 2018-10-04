@@ -188,7 +188,6 @@ class RideViewSetTest(APITestCase):
 
     def test_ride_complaints_create(self):
         ride = RideFactory.create(
-            number_of_seats=5,
             car=self.car)
         RideBookingFactory.create(
             ride=ride,
@@ -209,9 +208,7 @@ class RideViewSetTest(APITestCase):
     @mock.patch('apps.rides.utils.ride_booking_refund', autospec=True)
     def test_cancel_ride_by_driver(self, mock_ride_booking_refund):
         self.authenticate()
-        ride = RideFactory.create(
-            number_of_seats=5,
-            car=self.car)
+        ride = RideFactory.create(car=self.car)
         booking = RideBookingFactory.create(
             ride=ride,
             client=self.user)
@@ -226,7 +223,7 @@ class RideViewSetTest(APITestCase):
 
         self.assertEqual(ride.status, RideStatus.CREATED)
         resp = self.client.post(
-            '/rides/ride/{0}/cancel_ride_by_driver/'.format(ride.pk))
+            '/rides/ride/{0}/cancel/'.format(ride.pk))
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 1)
         mock_ride_booking_refund.assert_called_with(payed_booking)
@@ -248,11 +245,7 @@ class RideBookingViewSetTest(APITestCase):
         self.city1 = CityFactory.create()
         self.city2 = CityFactory.create()
 
-        self.car = CarFactory.create(
-            owner=self.user,
-            brand='some',
-            model='car',
-            number_of_seats=5)
+        self.car = CarFactory.create(owner=self.user)
 
         self.ride = RideFactory.create(car=self.car)
         self.booking = RideBookingFactory.create(
@@ -280,3 +273,53 @@ class RideBookingViewSetTest(APITestCase):
         self.assertSuccessResponse(resp)
         self.assertListEqual([another_booking.pk],
                              [book['pk'] for book in resp.data])
+
+    @mock.patch('apps.rides.viewsets.ride_booking_refund', autospec=True)
+    def test_cancel_payed_booking_by_passenger(self, mock_ride_booking_refund):
+        self.authenticate()
+        ride = RideFactory.create(
+            car=self.car)
+        payed_booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.PAYED)
+
+        resp = self.client.post(
+            '/rides/booking/{0}/cancel/'.format(payed_booking.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(mock_ride_booking_refund.call_count, 1)
+        mock_ride_booking_refund.assert_called_with(payed_booking)
+
+        payed_booking.refresh_from_db()
+        self.assertEqual(payed_booking.status, RideBookingStatus.CANCELED)
+
+    @mock.patch('apps.rides.viewsets.ride_booking_refund', autospec=True)
+    def test_cancel_created_booking_by_passenger(self, mock_ride_booking_refund):
+        self.authenticate()
+        ride = RideFactory.create(
+            car=self.car)
+        booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.CREATED)
+
+        resp = self.client.post(
+            '/rides/booking/{0}/cancel/'.format(booking.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(mock_ride_booking_refund.call_count, 0)
+
+        booking.refresh_from_db()
+        self.assertEqual(booking.status, RideBookingStatus.CANCELED)
+
+    def test_cancel_canceled_booking_by_passenger(self):
+        self.authenticate()
+        ride = RideFactory.create(
+            car=self.car)
+        booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.CANCELED)
+
+        resp = self.client.post(
+            '/rides/booking/{0}/cancel/'.format(booking.pk))
+        self.assertForbidden(resp)

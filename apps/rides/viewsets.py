@@ -10,6 +10,8 @@ from rest_framework.pagination import LimitOffsetPagination
 
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
 from apps.main.utils import send_mail
+from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
+    IsRideBookingActual
 from apps.rides.utils import ride_booking_refund, \
     ride_booking_execute_payment, ride_booking_create_payment, \
     cancel_ride_by_driver
@@ -85,14 +87,11 @@ class RideViewSet(ListFactoryMixin,
         ).distinct()
         return self.list_factory(queryset)(request, *args, **kwargs)
 
-    @action(methods=['POST'], detail=True, permission_classes=())
-    def cancel_ride_by_driver(self, request, *args, **kwargs):
+    @action(methods=['POST'], detail=True, permission_classes=(IsRideOwner,))
+    def cancel(self, request, *args, **kwargs):
         ride = self.get_object()
-        if request.user == ride.car.owner:
-            cancel_ride_by_driver(ride)
-            return HttpResponse(status=200)
-
-        return HttpResponse(status=403)
+        cancel_ride_by_driver(ride)
+        return HttpResponse(status=200)
 
     # Wrap with transaction.atomic to rollback on nested serializer error
     @transaction.atomic
@@ -182,11 +181,13 @@ class RideBookingViewSet(mixins.ListModelMixin,
         fail_url = '{0}?execution=fail'.format(ride_detail_url)
         return HttpResponseRedirect(fail_url)
 
-    @action(methods=['POST'], detail=True)
-    def paypal_payment_refund(self, request, *args, **kwargs):
+    @action(methods=['POST'], detail=True,
+            permission_classes=(IsRideBookingClient, IsRideBookingActual,))
+    def cancel(self, request, *args, **kwargs):
         ride_booking = self.get_object()
 
-        if ride_booking_refund(ride_booking):
+        if ride_booking.status == RideBookingStatus.PAYED:
+            ride_booking_refund(ride_booking)
             send_mail('client_ride_booking_refunded',
                       [ride_booking.client.email],
                       {'ride_booking': ride_booking})
@@ -194,9 +195,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
                       [ride_booking.ride.owner.email],
                       {'ride_booking': ride_booking})
 
-            return HttpResponse(status=200)
+        ride_booking.status = RideBookingStatus.CANCELED
+        ride_booking.save()
 
-        return HttpResponse(status=500)
+        return HttpResponse(status=200)
 
 
 class RideRequestViewSet(mixins.ListModelMixin,
