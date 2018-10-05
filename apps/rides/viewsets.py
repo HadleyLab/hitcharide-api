@@ -177,7 +177,6 @@ class RideBookingViewSet(mixins.ListModelMixin,
             serializer_class=RideBookingCancelSerializer)
     def cancel(self, request, *args, **kwargs):
         ride_booking = self.get_object()
-        cancel_reason = str(request.query_params.get('reason', ''))
 
         if ride_booking.status == RideBookingStatus.PAYED:
             ride_booking_refund(ride_booking)
