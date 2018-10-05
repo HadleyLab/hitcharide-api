@@ -8,7 +8,7 @@ from apps.cars.serializers.car_image import CarImageWritableSerializer, \
     CarImageDetailSerializer
 
 
-class CarWritableSerializer(WritableNestedModelSerializer):
+class CarWritableSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
 
