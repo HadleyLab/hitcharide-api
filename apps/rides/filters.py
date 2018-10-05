@@ -1,10 +1,6 @@
-from datetime import datetime, time
-
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework.filters import BaseFilterBackend
-
-from .models import RideStop
 
 
 class RidesListFilter(BaseFilterBackend):

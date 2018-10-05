@@ -48,6 +48,10 @@ class Ride(CreatedUpdatedMixin, models.Model):
         max_length=10,
         default=RideStatus.CREATED,
         choices=RideStatus.CHOICES)
+    cancel_reason = models.TextField(
+        blank=True,
+        null=False
+    )
 
     @property
     def available_number_of_seats(self):
@@ -88,9 +92,9 @@ class Ride(CreatedUpdatedMixin, models.Model):
             Q(city_to__in=stops_cities) | Q(city_to=self.city_to),
             date_time__gte=timezone.now(),
             city_from=self.city_from,
-            date_time__range=(self.date_time.date(),
-                              self.date_time.date() + timezone.timedelta(
-                                  days=3)))
+            date_time__range=(
+                self.date_time - timezone.timedelta(days=1),
+                self.date_time + timezone.timedelta(days=3)))
 
     def get_rating(self):
         return calc_rating(self.reviews.filter(
@@ -153,6 +157,9 @@ class RideBooking(CreatedUpdatedMixin):
     paypal_approval_link = models.TextField(
         blank=True,
         null=True)
+    cancel_reason = models.TextField(
+        blank=True,
+        null=False)
 
     def get_rating(self):
         return calc_rating(Review.objects.filter(
