@@ -94,7 +94,7 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
 
 class RideBookingCancelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Ride
+        model = RideBooking
         fields = ('cancel_reason',)
 
 
