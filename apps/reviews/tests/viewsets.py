@@ -3,7 +3,7 @@ from apps.accounts.factories import UserFactory
 from apps.places.factories import CityFactory
 from apps.rides.factories import RideFactory, RideBookingFactory
 from apps.cars.factories import CarFactory
-from apps.rides.models import RideBookingStatus
+from apps.rides.models import RideBookingStatus, RideStatus
 from apps.reviews.models import Review, ReviewAuthorType
 from apps.reviews.factories import ReviewFactory
 
@@ -21,7 +21,8 @@ class ReviewViewSetTest(APITestCase):
         self.ride = RideFactory.create(
             car=self.car,
             city_from=self.city1,
-            city_to=self.city2)
+            city_to=self.city2,
+            status=RideStatus.COMPLETED)
         self.passenger1 = UserFactory.create(
             email='passenger1@mail.ru',
             password='password')

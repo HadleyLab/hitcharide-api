@@ -7,7 +7,7 @@ from apps.cars.serializers import CarDetailSerializer
 from apps.places.serializers import CityWithStateSerializer
 from apps.reviews.models import Review, ReviewAuthorType
 from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint, \
-    RideBookingStatus
+    RideBookingStatus, RideStatus
 
 
 class RideStopDetailSerializer(serializers.ModelSerializer):
@@ -47,6 +47,9 @@ class RideDetailSerializer(WritableNestedModelSerializer):
         source='get_rating')
 
     def get_has_my_reviews(self, ride):
+        if ride.status != RideStatus.COMPLETED:
+            return False
+
         user = self.context['request'].user
         ride_passengers_pks = ride.bookings.filter(
             status=RideBookingStatus.PAYED
@@ -69,8 +72,8 @@ class RideDetailSerializer(WritableNestedModelSerializer):
                     ride=ride,
                     subject=ride_driver
                 ).exists()
-            else:
-                return False
+
+        return False
 
     class Meta:
         model = Ride

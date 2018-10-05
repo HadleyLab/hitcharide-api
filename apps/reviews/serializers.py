@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from apps.rides.models import RideBookingStatus
+from apps.rides.models import RideBookingStatus, RideStatus
 from .models import Review, ReviewAuthorType
 
 
@@ -20,7 +20,8 @@ class ReviewWritableSerializer(ReviewSerializer):
 
     def validate(self, attrs):
         ride = attrs['ride']
-        # TODO check ride status = finished!
+        if ride.status != RideStatus.COMPLETED:
+            raise ValidationError('Ride must be completed to create the review')
 
         author = attrs['author']
         subject = attrs['subject']
