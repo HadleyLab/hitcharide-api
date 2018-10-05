@@ -306,17 +306,3 @@ class RideBookingViewSetTest(APITestCase):
 
         booking.refresh_from_db()
         self.assertEqual(booking.status, RideBookingStatus.CANCELED)
-
-    # TODO: get 404, because get_object() not returns object
-    # def test_cancel_canceled_booking_by_passenger(self):
-    #     self.authenticate()
-    #     ride = RideFactory.create(
-    #         car=self.car)
-    #     booking = RideBookingFactory.create(
-    #         ride=ride,
-    #         client=self.user,
-    #         status=RideBookingStatus.CANCELED)
-    #
-    #     resp = self.client.post(
-    #         '/rides/booking/{0}/cancel/'.format(booking.pk))
-    #     self.assertForbidden(resp)
