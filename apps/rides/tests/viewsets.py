@@ -220,10 +220,12 @@ class RideViewSetTest(APITestCase):
             ride=ride,
             client=self.user,
             status=RideBookingStatus.CANCELED)
+        reason_text = 'test reason'
 
         self.assertEqual(ride.status, RideStatus.CREATED)
         resp = self.client.post(
-            '/rides/ride/{0}/cancel/'.format(ride.pk))
+            '/rides/ride/{0}/cancel/?reason={1}'.format(ride.pk, reason_text))
+
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 1)
         mock_ride_booking_refund.assert_called_with(payed_booking)
@@ -237,6 +239,7 @@ class RideViewSetTest(APITestCase):
         self.assertEqual(payed_booking.status, RideBookingStatus.REVOKED)
         self.assertEqual(canceled_booking.status, RideBookingStatus.CANCELED)
         self.assertEqual(ride.status, RideStatus.CANCELED)
+        self.assertEqual(ride.cancel_reason, reason_text)
 
 
 class RideBookingViewSetTest(APITestCase):
@@ -283,15 +286,19 @@ class RideBookingViewSetTest(APITestCase):
             ride=ride,
             client=self.user,
             status=RideBookingStatus.PAYED)
+        cancel_reason = 'test reason'
 
         resp = self.client.post(
-            '/rides/booking/{0}/cancel/'.format(payed_booking.pk))
+            '/rides/booking/{0}/cancel/?reason={1}'.format(
+                payed_booking.pk,
+                cancel_reason))
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 1)
         mock_ride_booking_refund.assert_called_with(payed_booking)
 
         payed_booking.refresh_from_db()
         self.assertEqual(payed_booking.status, RideBookingStatus.CANCELED)
+        self.assertEqual(payed_booking.cancel_reason, cancel_reason)
 
     @mock.patch('apps.rides.viewsets.ride_booking_refund', autospec=True)
     def test_cancel_created_booking_by_passenger(self, mock_ride_booking_refund):
@@ -301,15 +308,20 @@ class RideBookingViewSetTest(APITestCase):
         booking = RideBookingFactory.create(
             ride=ride,
             client=self.user,
-            status=RideBookingStatus.CREATED)
+            status=RideBookingStatus.CREATED,
+            cancel_reason='test reason 2')
+        cancel_reason = 'test reason'
 
         resp = self.client.post(
-            '/rides/booking/{0}/cancel/'.format(booking.pk))
+            '/rides/booking/{0}/cancel/?reason={1}'.format(
+                booking.pk,
+                cancel_reason))
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 0)
 
         booking.refresh_from_db()
         self.assertEqual(booking.status, RideBookingStatus.CANCELED)
+        self.assertNotEqual(booking.cancel_reason, cancel_reason)
 
     def test_cancel_canceled_booking_by_passenger(self):
         self.authenticate()

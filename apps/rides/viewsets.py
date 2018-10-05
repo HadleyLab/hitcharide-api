@@ -97,6 +97,9 @@ class RideViewSet(ListFactoryMixin,
     def cancel(self, request, *args, **kwargs):
         ride = self.get_object()
         cancel_ride_by_driver(ride)
+        cancel_reason = str(request.query_params.get('reason', ''))
+        ride.cancel_reason = cancel_reason
+        ride.save()
         return HttpResponse(status=200)
 
     # Wrap with transaction.atomic to rollback on nested serializer error
@@ -191,6 +194,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
             permission_classes=(IsRideBookingClient, IsRideBookingActual,))
     def cancel(self, request, *args, **kwargs):
         ride_booking = self.get_object()
+        cancel_reason = str(request.query_params.get('reason', ''))
 
         if ride_booking.status == RideBookingStatus.PAYED:
             ride_booking_refund(ride_booking)
@@ -202,6 +206,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
                       {'ride_booking': ride_booking})
 
         ride_booking.status = RideBookingStatus.CANCELED
+        ride_booking.cancel_reason = cancel_reason
         ride_booking.save()
 
         return HttpResponse(status=200)

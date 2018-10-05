@@ -47,6 +47,10 @@ class Ride(CreatedUpdatedMixin, models.Model):
         max_length=10,
         default=RideStatus.CREATED,
         choices=RideStatus.CHOICES)
+    cancel_reason = models.TextField(
+        blank=False,
+        null=True
+    )
 
     @property
     def available_number_of_seats(self):
@@ -144,6 +148,9 @@ class RideBooking(CreatedUpdatedMixin):
         null=True)
     paypal_approval_link = models.TextField(
         blank=True,
+        null=True)
+    cancel_reason = models.TextField(
+        blank=False,
         null=True)
 
     def __str__(self):
