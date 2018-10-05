@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.rides.models import Ride, RideBooking, RideBookingStatus, RideStatus
-from apps.rides.utils import ride_payout
+from apps.rides.utils import ride_payout, send_ride_need_review
 
 
 @shared_task()
@@ -18,6 +18,7 @@ def create_payouts_for_rides():
         ride_payout(ride)
         ride.status = RideStatus.COMPLETED
         ride.save()
+        send_ride_need_review(ride)
 
 
 @shared_task()

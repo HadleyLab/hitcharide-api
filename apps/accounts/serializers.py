@@ -4,13 +4,16 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    rating = serializers.JSONField(
+        read_only=True,
+        source='get_rating')
 
     class Meta:
         model = User
         fields = (
             'pk', 'email', 'phone', 'first_name', 'last_name',
             'age', 'photo', 'short_desc', 'is_phone_validated',
-            'paypal_account',
+            'paypal_account', 'rating',
         )
 
 
