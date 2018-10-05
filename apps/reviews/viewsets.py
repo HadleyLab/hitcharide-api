@@ -4,7 +4,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Review
-from .serializers import ReviewSerializer, ReviewCreateSerializer
+from .serializers import ReviewSerializer, ReviewWritableSerializer
 
 
 class ReviewViewSet(viewsets.GenericViewSet,
@@ -19,6 +19,6 @@ class ReviewViewSet(viewsets.GenericViewSet,
 
     def get_serializer_class(self):
         if self.action in ['create']:
-            return ReviewCreateSerializer
+            return ReviewWritableSerializer
 
         return self.serializer_class

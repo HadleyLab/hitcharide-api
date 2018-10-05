@@ -14,7 +14,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                   'subject', 'rating', 'comment')
 
 
-class ReviewCreateSerializer(ReviewSerializer):
+class ReviewWritableSerializer(ReviewSerializer):
     author = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
 
@@ -47,7 +47,7 @@ class ReviewCreateSerializer(ReviewSerializer):
                 raise ValidationError('Review author must be a passenger '
                                       'if author_type = PASSENGER')
 
-        return super(ReviewCreateSerializer, self).validate(attrs)
+        return super(ReviewWritableSerializer, self).validate(attrs)
 
     class Meta(ReviewSerializer.Meta):
         pass
