@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -68,6 +68,12 @@ class RideViewSet(ListFactoryMixin,
             queryset = queryset.filter(car__owner=self.request.user)
 
         return queryset
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return [AllowAny()]
+        else:
+            return super(RideViewSet, self).get_permissions()
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
