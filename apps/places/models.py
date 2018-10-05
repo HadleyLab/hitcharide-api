@@ -18,7 +18,7 @@ class City(models.Model):
         on_delete=models.CASCADE,
         related_name='cities')
     name = models.CharField(
-        max_length=50)
+        max_length=80)
     point = geo_models.PointField()
 
     def __str__(self):
