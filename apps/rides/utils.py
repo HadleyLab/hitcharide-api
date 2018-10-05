@@ -133,10 +133,10 @@ def ride_booking_execute_payment(payer_id, ride_booking):
             ride_booking.save()
             send_mail('ride_client_payment_executed',
                       [ride_booking.client.email],
-                      {'ride': ride_booking})
+                      {'ride': ride_booking.ride})
             send_mail('ride_owner_payment_executed',
                       [ride_booking.ride.car.owner.email],
-                      {'ride': ride_booking})
+                      {'ride': ride_booking.ride})
 
             return True
 

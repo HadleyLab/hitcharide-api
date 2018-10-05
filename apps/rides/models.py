@@ -88,7 +88,7 @@ class Ride(CreatedUpdatedMixin, models.Model):
                                   days=3)))
 
     def __str__(self):
-        return '{0} --> {1} on {2}'.format(
+        return '{0} - {1} on {2}'.format(
             self.city_from,
             self.city_to,
             self.car)
