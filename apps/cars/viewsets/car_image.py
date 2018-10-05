@@ -1,7 +1,7 @@
 from rest_framework import viewsets, mixins
 
 from apps.cars.models import Car, CarImage
-from apps.cars.permissions import IsImageOwner
+from apps.cars.permissions import IsCarImageOwner
 from apps.cars.serializers.car_image import CarImageDetailSerializer, \
     CarImageWritableSerializer
 
@@ -12,7 +12,7 @@ class CarImageViewSet(viewsets.GenericViewSet,
                       mixins.DestroyModelMixin):
     queryset = CarImage.objects.all()
     serializer_class = CarImageDetailSerializer
-    permission_classes = (IsImageOwner,)
+    permission_classes = (IsCarImageOwner,)
 
     def get_serializer_class(self):
         if self.action in ['create']:

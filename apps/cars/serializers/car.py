@@ -11,12 +11,11 @@ from apps.cars.serializers.car_image import CarImageWritableSerializer, \
 class CarWritableSerializer(WritableNestedModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
-    images = CarImageWritableSerializer(many=True)
 
     class Meta:
         model = Car
         fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'images', 'production_year')
+                  'number_of_seats', 'production_year')
 
 
 class CarDetailSerializer(serializers.ModelSerializer):
