@@ -65,6 +65,12 @@ class RideWritableSerializer(WritableNestedModelSerializer):
                   'price', 'number_of_seats', 'description')
 
 
+class RideCancelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ride
+        fields = ('cancel_reason',)
+
+
 class RideBookingDetailSerializer(serializers.ModelSerializer):
     ride = RideDetailSerializer()
     status = serializers.CharField(read_only=True)

@@ -220,7 +220,10 @@ class RideViewSetTest(APITestCase):
 
         self.assertEqual(ride.status, RideStatus.CREATED)
         resp = self.client.post(
-            '/rides/ride/{0}/cancel/?reason={1}'.format(ride.pk, reason_text))
+            '/rides/ride/{0}/cancel/'.format(ride.pk),
+            {
+                'cancel_reason': reason_text
+            })
 
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 1)

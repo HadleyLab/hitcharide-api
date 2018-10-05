@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 
-from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
 from apps.main.utils import send_mail
 from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
     IsRideBookingActual
@@ -20,11 +19,11 @@ from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint, \
     RideBookingStatus
-from apps.cars.models import Car
 from .serializers import RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
-    RideBookingWritableSerializer, RideComplaintWritableSerializer
+    RideBookingWritableSerializer, RideComplaintWritableSerializer, \
+    RideCancelSerializer
 
 
 class RideViewSet(ListFactoryMixin,
@@ -75,13 +74,14 @@ class RideViewSet(ListFactoryMixin,
         ).distinct()
         return self.list_factory(queryset)(request, *args, **kwargs)
 
-    @action(methods=['POST'], detail=True, permission_classes=(IsRideOwner,))
+    @action(methods=['POST'], detail=True, permission_classes=(IsRideOwner,),
+            serializer_class=RideCancelSerializer)
     def cancel(self, request, *args, **kwargs):
         ride = self.get_object()
         cancel_ride_by_driver(ride)
-        cancel_reason = str(request.query_params.get('reason', ''))
-        ride.cancel_reason = cancel_reason
-        ride.save()
+        serializer = self.get_serializer(ride, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return HttpResponse(status=200)
 
     # Wrap with transaction.atomic to rollback on nested serializer error

@@ -87,9 +87,9 @@ class Ride(CreatedUpdatedMixin, models.Model):
             Q(city_to__in=stops_cities) | Q(city_to=self.city_to),
             date_time__gte=timezone.now(),
             city_from=self.city_from,
-            date_time__range=(self.date_time.date(),
-                              self.date_time.date() + timezone.timedelta(
-                                  days=3)))
+            date_time__range=(
+                self.date_time - timezone.timedelta(days=1),
+                self.date_time + timezone.timedelta(days=3)))
 
     def __str__(self):
         return '{0} - {1} on {2}'.format(
