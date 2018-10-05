@@ -5,7 +5,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.accounts.models import User
+from apps.reviews.models import Review, ReviewAuthorType
+from apps.reviews.utils import calc_rating
 from .mixins import CreatedUpdatedMixin
 
 
@@ -77,8 +78,12 @@ class Ride(CreatedUpdatedMixin, models.Model):
         return sum(self.bookings.filter(status=RideBookingStatus.PAYED).
                    values_list('seats_count', flat=True))
 
-    def get_clients_emails(self):
-        return [item.client.email for item in self.bookings.all()]
+    def get_clients_emails(self, status=None):
+        if status:
+            return [item.client.email for item in self.bookings.filter(
+                status=status)]
+        else:
+            return [item.client.email for item in self.bookings.all()]
 
     def get_ride_requests(self):
         stops_cities = self.stops.values_list('city', flat=True)
@@ -90,6 +95,10 @@ class Ride(CreatedUpdatedMixin, models.Model):
             date_time__range=(
                 self.date_time - timezone.timedelta(days=1),
                 self.date_time + timezone.timedelta(days=3)))
+
+    def get_rating(self):
+        return calc_rating(self.reviews.filter(
+            author_type=ReviewAuthorType.PASSENGER))
 
     def __str__(self):
         return '{0} - {1} on {2}'.format(
@@ -141,8 +150,7 @@ class RideBooking(CreatedUpdatedMixin):
         default=RideBookingStatus.CREATED,
         choices=RideBookingStatus.CHOICES)
     seats_count = models.IntegerField(
-        default=1
-    )
+        default=1)
     paypal_payment_id = models.TextField(
         blank=True,
         null=True)
@@ -152,6 +160,12 @@ class RideBooking(CreatedUpdatedMixin):
     cancel_reason = models.TextField(
         blank=True,
         null=False)
+
+    def get_rating(self):
+        return calc_rating(Review.objects.filter(
+            ride=self.ride,
+            author_type=ReviewAuthorType.DRIVER,
+            subject=self.client))
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(

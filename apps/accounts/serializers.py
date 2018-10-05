@@ -3,14 +3,22 @@ from rest_framework import serializers
 from .models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
-
+class UserBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = ('pk', 'first_name', 'last_name')
+
+
+class UserSerializer(UserBaseSerializer):
+    rating = serializers.JSONField(
+        read_only=True,
+        source='get_rating')
+
+    class Meta(UserBaseSerializer.Meta):
         fields = (
             'pk', 'email', 'phone', 'first_name', 'last_name',
             'age', 'photo', 'short_desc', 'is_phone_validated',
-            'paypal_account',
+            'paypal_account', 'rating',
         )
 
 

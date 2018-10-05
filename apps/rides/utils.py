@@ -1,10 +1,9 @@
 from django.conf import settings
-from django.db import transaction
 from django.urls import reverse
 from paypalrestsdk import Payment, Payout, Sale
 
 from apps.main.utils import send_mail
-from apps.rides.models import RideBookingStatus, Ride, RideBooking, RideStatus
+from apps.rides.models import RideBookingStatus, RideStatus
 
 
 def inform_all_subscribers(ride):
@@ -141,3 +140,12 @@ def ride_booking_execute_payment(payer_id, ride_booking):
             return True
 
     return False
+
+
+def send_ride_need_review(ride):
+    driver = ride.car.owner
+    send_mail('ride_review_inform_driver', [driver.email], {'ride': ride})
+    for client_email in ride.get_clients_emails(RideBookingStatus.PAYED):
+        send_mail('ride_review_inform_passenger',
+                  client_email,
+                  {'ride': ride, 'driver': driver})

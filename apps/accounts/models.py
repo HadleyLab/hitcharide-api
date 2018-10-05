@@ -6,6 +6,7 @@ from django.utils import timezone
 import uuid
 
 from apps.accounts.fields import PhoneField
+from apps.reviews.utils import calc_rating
 
 
 class User(AbstractUser):
@@ -53,6 +54,9 @@ class User(AbstractUser):
             return today.year - self.birthday.year - months_diff
         else:
             return None
+
+    def get_rating(self):
+        return calc_rating(self.reviews.all())
 
 
 @receiver(pre_save, sender=User)
