@@ -6,22 +6,31 @@ from djoser import views as djoser_views
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework_jwt.views import verify_jwt_token
 from rest_framework_jwt.views import refresh_jwt_token
+from rest_framework_nested.routers import SimpleRouter, NestedSimpleRouter
 
 from apps.accounts.viewsets import UserDetailViewSet
+from apps.cars.viewsets import CarViewSet, CarImageViewSet
 from apps.places.viewsets import StateViewSet, CityViewSet
 from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
     ValidatePhoneView, complete
-from apps.rides.viewsets import CarViewSet, RideViewSet, \
+from apps.rides.viewsets import RideViewSet, \
     RideBookingViewSet, RideRequestViewSet, RideComplaintViewSet
 
 from .routers import Router
+
+
+nested_router = SimpleRouter()
+nested_router.register('rides/car', CarViewSet, base_name='cars')
+
+car_router = NestedSimpleRouter(
+    nested_router, r'rides/car', lookup='car')
+car_router.register('images', CarImageViewSet)
 
 
 router = Router()
 router.register('places/state', StateViewSet)
 router.register('places/city', CityViewSet)
 
-router.register('rides/car', CarViewSet)
 router.register('rides/ride', RideViewSet)
 router.register('rides/booking', RideBookingViewSet)
 router.register('rides/request', RideRequestViewSet)
@@ -57,7 +66,10 @@ urlpatterns = [
     re_path(r'^accounts/social/complete/(?P<backend>[^/]+)/$',
             complete, name='complete'),
     path('accounts/social/', include('social_django.urls', namespace='social')),
-] + router.urls
+    path('', include(router.urls)),
+    path('', include(nested_router.urls)),
+    path('', include(car_router.urls)),
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,

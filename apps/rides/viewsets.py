@@ -27,24 +27,6 @@ from .serializers import RideBookingDetailSerializer, \
     RideBookingWritableSerializer, RideComplaintWritableSerializer
 
 
-class CarViewSet(viewsets.GenericViewSet,
-                 mixins.ListModelMixin,
-                 mixins.CreateModelMixin,
-                 mixins.DestroyModelMixin):
-    queryset = Car.objects.all()
-    serializer_class = CarDetailSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def get_serializer_class(self):
-        if self.action in ['create', 'update']:
-            return CarWritableSerializer
-        return self.serializer_class
-
-    def get_queryset(self):
-        return super(CarViewSet, self).get_queryset().filter(
-            owner=self.request.user)
-
-
 class RideViewSet(ListFactoryMixin,
                   mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
