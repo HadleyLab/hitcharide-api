@@ -48,8 +48,8 @@ class Ride(CreatedUpdatedMixin, models.Model):
         default=RideStatus.CREATED,
         choices=RideStatus.CHOICES)
     cancel_reason = models.TextField(
-        blank=False,
-        null=True
+        blank=True,
+        null=False
     )
 
     @property
@@ -150,8 +150,8 @@ class RideBooking(CreatedUpdatedMixin):
         blank=True,
         null=True)
     cancel_reason = models.TextField(
-        blank=False,
-        null=True)
+        blank=True,
+        null=False)
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(

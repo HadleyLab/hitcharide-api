@@ -304,8 +304,7 @@ class RideBookingViewSetTest(APITestCase):
         booking = RideBookingFactory.create(
             ride=ride,
             client=self.user,
-            status=RideBookingStatus.CREATED,
-            cancel_reason='test reason 2')
+            status=RideBookingStatus.CREATED)
         cancel_reason = 'test reason'
 
         resp = self.client.post(
@@ -317,7 +316,7 @@ class RideBookingViewSetTest(APITestCase):
 
         booking.refresh_from_db()
         self.assertEqual(booking.status, RideBookingStatus.CANCELED)
-        self.assertNotEqual(booking.cancel_reason, cancel_reason)
+        self.assertEqual(booking.cancel_reason, cancel_reason)
 
     def test_cancel_canceled_booking_by_passenger(self):
         self.authenticate()
@@ -326,8 +325,14 @@ class RideBookingViewSetTest(APITestCase):
         booking = RideBookingFactory.create(
             ride=ride,
             client=self.user,
-            status=RideBookingStatus.CANCELED)
+            status=RideBookingStatus.CANCELED,
+            cancel_reason='test reason 2')
+        cancel_reason = 'test reason'
 
         resp = self.client.post(
-            '/rides/booking/{0}/cancel/'.format(booking.pk))
+            '/rides/booking/{0}/cancel/?reason={1}'.format(
+                booking.pk, cancel_reason))
         self.assertForbidden(resp)
+
+        booking.refresh_from_db()
+        self.assertNotEqual(booking.cancel_reason, cancel_reason)
