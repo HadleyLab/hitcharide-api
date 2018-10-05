@@ -96,10 +96,6 @@ class RideViewSetTest(APITestCase):
             }
         )
 
-    def test_list_unauthorized(self):
-        resp = self.client.get('/rides/ride/', format='json')
-        self.assertUnauthorized(resp)
-
     def test_list(self):
         self.authenticate()
 
