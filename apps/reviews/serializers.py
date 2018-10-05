@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from apps.accounts.serializers import UserBaseSerializer
 from apps.rides.models import RideBookingStatus, RideStatus
 from .models import Review, ReviewAuthorType
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    # author = UserSerializer() TODO: don't need to show all contact info
+    author = UserBaseSerializer()
 
     class Meta:
         model = Review
