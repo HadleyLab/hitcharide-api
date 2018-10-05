@@ -12,13 +12,13 @@ class Car(models.Model):
         max_length=50)
     number_of_seats = models.PositiveSmallIntegerField(
         verbose_name='Maximum number of seats in this car')
-    photo = models.ImageField(
-        upload_to='car_photos',
-        blank=True, null=True)
     color = models.CharField(
         max_length=50)
     license_plate = models.CharField(
-        max_length=50)
+        max_length=50,
+        blank=True, null=True)
+    production_year = models.IntegerField(
+        blank=True, null=True)
 
     def __str__(self):
         return '{0} {1} - {2}'.format(
