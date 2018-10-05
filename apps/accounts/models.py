@@ -1,12 +1,12 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import Avg
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 import uuid
 
 from apps.accounts.fields import PhoneField
+from apps.reviews.utils import calc_rating
 
 
 class User(AbstractUser):
@@ -56,13 +56,7 @@ class User(AbstractUser):
             return None
 
     def get_rating(self):
-        result = self.reviews.all().aggregate(
-            rating=models.Avg('rating'),
-            count=models.Count('pk'))
-        return {
-            'value': result['rating'] or 0.0,
-            'count': result['count']
-        }
+        return calc_rating(self.reviews.all())
 
 
 @receiver(pre_save, sender=User)

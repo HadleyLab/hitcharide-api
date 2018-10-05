@@ -42,8 +42,9 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     bookings = RidePassengerSerializer(source='actual_bookings',
                                        many=True)
     has_my_reviews = serializers.SerializerMethodField()
-    rating = serializers.SerializerMethodField()
-    # TODO: it looks like strange optimisation, maybe use 2 fields?
+    rating = serializers.JSONField(
+        read_only=True,
+        source='get_rating')
 
     def get_has_my_reviews(self, ride):
         user = self.context['request'].user
@@ -70,9 +71,6 @@ class RideDetailSerializer(WritableNestedModelSerializer):
                 ).exists()
             else:
                 return False
-
-    def get_rating(self, ride):
-        return ride.get_rating()
 
     class Meta:
         model = Ride
@@ -104,7 +102,9 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
     ride = RideDetailSerializer()
     status = serializers.CharField(read_only=True)
     has_my_reviews = serializers.SerializerMethodField()
-    rating = serializers.FloatField()
+    rating = serializers.JSONField(
+        read_only=True,
+        source='get_rating')
 
     def get_has_my_reviews(self, booking):
         if booking.status == RideBookingStatus.PAYED:

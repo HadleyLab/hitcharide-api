@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from apps.reviews.models import Review, ReviewAuthorType
+from apps.reviews.utils import calc_rating
 from .mixins import CreatedUpdatedMixin
 
 
@@ -92,15 +93,8 @@ class Ride(CreatedUpdatedMixin, models.Model):
                                   days=3)))
 
     def get_rating(self):
-        result = self.reviews.filter(
-            author_type=ReviewAuthorType.PASSENGER
-        ).aggregate(
-            rating=models.Avg('rating'),
-            count=models.Count('pk'))
-        return {
-            'value': result['rating'] or 0.0,
-            'count': result['count']
-        }
+        return calc_rating(self.reviews.filter(
+            author_type=ReviewAuthorType.PASSENGER))
 
     def __str__(self):
         return '{0} - {1} on {2}'.format(
@@ -160,16 +154,11 @@ class RideBooking(CreatedUpdatedMixin):
         blank=True,
         null=True)
 
-    @property
-    def rating(self):
-        review = Review.objects.filter(
+    def get_rating(self):
+        return calc_rating(Review.objects.filter(
             ride=self.ride,
             author_type=ReviewAuthorType.DRIVER,
-            subject=self.client).first()
-        if review:
-            return review.rating
-        else:
-            return 0.0
+            subject=self.client))
 
     def __str__(self):
         return '{0} on {1} ({2})'.format(
