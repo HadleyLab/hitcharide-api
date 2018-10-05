@@ -288,9 +288,9 @@ class RideBookingViewSetTest(APITestCase):
         cancel_reason = 'test reason'
 
         resp = self.client.post(
-            '/rides/booking/{0}/cancel/?reason={1}'.format(
-                payed_booking.pk,
-                cancel_reason))
+            '/rides/booking/{0}/cancel/'.format(
+                payed_booking.pk),
+            {'cancel_reason': cancel_reason})
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 1)
         mock_ride_booking_refund.assert_called_with(payed_booking)
@@ -311,9 +311,9 @@ class RideBookingViewSetTest(APITestCase):
         cancel_reason = 'test reason'
 
         resp = self.client.post(
-            '/rides/booking/{0}/cancel/?reason={1}'.format(
-                booking.pk,
-                cancel_reason))
+            '/rides/booking/{0}/cancel/'.format(
+                booking.pk),
+            {'cancel_reason': cancel_reason})
         self.assertSuccessResponse(resp)
         self.assertEqual(mock_ride_booking_refund.call_count, 0)
 
@@ -333,8 +333,9 @@ class RideBookingViewSetTest(APITestCase):
         cancel_reason = 'test reason'
 
         resp = self.client.post(
-            '/rides/booking/{0}/cancel/?reason={1}'.format(
-                booking.pk, cancel_reason))
+            '/rides/booking/{0}/cancel/'.format(
+                booking.pk),
+            {'cancel_reason': cancel_reason})
         self.assertForbidden(resp)
 
         booking.refresh_from_db()

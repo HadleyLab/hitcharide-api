@@ -92,6 +92,12 @@ class RideBookingWritableSerializer(serializers.ModelSerializer):
         extra_kwargs = {'paypal_approval_link': {'read_only': True}}
 
 
+class RideBookingCancelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ride
+        fields = ('cancel_reason',)
+
+
 class RideRequestDetailSerializer(serializers.ModelSerializer):
     city_from = CityWithStateSerializer()
     city_to = CityWithStateSerializer()

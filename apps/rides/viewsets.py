@@ -23,7 +23,7 @@ from .serializers import RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
     RideBookingWritableSerializer, RideComplaintWritableSerializer, \
-    RideCancelSerializer
+    RideCancelSerializer, RideBookingCancelSerializer
 
 
 class RideViewSet(ListFactoryMixin,
@@ -173,7 +173,8 @@ class RideBookingViewSet(mixins.ListModelMixin,
         return HttpResponseRedirect(fail_url)
 
     @action(methods=['POST'], detail=True,
-            permission_classes=(IsRideBookingClient, IsRideBookingActual,))
+            permission_classes=(IsRideBookingClient, IsRideBookingActual,),
+            serializer_class=RideBookingCancelSerializer)
     def cancel(self, request, *args, **kwargs):
         ride_booking = self.get_object()
         cancel_reason = str(request.query_params.get('reason', ''))
@@ -188,8 +189,12 @@ class RideBookingViewSet(mixins.ListModelMixin,
                       {'ride_booking': ride_booking})
 
         ride_booking.status = RideBookingStatus.CANCELED
-        ride_booking.cancel_reason = cancel_reason
         ride_booking.save()
+
+        serializer = self.get_serializer(
+            ride_booking, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return HttpResponse(status=200)
 
