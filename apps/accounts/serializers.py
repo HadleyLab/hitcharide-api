@@ -4,11 +4,9 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        return obj.get_rating()
+    rating = serializers.JSONField(
+        read_only=True,
+        source='get_rating')
 
     class Meta:
         model = User

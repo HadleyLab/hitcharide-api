@@ -4,7 +4,7 @@ from apps.places.factories import CityFactory
 from apps.rides.factories import RideFactory, RideBookingFactory
 from apps.cars.factories import CarFactory
 from apps.rides.models import RideBookingStatus
-from apps.reviews.models import Review, ReviewType
+from apps.reviews.models import Review, ReviewAuthorType
 from apps.reviews.factories import ReviewFactory
 
 
@@ -41,7 +41,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger1.pk,
-            'author_type': ReviewType.DRIVER,
+            'author_type': ReviewAuthorType.DRIVER,
             'rating': 5
         }, format='json')
         self.assertUnauthorized(resp)
@@ -51,7 +51,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger1.pk,
-            'author_type': ReviewType.PASSENGER,
+            'author_type': ReviewAuthorType.PASSENGER,
             'rating': 5
         }, format='json')
         self.assertBadRequest(resp)
@@ -61,7 +61,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger1.pk,
-            'author_type': ReviewType.DRIVER,
+            'author_type': ReviewAuthorType.DRIVER,
             'rating': 5
         }, format='json')
         self.assertBadRequest(resp)
@@ -72,7 +72,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': passenger3.pk,
-            'author_type': ReviewType.DRIVER,
+            'author_type': ReviewAuthorType.DRIVER,
             'rating': 5
         }, format='json')
         self.assertBadRequest(resp)
@@ -82,7 +82,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger2.pk,
-            'author_type': ReviewType.PASSENGER,
+            'author_type': ReviewAuthorType.PASSENGER,
             'rating': 5
         }, format='json')
         self.assertBadRequest(resp)
@@ -92,7 +92,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.user.pk,
-            'author_type': ReviewType.DRIVER,
+            'author_type': ReviewAuthorType.DRIVER,
             'rating': 5
         }, format='json')
         self.assertBadRequest(resp)
@@ -102,7 +102,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger1.pk,
-            'author_type': ReviewType.PASSENGER,
+            'author_type': ReviewAuthorType.PASSENGER,
             'rating': 5
         }, format='json')
         self.assertBadRequest(resp)
@@ -113,7 +113,7 @@ class ReviewViewSetTest(APITestCase):
         resp = self.client.post('/reviews/', {
             'ride': self.ride.pk,
             'subject': self.passenger1.pk,
-            'author_type': ReviewType.DRIVER,
+            'author_type': ReviewAuthorType.DRIVER,
             'rating': 5
         }, format='json')
         self.assertSuccessResponse(resp)
@@ -131,14 +131,14 @@ class ReviewViewSetTest(APITestCase):
             author=self.user,
             ride=self.ride,
             subject=self.passenger1,
-            author_type=ReviewType.DRIVER,
+            author_type=ReviewAuthorType.DRIVER,
             rating=3,
             comment='Always crying and smells like ....')
         self.review2 = ReviewFactory.create(
             author=self.user,
             ride=self.ride,
             subject=self.passenger2,
-            author_type=ReviewType.DRIVER,
+            author_type=ReviewAuthorType.DRIVER,
             rating=5,
             comment='Nice passenger!')
 
@@ -146,14 +146,14 @@ class ReviewViewSetTest(APITestCase):
             author=self.passenger1,
             ride=self.ride,
             subject=self.user,
-            author_type=ReviewType.PASSENGER,
+            author_type=ReviewAuthorType.PASSENGER,
             rating=2,
             comment='Always screaming on me!')
         self.review4 = ReviewFactory.create(
             author=self.passenger2,
             ride=self.ride,
             subject=self.user,
-            author_type=ReviewType.PASSENGER,
+            author_type=ReviewAuthorType.PASSENGER,
             rating=5,
             comment='Nice driver!')
 

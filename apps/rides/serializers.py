@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from apps.accounts.serializers import UserSerializer
 from apps.cars.serializers import CarDetailSerializer
 from apps.places.serializers import CityWithStateSerializer
-from apps.reviews.models import Review, ReviewType
+from apps.reviews.models import Review, ReviewAuthorType
 from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint, \
     RideBookingStatus
 
@@ -55,7 +55,7 @@ class RideDetailSerializer(WritableNestedModelSerializer):
             # I am driver
             return Review.objects.filter(
                 author=user,
-                author_type=ReviewType.DRIVER,
+                author_type=ReviewAuthorType.DRIVER,
                 ride=ride,
                 subject_id__in=ride_passengers_pks
             ).count() == len(ride_passengers_pks)
@@ -64,7 +64,7 @@ class RideDetailSerializer(WritableNestedModelSerializer):
             if user.pk in ride_passengers_pks:
                 return Review.objects.filter(
                     author=user,
-                    author_type=ReviewType.PASSENGER,
+                    author_type=ReviewAuthorType.PASSENGER,
                     ride=ride,
                     subject=ride_driver
                 ).exists()
@@ -110,7 +110,7 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
         if booking.status == RideBookingStatus.PAYED:
             return Review.objects.filter(
                 author=self.context['request'].user,
-                author_type=ReviewType.PASSENGER,
+                author_type=ReviewAuthorType.PASSENGER,
                 ride=booking.ride,
                 subject=booking.ride.car.owner).exists()
 

@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.reviews.models import Review, ReviewType
+from apps.reviews.models import Review, ReviewAuthorType
 from .mixins import CreatedUpdatedMixin
 
 
@@ -93,7 +93,7 @@ class Ride(CreatedUpdatedMixin, models.Model):
 
     def get_rating(self):
         result = self.reviews.filter(
-            author_type=ReviewType.PASSENGER
+            author_type=ReviewAuthorType.PASSENGER
         ).aggregate(
             rating=models.Avg('rating'),
             count=models.Count('pk'))
@@ -164,7 +164,7 @@ class RideBooking(CreatedUpdatedMixin):
     def rating(self):
         review = Review.objects.filter(
             ride=self.ride,
-            author_type=ReviewType.DRIVER,
+            author_type=ReviewAuthorType.DRIVER,
             subject=self.client).first()
         if review:
             return review.rating

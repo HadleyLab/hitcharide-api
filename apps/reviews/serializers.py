@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from apps.rides.models import RideBookingStatus
-from .models import Review, ReviewType
+from .models import Review, ReviewAuthorType
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -30,7 +30,7 @@ class ReviewCreateSerializer(ReviewSerializer):
         ).values_list('client_id', flat=True)
         ride_driver = ride.car.owner
 
-        if attrs['author_type'] == ReviewType.DRIVER:
+        if attrs['author_type'] == ReviewAuthorType.DRIVER:
             if author != ride_driver:
                 raise ValidationError('Review author must be a driver '
                                       'if author_type = DRIVER')

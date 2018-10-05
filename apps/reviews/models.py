@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from apps.rides.mixins import CreatedUpdatedMixin
 
 
-class ReviewType(object):
+class ReviewAuthorType(object):
     DRIVER = 1
     PASSENGER = 2
 
@@ -28,7 +28,7 @@ class Review(CreatedUpdatedMixin):
         on_delete=models.PROTECT,
         related_name='reviews')
     author_type = models.PositiveSmallIntegerField(
-        choices=ReviewType.CHOICES)
+        choices=ReviewAuthorType.CHOICES)
     rating = models.IntegerField(
         validators=[
             MinValueValidator(1),
