@@ -1,11 +1,14 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-import uuid
 
 from apps.accounts.fields import PhoneField
+from apps.accounts.upload_paths import user_photo_path
+from apps.main.storages import public_storage
 from apps.reviews.utils import calc_rating
 
 
@@ -24,7 +27,8 @@ class User(AbstractUser):
     birthday = models.DateTimeField(
         blank=True, null=True)
     photo = models.ImageField(
-        upload_to='user_photos',
+        upload_to=user_photo_path,
+        storage=public_storage,
         blank=True, null=True)
     short_desc = models.TextField(
         blank=True, null=True)
