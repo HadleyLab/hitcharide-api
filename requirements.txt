@@ -46,6 +46,8 @@ celery==4.2.1
 -e git+https://github.com/LPgenerator/django-db-mailer.git@cb5e042e82055fbfab0005cbd28dd52d66a8c1ca#egg=django-db-mailer
 git+git://github.com/beda-software/djangorestframework-camel-case@a6a448360941130678b62aebed5d5d09ba1214bb#egg=djangorestframework-camel-case
 paypalrestsdk==1.13.1
+boto3==1.9.18
+django-storages==1.7.1
 
 
 whitenoise==3.3.0
