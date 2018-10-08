@@ -23,10 +23,10 @@ class MyView(APIView):
     def put(self, request):
         serializer = UserUpdateSerializer(
             request.user, data=request.data)
-        print(request.data)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        return Response(UserSerializer(instance).data)
+        return Response(
+            UserSerializer(instance, context={'request': request}).data)
 
 
 class SendPhoneValidationCodeView(APIView):
