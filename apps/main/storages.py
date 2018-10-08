@@ -8,7 +8,7 @@ class PublicStorage(LazyObject):
     def _setup(self):
         storage = DefaultStorage()
 
-        public_bucket = settings.AWS_STORAGE_PUBLIC_BUCKET_NAME
+        public_bucket = settings.AWS_STORAGE_BUCKET_NAME
         if public_bucket:  # pragma: no cover
             storage = S3Boto3Storage(
                 bucket=public_bucket, querystring_auth=False)
