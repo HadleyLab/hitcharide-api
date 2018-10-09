@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Case, When, BooleanField
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from constance import config
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
 
 from apps.main.utils import send_mail
 from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
@@ -93,7 +94,7 @@ class RideViewSet(ListFactoryMixin,
         serializer = self.get_serializer(ride, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return HttpResponse(status=200)
+        return Response({'status': 'success'})
 
     # Wrap with transaction.atomic to rollback on nested serializer error
     @transaction.atomic
@@ -206,7 +207,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return HttpResponse(status=200)
+        return Response({'status': 'success'})
 
 
 class RideRequestViewSet(mixins.ListModelMixin,
