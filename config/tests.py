@@ -2,6 +2,7 @@ import shutil
 import tempfile
 import errno
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test.utils import override_settings
 from rest_framework.test import APITestCase as BaseAPITestCase
 from rest_framework import status
@@ -46,17 +47,3 @@ class APITestCase(BaseAPITestCase):
 
     def assertNotFound(self, resp):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
-
-    def fake_media(self):
-        tmp_dir = tempfile.mkdtemp()
-
-        try:
-            return override_settings(MEDIA_ROOT=tmp_dir)
-        finally:
-            try:
-                shutil.rmtree(tmp_dir)
-            except OSError as e:
-                # Reraise unless ENOENT: No such file or directory
-                # (ok if directory has already been deleted)
-                if e.errno != errno.ENOENT:
-                    raise

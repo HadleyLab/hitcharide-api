@@ -248,6 +248,12 @@ TWILIO_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
 
 
+AWS_S3_SECURE_URLS = True  # use https
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_S3_ACCESS_KEY_ID = os.environ.get('AWS_S3_ACCESS_KEY_ID', )
+AWS_S3_SECRET_ACCESS_KEY = os.environ.get('AWS_S3_SECRET_ACCESS_KEY', )
+
+
 CONSTANCE_CONFIG = {
     'MANAGER_EMAIL': ('manager@hitcharide.com', 'Email for complaints'),
     'SELLER_EMAIL': (
