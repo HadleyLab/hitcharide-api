@@ -20,7 +20,7 @@ from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
     BookingsListFilter
 from .mixins import ListFactoryMixin
 from .models import Ride, RideBooking, RideRequest, RideComplaint, \
-    RideBookingStatus
+    RideBookingStatus, RideStatus
 from .serializers import RideBookingDetailSerializer, \
     RideWritableSerializer, RideDetailSerializer, \
     RideRequestWritableSerializer, RideRequestDetailSerializer, \
@@ -63,7 +63,9 @@ class RideViewSet(ListFactoryMixin,
 
         if self.action == 'list':
             # Only future rides
-            queryset = queryset.filter(date_time__gt=timezone.now())
+            queryset = queryset.filter(
+                date_time__gt=timezone.now(),
+                status=RideStatus.CREATED)
 
         if self.action == 'booked':
             # Only my booked rides
