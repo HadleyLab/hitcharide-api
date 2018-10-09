@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'apps.dbmail_templates',
     'apps.cars',
     'apps.reviews',
+    'apps.flatpages',
 ]
 
 SITE_ID = 1

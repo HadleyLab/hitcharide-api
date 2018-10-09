@@ -16,6 +16,7 @@ from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
 from apps.rides.viewsets import RideViewSet, \
     RideBookingViewSet, RideRequestViewSet, RideComplaintViewSet
 from apps.reviews.viewsets import ReviewViewSet
+from apps.flatpages.viewsets import FlatPageViewSet
 
 from .routers import Router
 
@@ -38,6 +39,7 @@ router.register('rides/request', RideRequestViewSet)
 router.register('rides/complaint', RideComplaintViewSet)
 router.register('accounts', UserDetailViewSet)
 router.register('reviews', ReviewViewSet)
+router.register('flatpages', FlatPageViewSet)
 
 
 urlpatterns = [
