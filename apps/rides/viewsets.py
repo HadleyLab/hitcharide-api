@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Case, When, BooleanField
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from rest_framework import viewsets, mixins
@@ -44,61 +43,36 @@ class RideViewSet(ListFactoryMixin,
             return RideWritableSerializer
         return self.serializer_class
 
-    def get_queryset(self):
-        now = timezone.now()
-        queryset = super(RideViewSet, self).get_queryset()
-
-        if self.action in ['my', 'booked']:
-            # Change ordering to 2 blocks: future and past rides
-            queryset = queryset.annotate(
-                is_future=Case(
-                    When(
-                        date_time__gt=now,
-                        then=True
-                    ),
-                    default=False,
-                    output_field=BooleanField()
-                )
-            ).order_by('-is_future', 'date_time')
-
-        if self.action == 'list':
-            # Only future rides
-            queryset = queryset.filter(
-                date_time__gt=now,
-                status=RideStatus.CREATED)
-
-        if self.action == 'booked':
-            # Only my booked rides
-            queryset = queryset.filter(
-                bookings__client=self.request.user
-            ).distinct()
-
-        if self.action in ['my', 'update', 'destroy']:
-            # Only my rides
-            queryset = queryset.filter(car__owner=self.request.user)
-
-        return queryset
-
     def get_permissions(self):
         if self.action == 'list':
             return [AllowAny()]
+        elif self.action in ['update', 'destroy', 'cancel']:
+            return [IsRideOwner()]
         else:
             return super(RideViewSet, self).get_permissions()
 
     def list(self, request, *args, **kwargs):
-        return self.list_factory(self.get_queryset())(request, *args, **kwargs)
+        queryset = self.get_queryset().filter(
+            date_time__gt=timezone.now(),
+            status=RideStatus.CREATED)
+        return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
             filter_backends=(MyRidesFilter, RidesListFilter))
     def my(self, request, *args, **kwargs):
-        return self.list_factory(self.get_queryset())(request, *args, **kwargs)
+        queryset = Ride.order_by_future(self.get_queryset()).filter(
+            car__owner=self.request.user)
+        return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
             filter_backends=(MyRidesFilter, RidesListFilter))
     def booked(self, request, *args, **kwargs):
-        return self.list_factory(self.get_queryset())(request, *args, **kwargs)
+        queryset = Ride.order_by_future(self.get_queryset()).filter(
+            bookings__client=self.request.user
+        ).distinct()
+        return self.list_factory(queryset)(request, *args, **kwargs)
 
-    @action(methods=['POST'], detail=True, permission_classes=(IsRideOwner,),
+    @action(methods=['POST'], detail=True,
             serializer_class=RideCancelSerializer)
     def cancel(self, request, *args, **kwargs):
         ride = self.get_object()
