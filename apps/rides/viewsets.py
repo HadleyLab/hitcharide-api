@@ -64,7 +64,7 @@ class RideViewSet(ListFactoryMixin,
         if self.action == 'list':
             # Only future rides
             queryset = queryset.filter(
-                date_time__gt=timezone.now(),
+                date_time__gt=now,
                 status=RideStatus.CREATED)
 
         if self.action == 'booked':
