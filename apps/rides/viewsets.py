@@ -46,18 +46,33 @@ class RideViewSet(ListFactoryMixin,
 
     def get_queryset(self):
         now = timezone.now()
-        queryset = super(RideViewSet, self).get_queryset().annotate(
-            is_future=Case(
-                When(
-                    date_time__gt=now,
-                    then=True
-                ),
-                default=False,
-                output_field=BooleanField()
-            )
-        ).order_by('-is_future', 'date_time')
+        queryset = super(RideViewSet, self).get_queryset()
+
+        if self.action in ['my', 'booked']:
+            # Change ordering to 2 blocks: future and past rides
+            queryset = queryset.annotate(
+                is_future=Case(
+                    When(
+                        date_time__gt=now,
+                        then=True
+                    ),
+                    default=False,
+                    output_field=BooleanField()
+                )
+            ).order_by('-is_future', 'date_time')
+
+        if self.action == 'list':
+            # Only future rides
+            queryset = queryset.filter(date_time__gt=timezone.now())
+
+        if self.action == 'booked':
+            # Only my booked rides
+            queryset = queryset.filter(
+                bookings__client=self.request.user
+            ).distinct()
 
         if self.action in ['my', 'update', 'destroy']:
+            # Only my rides
             queryset = queryset.filter(car__owner=self.request.user)
 
         return queryset
@@ -69,9 +84,7 @@ class RideViewSet(ListFactoryMixin,
             return super(RideViewSet, self).get_permissions()
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(
-            date_time__gt=timezone.now())
-        return self.list_factory(queryset)(request, *args, **kwargs)
+        return self.list_factory(self.get_queryset())(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
             filter_backends=(MyRidesFilter, RidesListFilter))
@@ -81,10 +94,7 @@ class RideViewSet(ListFactoryMixin,
     @action(methods=['GET'], detail=False,
             filter_backends=(MyRidesFilter, RidesListFilter))
     def booked(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(
-            bookings__client=request.user
-        ).distinct()
-        return self.list_factory(queryset)(request, *args, **kwargs)
+        return self.list_factory(self.get_queryset())(request, *args, **kwargs)
 
     @action(methods=['POST'], detail=True, permission_classes=(IsRideOwner,),
             serializer_class=RideCancelSerializer)
