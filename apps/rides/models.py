@@ -3,6 +3,7 @@ from decimal import Decimal
 from constance import config
 from django.db import models
 from django.db.models import Q
+from django.db.models import Case, When, BooleanField
 from django.utils import timezone
 
 from apps.reviews.models import Review, ReviewAuthorType
@@ -105,6 +106,19 @@ class Ride(CreatedUpdatedMixin, models.Model):
             self.city_from,
             self.city_to,
             self.car)
+
+    @staticmethod
+    def order_by_future(queryset):
+        return queryset.annotate(
+            is_future=Case(
+                When(
+                    date_time__gt=timezone.now(),
+                    then=True
+                ),
+                default=False,
+                output_field=BooleanField()
+            )
+        ).order_by('-is_future', 'date_time')
 
 
 class RideStop(models.Model):
