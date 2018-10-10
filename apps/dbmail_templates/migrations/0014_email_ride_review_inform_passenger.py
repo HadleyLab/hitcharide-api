@@ -24,6 +24,12 @@ def load_mail_template(apps, schema_editor):
     # TODO link!
 
 
+def delete_mail_template(apps, schema_editor):
+    MailTemplate.objects.filter(
+        slug='ride_review_inform_passenger'
+    ).delete()
+
+
 def clean_cache(apps, schema_editor):
     from dbmail.models import MailTemplate, ApiKey
 
@@ -38,6 +44,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load_mail_template),
-        migrations.RunPython(clean_cache),
+        migrations.RunPython(load_mail_template, delete_mail_template),
+        migrations.RunPython(clean_cache, lambda apps, schema_editor: None),
     ]

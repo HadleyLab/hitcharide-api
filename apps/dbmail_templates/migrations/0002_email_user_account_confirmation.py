@@ -15,6 +15,12 @@ def load_mail_template(apps, schema_editor):
         is_html=True,)
 
 
+def delete_mail_template(apps, schema_editor):
+    MailTemplate.objects.filter(
+        slug='account_confirmation'
+    ).delete()
+
+
 def clean_cache(apps, schema_editor):
     from dbmail.models import MailTemplate, ApiKey
 
@@ -29,6 +35,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load_mail_template),
-        migrations.RunPython(clean_cache),
+        migrations.RunPython(load_mail_template, delete_mail_template),
+        migrations.RunPython(clean_cache, lambda apps, schema_editor: None),
     ]
