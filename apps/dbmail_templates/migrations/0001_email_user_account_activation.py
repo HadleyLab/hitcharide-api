@@ -6,7 +6,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="Account activate",
-        subject="Account activation",
+        subject="{{ site_name }} | Account activation",
         message="""
         <p>You're receiving this email because you need to finish activation process on {{ site_name }}.</p>
         <p>Please go to the following page to activate account:</p>

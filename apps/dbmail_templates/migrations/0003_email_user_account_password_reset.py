@@ -6,7 +6,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="Password reset",
-        subject="Password reset on {{ site_name }}",
+        subject="{{ site_name }} | Password reset",
         message="""
         <p>You're receiving this email because you requested a password reset for your user account at {{ site_name }}.</p>
         <p>Please go to the following page and choose a new password:</p>

@@ -7,7 +7,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="New ride for ride request",
-        subject="You have a new ride suggest",
+        subject="{{ site_name }} | You have a new ride suggest: {{ ride }}",
         message="""
         <p>You created a ride request {{ ride_request }}</p>
         <p>There is a ride for you:</p>

@@ -6,7 +6,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="The ride has been deleted",
-        subject="The ride {{ ride }} has been edited",
+        subject="{{ site_name }} | The ride {{ ride }} has been edited",
         message="""
         <p>You're receiving this email because you booked ride has been edited at {{ site_name }}.</p>
         <p><b>There is an information about the ride:<b><br>

@@ -6,7 +6,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="The ride_booking canceled (owner)",
-        subject="The client canceled the booking for ride {{ ride }}",
+        subject="{{ site_name }} | The client canceled the booking for ride {{ ride }}",
         message="""
         <p></p>
         <p><b>There is an information about the ride:<b><br>

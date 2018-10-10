@@ -6,7 +6,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="Account confirmation",
-        subject="Your account has been successfully created and activated!",
+        subject="{{ site_name }} | Your account has been successfully created and activated!",
         message="""
         <p>Your account has been created and is ready to use!</p>
         <p>Thanks for using our site!</p>
