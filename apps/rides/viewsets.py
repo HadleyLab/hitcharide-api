@@ -61,7 +61,8 @@ class RideViewSet(ListFactoryMixin,
             filter_backends=(MyRidesFilter, RidesListFilter))
     def my(self, request, *args, **kwargs):
         queryset = Ride.order_by_future(self.get_queryset()).filter(
-            car__owner=self.request.user)
+            car__owner=self.request.user,
+            status__in=RideStatus.ACTUAL)
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
@@ -137,8 +138,7 @@ class RideBookingViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return super(RideBookingViewSet, self).get_queryset().filter(
             client=self.request.user,
-            status__in=RideBookingStatus.ACTUAL
-        )
+            status__in=RideBookingStatus.ACTUAL)
 
     @transaction.atomic
     def perform_create(self, serializer):
