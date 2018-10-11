@@ -16,7 +16,7 @@ class CarWritableSerializer(serializers.ModelSerializer):
                   'number_of_seats', 'production_year')
 
 
-class CarListSerializer(serializers.ModelSerializer):
+class CarListSerializer(CarWritableSerializer):
     images = CarImageDetailSerializer(many=True)
 
     class Meta(CarWritableSerializer.Meta):
