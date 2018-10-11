@@ -9,8 +9,6 @@ class CarImageDetailSerializer(serializers.ModelSerializer):
         fields = ('pk', 'image')
 
 
-class CarImageWritableSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CarImage
-        fields = ('pk', 'image')
+class CarImageWritableSerializer(CarImageDetailSerializer):
+    class Meta(CarImageDetailSerializer.Meta):
+        pass
