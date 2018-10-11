@@ -106,7 +106,7 @@ class Ride(CreatedUpdatedMixin, models.Model):
             self.city_from,
             self.city_to,
             self.car,
-            self.date_time.strftime('%m/%d/%Y %H:%M'))
+            self.date_time.strftime('%m/%d/%Y'))
 
     @staticmethod
     def order_by_future(queryset):
