@@ -6,18 +6,24 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="The ride_booking canceled (owner)",
-        subject="The client canceled the booking for ride {{ booking.ride }}",
+        subject="{{ site_name }} | The client canceled the booking for ride {{ ride }}",
         message="""
         <p></p>
         <p><b>There is an information about the ride:<b><br>
-        <b>Car:</b> {{ booking.ride.car }}<br>
-        <b>Number of sits:</b> {{ booking.ride.number_of_seats }}<br>
-        <b>Description:</b> {{ booking.ride.description }}<br
+        <b>Car:</b> {{ ride.car }}<br>
+        <b>Number of sits:</b> {{ ride.number_of_seats }}<br>
+        <b>Description:</b> {{ ride.description }}<br
         </p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
         slug="owner_ride_booking_refunded",
         is_html=True,)
+
+
+def delete_mail_template(apps, schema_editor):
+    MailTemplate.objects.filter(
+        slug='owner_ride_booking_refunded'
+    ).delete()
 
 
 def clean_cache(apps, schema_editor):
@@ -34,6 +40,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load_mail_template),
-        migrations.RunPython(clean_cache),
+        migrations.RunPython(load_mail_template, delete_mail_template),
+        migrations.RunPython(clean_cache, lambda apps, schema_editor: None),
     ]

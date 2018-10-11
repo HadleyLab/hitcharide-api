@@ -102,10 +102,11 @@ class Ride(CreatedUpdatedMixin, models.Model):
             author_type=ReviewAuthorType.PASSENGER))
 
     def __str__(self):
-        return '{0} - {1} on {2}'.format(
+        return '{0} - {1} on {2} {3}'.format(
             self.city_from,
             self.city_to,
-            self.car)
+            self.car,
+            self.date_time.strftime('%m/%d/%Y'))
 
     @staticmethod
     def order_by_future(queryset):

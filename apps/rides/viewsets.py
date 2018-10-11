@@ -180,10 +180,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
             ride_booking_refund(ride_booking)
             send_mail('client_ride_booking_refunded',
                       [ride_booking.client.email],
-                      {'ride_booking': ride_booking})
+                      {'ride': ride_booking.ride})
             send_mail('owner_ride_booking_refunded',
                       [ride_booking.ride.car.owner.email],
-                      {'ride_booking': ride_booking})
+                      {'ride': ride_booking.ride})
 
         ride_booking.status = RideBookingStatus.CANCELED
         ride_booking.save()

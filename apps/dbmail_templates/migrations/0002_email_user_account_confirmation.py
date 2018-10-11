@@ -6,13 +6,19 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="Account confirmation",
-        subject="Your account has been successfully created and activated!",
+        subject="{{ site_name }} | Your account has been successfully created and activated!",
         message="""
         <p>Your account has been created and is ready to use!</p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
         slug="account_confirmation",
         is_html=True,)
+
+
+def delete_mail_template(apps, schema_editor):
+    MailTemplate.objects.filter(
+        slug='account_confirmation'
+    ).delete()
 
 
 def clean_cache(apps, schema_editor):
@@ -29,6 +35,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load_mail_template),
-        migrations.RunPython(clean_cache),
+        migrations.RunPython(load_mail_template, delete_mail_template),
+        migrations.RunPython(clean_cache, lambda apps, schema_editor: None),
     ]

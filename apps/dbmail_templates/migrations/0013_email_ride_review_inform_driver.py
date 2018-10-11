@@ -6,7 +6,7 @@ from django.db import migrations
 def load_mail_template(apps, schema_editor):
     MailTemplate.objects.create(
         name="Rate the ride passengers",
-        subject="You can rate passengers from the ride {{ ride }}",
+        subject="{{ site_name }} | You can rate passengers from the ride {{ ride }}",
         message="""
         <p></p>
         <p>You can rate passengers from your ride, 
@@ -17,6 +17,12 @@ def load_mail_template(apps, schema_editor):
         slug="ride_review_inform_driver",
         is_html=True)
     # TODO link!
+
+
+def delete_mail_template(apps, schema_editor):
+    MailTemplate.objects.filter(
+        slug='ride_review_inform_driver'
+    ).delete()
 
 
 def clean_cache(apps, schema_editor):
@@ -33,6 +39,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(load_mail_template),
-        migrations.RunPython(clean_cache),
+        migrations.RunPython(load_mail_template, delete_mail_template),
+        migrations.RunPython(clean_cache, lambda apps, schema_editor: None),
     ]
