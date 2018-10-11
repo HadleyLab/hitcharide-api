@@ -62,7 +62,7 @@ class RideViewSet(ListFactoryMixin,
     def my(self, request, *args, **kwargs):
         queryset = Ride.order_by_future(self.get_queryset()).filter(
             car__owner=self.request.user,
-            status__in=RideStatus.ACTUAL)
+            status__in=[RideStatus.CREATED, RideStatus.COMPLETED])
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,

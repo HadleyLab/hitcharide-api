@@ -22,8 +22,6 @@ class RideStatus(object):
         ]
     )
 
-    ACTUAL = [CREATED, COMPLETED]
-
 
 class Ride(CreatedUpdatedMixin, models.Model):
     car = models.ForeignKey(
