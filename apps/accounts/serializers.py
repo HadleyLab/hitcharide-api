@@ -13,12 +13,15 @@ class UserSerializer(UserBaseSerializer):
     rating = serializers.JSONField(
         read_only=True,
         source='get_rating')
+    rides_statistics = serializers.JSONField(
+        read_only=True,
+        source='get_rides_statistics')
 
     class Meta(UserBaseSerializer.Meta):
         fields = (
             'pk', 'email', 'phone', 'first_name', 'last_name',
             'age', 'photo', 'short_desc', 'is_phone_validated',
-            'paypal_account', 'rating',
+            'paypal_account', 'rating', 'rides_statistics'
         )
 
 
