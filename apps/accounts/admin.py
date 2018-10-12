@@ -7,7 +7,8 @@ from .models import User
 class MyUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         ('User fields', {
-            'fields': ('birthday', 'photo', 'phone', 'short_desc')
+            'fields': ('birthday', 'photo', 'phone',
+                       'is_phone_validated', 'short_desc')
         }),
     )
 
