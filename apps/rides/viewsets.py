@@ -147,9 +147,6 @@ class RideBookingViewSet(mixins.ListModelMixin,
         send_mail('client_booked_a_ride',
                   [ride_booking.client.email],
                   {'ride': ride_booking.ride})
-        send_mail('driver_somebody_booked_a_ride',
-                  [ride_booking.ride.car.owner.email],
-                  {'ride': ride_booking.ride})
 
         ride_booking_create_payment(ride_booking, self.request)
         serializer.data['paypal_approval_link'] = \
