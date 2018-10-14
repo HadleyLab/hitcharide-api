@@ -10,6 +10,7 @@ from apps.accounts.fields import PhoneField
 from apps.accounts.upload_paths import user_photo_path
 from apps.main.storages import public_storage
 from apps.reviews.utils import calc_rating
+from apps.rides.models import Ride, RideStatus, RideBooking, RideBookingStatus
 
 
 class User(AbstractUser):
@@ -61,6 +62,26 @@ class User(AbstractUser):
 
     def get_rating(self):
         return calc_rating(self.reviews.all())
+
+    def get_rides_statistics(self):
+        completed_rides_driver = Ride.objects.filter(
+            car__owner=self,
+            status=RideStatus.COMPLETED).count()
+        canceled_rides_driver = Ride.objects.filter(
+            car__owner=self,
+            status=RideStatus.CANCELED).count()
+
+        completed_rides_passenger = RideBooking.objects.filter(
+            client=self,
+            ride__status=RideStatus.COMPLETED).count()
+        canceled_rides_passenger = RideBooking.objects.filter(
+            client=self,
+            status=RideBookingStatus.CANCELED).count()
+
+        return {
+            'completed': completed_rides_driver + completed_rides_passenger,
+            'canceled': canceled_rides_driver + canceled_rides_passenger
+        }
 
 
 @receiver(pre_save, sender=User)
