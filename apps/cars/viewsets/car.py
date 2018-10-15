@@ -1,4 +1,5 @@
 from rest_framework import viewsets, mixins
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 
 from apps.cars.models import Car
@@ -23,3 +24,14 @@ class CarViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         return super(CarViewSet, self).get_queryset().filter(
             owner=self.request.user)
+
+    def perform_destroy(self, instance):
+        # super(CarViewSet, self).perform_delete(serializer)
+        if instance.rides.count() > 0:
+            rides = []
+            for ride in instance.rides.filter():
+                rides.append(ride)
+            raise PermissionDenied("This car has a rides. {0}".format(rides))
+        else:
+            instance.is_deleted = True
+            instance.save()
