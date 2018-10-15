@@ -19,6 +19,7 @@ class Car(models.Model):
         blank=True, null=True)
     production_year = models.IntegerField(
         blank=True, null=True)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return '{0} {1} - {2}'.format(
