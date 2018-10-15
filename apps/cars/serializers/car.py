@@ -13,7 +13,7 @@ class CarWritableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'production_year')
+                  'number_of_seats', 'production_year',)
 
 
 class CarListSerializer(CarWritableSerializer):
@@ -30,7 +30,7 @@ class CarDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'images', 'production_year')
+                  'number_of_seats', 'images', 'production_year', 'is_deleted')
 
 
 class UserWithCarsSerializer(UserSerializer):
