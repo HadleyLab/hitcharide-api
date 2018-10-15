@@ -23,10 +23,11 @@ class CarViewSet(viewsets.GenericViewSet,
 
     def get_queryset(self):
         return super(CarViewSet, self).get_queryset().filter(
-            owner=self.request.user)
+            owner=self.request.user,
+            is_deleted=False,
+        )
 
     def perform_destroy(self, instance):
-        # super(CarViewSet, self).perform_delete(serializer)
         if instance.rides.count() > 0:
             rides = []
             for ride in instance.rides.filter():
