@@ -145,10 +145,13 @@ class RideBookingViewSet(mixins.ListModelMixin,
     @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
+        ride = ride_booking.ride
 
         send_mail('client_booked_a_ride',
                   [ride_booking.client.email],
-                  {'ride': ride_booking.ride})
+                  {'ride': ride,
+                   'ride_detail': settings.RIDE_DETAIL_URL.format(
+                       ride_pk=ride.pk)})
 
         ride_booking_create_payment(ride_booking, self.request)
         serializer.data['paypal_approval_link'] = \
