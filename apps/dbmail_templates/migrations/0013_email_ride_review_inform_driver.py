@@ -10,13 +10,12 @@ def load_mail_template(apps, schema_editor):
         message="""
         <p></p>
         <p>You can rate passengers from your ride, 
-        by using this link: _______
+        by using this link: <a href='{{ review_url }}'>rate passengers.</a>
         </p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
         slug="ride_review_inform_driver",
         is_html=True)
-    # TODO link!
 
 
 def delete_mail_template(apps, schema_editor):

@@ -49,7 +49,9 @@ def ride_booking_create_payment(ride_booking, request):
     ride_booking.save()
     send_mail('ride_client_payment_created',
               [ride_booking.client.email],
-              {'booking': ride_booking})
+              {'booking': ride_booking,
+               'ride_detail': settings.RIDE_DETAIL_URL.format(
+                   ride_pk=ride_booking.ride.pk)})
 
 
 def ride_payout(ride):
@@ -85,7 +87,8 @@ def ride_payout(ride):
 
     send_mail('ride_payout_to_owner',
               [ride.car.owner.email],
-              {'ride': ride})
+              {'ride': ride,
+               'ride_detail': settings.RIDE_DETAIL_URL.format(ride_pk=ride.pk)})
 
 
 def ride_booking_refund(ride_booking):
@@ -130,12 +133,17 @@ def ride_booking_execute_payment(payer_id, ride_booking):
         if payment.execute({"payer_id": payer_id}):
             ride_booking.status = RideBookingStatus.PAYED
             ride_booking.save()
+            ride = ride_booking.ride
             send_mail('ride_client_payment_executed',
                       [ride_booking.client.email],
-                      {'ride': ride_booking.ride})
+                      {'ride': ride,
+                       'ride_detail': settings.RIDE_DETAIL_URL.format(
+                           ride_pk=ride.pk)})
             send_mail('ride_owner_payment_executed',
                       [ride_booking.ride.car.owner.email],
-                      {'ride': ride_booking.ride})
+                      {'ride': ride,
+                       'ride_detail': settings.RIDE_DETAIL_URL.format(
+                           ride_pk=ride.pk)})
 
             return True
 
@@ -143,9 +151,16 @@ def ride_booking_execute_payment(payer_id, ride_booking):
 
 
 def send_ride_need_review(ride):
+    review_url = settings.RIDE_REVIEW_URL.format(ride_pk=ride.pk)
     driver = ride.car.owner
-    send_mail('ride_review_inform_driver', [driver.email], {'ride': ride})
+    send_mail('ride_review_inform_driver',
+              [driver.email],
+              {'ride': ride, 'review_url': review_url})
     for client_email in ride.get_clients_emails(RideBookingStatus.PAYED):
         send_mail('ride_review_inform_passenger',
                   client_email,
-                  {'ride': ride, 'driver': driver})
+                  {
+                      'ride': ride,
+                      'driver': driver,
+                      'review_url': review_url
+                  })

@@ -11,7 +11,7 @@ def load_mail_template(apps, schema_editor):
         message="""
         <p>You created a ride request {{ ride_request }}</p>
         <p>There is a ride for you:</p>
-        <a href="{{ ride_url }}">{{ ride }}</a>
+        <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
         """,
         slug="new_ride_for_ride_request",
         is_html=True,)
