@@ -132,9 +132,11 @@ def ride_booking_execute_payment(payer_id, ride_booking):
         if payment.execute({"payer_id": payer_id}):
             ride_booking.status = RideBookingStatus.PAYED
             ride_booking.save()
+            ride = ride_booking.ride
             send_mail('ride_client_payment_executed',
                       [ride_booking.client.email],
-                      {'ride': ride_booking.ride})
+                      {'ride': ride,
+                       'ride_detail': ride.pk})
             send_mail('ride_owner_payment_executed',
                       [ride_booking.ride.car.owner.email],
                       {'ride': ride_booking.ride})
