@@ -19,7 +19,7 @@ class CarViewSetTest(APITestCase):
         resp = self.client.delete('/rides/car/{0}/'.format(self.car.pk))
         self.assertSuccessResponse(resp)
         self.car.refresh_from_db()
-        self.asserTrue(self.car.is_deleted)
+        self.assertTrue(self.car.is_deleted)
 
     def test_delete_car_with_rides(self):
         self.authenticate()
