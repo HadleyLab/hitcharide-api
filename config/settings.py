@@ -146,6 +146,7 @@ BACKEND_URL = os.environ.get(
 )
 
 RIDE_DETAIL_URL = FRONTEND_URL + '/app/ride/{ride_pk}/'
+RIDE_REVIEW_URL = FRONTEND_URL + '/app/rate/{ride_pk}/'
 
 
 DJOSER = {

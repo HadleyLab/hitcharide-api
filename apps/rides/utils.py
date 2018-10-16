@@ -143,9 +143,16 @@ def ride_booking_execute_payment(payer_id, ride_booking):
 
 
 def send_ride_need_review(ride):
+    review_url = settings.RIDE_REVIEW_URL.format(ride_pk=ride.pk)
     driver = ride.car.owner
-    send_mail('ride_review_inform_driver', [driver.email], {'ride': ride})
+    send_mail('ride_review_inform_driver',
+              [driver.email],
+              {'ride': ride, 'review_url': review_url})
     for client_email in ride.get_clients_emails(RideBookingStatus.PAYED):
         send_mail('ride_review_inform_passenger',
                   client_email,
-                  {'ride': ride, 'driver': driver})
+                  {
+                      'ride': ride,
+                      'driver': driver,
+                      'review_url': review_url
+                  })

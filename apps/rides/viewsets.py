@@ -110,7 +110,8 @@ class RideViewSet(ListFactoryMixin,
         if instance.get_booked_seats_count():
             send_mail('ride_has_been_edited',
                       instance.get_clients_emails(),
-                      {'ride': instance})
+                      {'ride': instance,
+                       'ride_detail': settings.RIDE_DETAIL_URL})
 
     def perform_destroy(self, instance):
         if instance.get_booked_seats_count():
