@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -21,8 +22,8 @@ class ReviewWritableSerializer(ReviewSerializer):
 
     def validate(self, attrs):
         ride = attrs['ride']
-        if ride.status != RideStatus.COMPLETED:
-            raise ValidationError('Ride must be completed to create the review')
+        if ride.date_time > timezone.now():
+            raise ValidationError('Ride must be started to create the review')
 
         author = attrs['author']
         subject = attrs['subject']
