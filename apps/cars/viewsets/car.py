@@ -28,11 +28,9 @@ class CarViewSet(viewsets.GenericViewSet,
         )
 
     def perform_destroy(self, instance):
-        if instance.rides.count() > 0:
-            rides = []
-            for ride in instance.rides.filter():
-                rides.append(ride)
+        rides = [ride for ride in instance.rides.filter(status='created')]
+        if rides:
             raise PermissionDenied("This car has a rides. {0}".format(rides))
-        else:
-            instance.is_deleted = True
-            instance.save()
+
+        instance.is_deleted = True
+        instance.save()
