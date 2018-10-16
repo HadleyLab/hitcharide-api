@@ -238,4 +238,5 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
         if config.MANAGER_EMAIL:
             send_mail('new_ride_complaint',
                       [config.MANAGER_EMAIL],
-                      {'complaint': instance})
+                      {'complaint': instance,
+                       'ride_detail': settings.RIDE_DETAIL_URL})

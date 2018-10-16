@@ -13,8 +13,9 @@ def load_mail_template(apps, schema_editor):
         <p><b>There is an information about the ride:<b><br>
         <b>Car:</b> {{ complaint.ride.car }}<br>
         <b>Number of sits:</b> {{ complaint.ride.number_of_seats }}<br>
-        <b>Description:</b> {{ complaint.ride.description }}<br
+        <b>Description:</b> {{ complaint.ride.description }}<br>
         </p>,
+        <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
         """,
             slug="new_ride_complaint",
         is_html=True,)
