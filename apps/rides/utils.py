@@ -49,7 +49,8 @@ def ride_booking_create_payment(ride_booking, request):
     ride_booking.save()
     send_mail('ride_client_payment_created',
               [ride_booking.client.email],
-              {'booking': ride_booking})
+              {'booking': ride_booking,
+               'ride_detail': settings.RIDE_DETAIL_URL})
 
 
 def ride_payout(ride):
