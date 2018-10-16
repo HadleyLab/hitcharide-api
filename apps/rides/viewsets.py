@@ -101,7 +101,7 @@ class RideViewSet(ListFactoryMixin,
                       [request.author.email],
                       {'ride': instance,
                        'ride_request': request,
-                       'ride_url': settings.RIDE_DETAIL_URL.format(
+                       'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=instance.pk)})
 
     def perform_update(self, serializer):
@@ -111,7 +111,8 @@ class RideViewSet(ListFactoryMixin,
             send_mail('ride_has_been_edited',
                       instance.get_clients_emails(),
                       {'ride': instance,
-                       'ride_detail': settings.RIDE_DETAIL_URL})
+                       'ride_detail': settings.RIDE_DETAIL_URL.format(
+                           ride_pk=instance.pk)})
 
     def perform_destroy(self, instance):
         if instance.get_booked_seats_count():
@@ -239,4 +240,5 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
             send_mail('new_ride_complaint',
                       [config.MANAGER_EMAIL],
                       {'complaint': instance,
-                       'ride_detail': settings.RIDE_DETAIL_URL})
+                       'ride_detail': settings.RIDE_DETAIL_URL.format(
+                           ride_pk=instance.pk)})
