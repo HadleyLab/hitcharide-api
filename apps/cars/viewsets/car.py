@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from apps.cars.models import Car
 from apps.cars.serializers import CarDetailSerializer, CarWritableSerializer
+from apps.rides.models import RideStatus
 
 
 class CarViewSet(viewsets.GenericViewSet,
@@ -28,7 +29,8 @@ class CarViewSet(viewsets.GenericViewSet,
         )
 
     def perform_destroy(self, instance):
-        rides = [ride for ride in instance.rides.filter(status='created')]
+        rides = [ride for ride in instance.rides.filter(
+            status=RideStatus.CREATED)]
         if rides:
             raise PermissionDenied("This car has a rides. {0}".format(rides))
 
