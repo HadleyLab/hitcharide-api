@@ -1,5 +1,7 @@
 import uuid
 
+import pytz
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import pre_save
@@ -11,6 +13,8 @@ from apps.accounts.upload_paths import user_photo_path
 from apps.main.storages import public_storage
 from apps.reviews.utils import calc_rating
 from apps.rides.models import Ride, RideStatus, RideBooking, RideBookingStatus
+
+TIMEZONES = [(name, name) for name in pytz.common_timezones]
 
 
 class User(AbstractUser):
@@ -36,6 +40,12 @@ class User(AbstractUser):
     paypal_account = models.CharField(
         max_length=150,
         blank=True, null=True)
+    timezone = models.CharField(
+        verbose_name='Time zone',
+        max_length=32,
+        choices=TIMEZONES,
+        default=settings.TIME_ZONE
+    )
 
     __original_phone = None
 

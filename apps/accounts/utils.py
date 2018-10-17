@@ -1,7 +1,10 @@
+from contextlib import contextmanager
 from random import randint
 
+import pytz
 from django.core.cache import cache
 from django.conf import settings
+from django.utils import timezone
 
 
 def random_digit(len):
@@ -30,3 +33,15 @@ def check_twilio_enabled():
     return settings.TWILIO_SID and \
            settings.TWILIO_TOKEN and \
            settings.TWILIO_PHONE
+
+
+@contextmanager
+def localize_for_user(user):
+    """
+    Context manager which should be used to localize output for
+    the concrete `user`.
+    Actually it just changes local timezone to user's timezone
+    """
+    timezone.activate(pytz.timezone(user.timezone))
+    yield
+    timezone.deactivate()
