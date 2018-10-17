@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.urls import reverse
+from django.utils.timezone import localtime
 from paypalrestsdk import Payment, Payout, Sale
 
+from apps.accounts.models import User
+from apps.accounts.utils import localize_for_user
 from apps.main.utils import send_mail
 from apps.rides.models import RideBookingStatus, RideStatus
 
@@ -157,10 +160,14 @@ def send_ride_need_review(ride):
               [driver.email],
               {'ride': ride, 'review_url': review_url})
     for client_email in ride.get_clients_emails(RideBookingStatus.PAYED):
-        send_mail('ride_review_inform_passenger',
-                  client_email,
-                  {
-                      'ride': ride,
-                      'driver': driver,
-                      'review_url': review_url
-                  })
+        with localize_for_user(User.objects.get(email=client_email)):
+            send_mail(
+                'ride_review_inform_passenger',
+                client_email,
+                {
+                    'ride': ride,
+                    'ride_date_time': localtime(
+                        ride.date_time).strftime('%Y-%m-%d %H:%M'),
+                    'driver': driver,
+                    'review_url': review_url
+                })
