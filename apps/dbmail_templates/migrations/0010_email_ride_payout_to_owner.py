@@ -11,7 +11,7 @@ def load_mail_template(apps, schema_editor):
         <p>You're receiving this email because you have a payout for the ride.</p>
         <p><b>There is an information about the ride:<b><br>
         <b>Car:</b> {{ ride.car }}<br>
-        <b>Number of sits:</b> {{ ride.number_of_seats }}<br>
+        <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
         <b>Description:</b> {{ ride.description }}<br
         </p>
         <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
