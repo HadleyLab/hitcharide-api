@@ -30,8 +30,18 @@ class RideComplaintsFilter(admin.SimpleListFilter):
         return queryset.filter(complaints__status=self.value())
 
 
+class ComplaintInline(admin.TabularInline):
+    model = RideComplaint
+    readonly_fields = ('user', 'description',)
+    can_delete = False
+
+
 class RideAdmin(admin.ModelAdmin):
     list_filter = (RideStatusFilter, RideComplaintsFilter,)
+
+    inlines = [
+        ComplaintInline,
+    ]
 
 
 admin.site.register(RideComplaint)
