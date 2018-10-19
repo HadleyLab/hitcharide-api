@@ -15,7 +15,6 @@ def load_mail_template(apps, schema_editor):
         <b>Description:</b> {{ ride.description }}<br
         </p>
         <p>
-        The Cost Contribution for the ride includes<br>
         Your reward: {{ ride.total_for_driver }} $
         </p>
         <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
