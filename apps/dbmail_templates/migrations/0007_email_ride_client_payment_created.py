@@ -15,6 +15,11 @@ def load_mail_template(apps, schema_editor):
         <b>Number of sits:</b> {{ booking.ride.number_of_seats }}<br>
         <b>Description:</b> {{ booking.ride.description }}<br
         </p>
+        <p>
+        The Cost Contribution for the ride includes<br>
+        Driver reward: {{ ride.total_for_driver }} $
+        Service fee: {{ fee_value }} $
+        </p>
         <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
         <p>Thanks for using our site!</p>
         <p>The {{ site_name }} team</p>""",
