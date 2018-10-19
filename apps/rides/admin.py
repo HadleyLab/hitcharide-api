@@ -28,7 +28,7 @@ class RideComplaintsFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value:
-            queryset = queryset.filter(complaints__status=self.value())
+            queryset = queryset.filter(complaints__status=value)
         return queryset
 
 
