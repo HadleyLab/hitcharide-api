@@ -14,7 +14,10 @@ class RideStatusFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        return queryset.filter(status=self.value())
+        value = self.value()
+        if value:
+            queryset = queryset.filter(status=value)
+        return queryset
 
 
 class RideComplaintsFilter(admin.SimpleListFilter):
@@ -27,7 +30,10 @@ class RideComplaintsFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        return queryset.filter(complaints__status=self.value())
+        value = self.value()
+        if value:
+            queryset = queryset.filter(complaints__status=self.value())
+        return queryset
 
 
 class ComplaintInline(admin.TabularInline):
@@ -37,6 +43,7 @@ class ComplaintInline(admin.TabularInline):
 
 
 class RideAdmin(admin.ModelAdmin):
+    readonly_fields = ['city_to', 'city_from']
     list_filter = (RideStatusFilter, RideComplaintsFilter,)
 
     inlines = [
