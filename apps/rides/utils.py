@@ -54,7 +54,6 @@ def ride_booking_create_payment(ride_booking, request):
     send_mail('ride_client_payment_created',
               [ride_booking.client.email],
               {'booking': ride_booking,
-               'fee_value': ride_booking.ride.fee_price,
                'ride_detail': settings.RIDE_DETAIL_URL.format(
                    ride_pk=ride_booking.ride.pk)})
 
@@ -93,7 +92,6 @@ def ride_payout(ride):
     send_mail('ride_payout_to_owner',
               [ride.car.owner.email],
               {'ride': ride,
-               'fee_value': ride.fee_price,
                'ride_detail': settings.RIDE_DETAIL_URL.format(ride_pk=ride.pk)})
 
 
@@ -143,13 +141,11 @@ def ride_booking_execute_payment(payer_id, ride_booking):
             send_mail('ride_client_payment_executed',
                       [ride_booking.client.email],
                       {'ride': ride,
-                       'fee_value': ride.fee_price,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=ride.pk)})
             send_mail('ride_owner_payment_executed',
                       [ride_booking.ride.car.owner.email],
                       {'ride': ride,
-                       'fee_value': ride.fee_price,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=ride.pk)})
 
