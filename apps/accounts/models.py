@@ -46,6 +46,9 @@ class User(AbstractUser):
         choices=TIMEZONES,
         default=settings.TIME_ZONE
     )
+    sms_notifications = models.BooleanField(
+        default=False
+    )
 
     __original_phone = None
 
