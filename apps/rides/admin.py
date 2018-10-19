@@ -9,9 +9,7 @@ class RideStatusFilter(admin.SimpleListFilter):
     parameter_name = 'status'
 
     def lookups(self, request, model_admin):
-        return (
-            RideStatus.CHOICES
-        )
+        return RideStatus.CHOICES
 
     def queryset(self, request, queryset):
         value = self.value()
@@ -25,9 +23,7 @@ class RideComplaintsFilter(admin.SimpleListFilter):
     parameter_name = 'complaints'
 
     def lookups(self, request, model_admin):
-        return (
-            RideComplaintStatus.CHOICES
-        )
+        return RideComplaintStatus.CHOICES
 
     def queryset(self, request, queryset):
         value = self.value()
