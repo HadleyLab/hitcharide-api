@@ -13,7 +13,7 @@ def load_mail_template(apps, schema_editor):
             {{ driver.first_name }} {{ driver.last_name }}<br>
             <b>Date:</b> {{ ride_date_time }}<br>
             <b>Car:</b> {{ ride.car }}<br>
-            <b>Number of sits:</b> {{ ride.number_of_seats }}<br>
+            <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
             <b>Description:</b> {{ ride.description }}<br>
             Using this link: <a href='{{ review_url }}'>rate a ride.</a>
             </p>
