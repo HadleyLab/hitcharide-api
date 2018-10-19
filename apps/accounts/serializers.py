@@ -21,7 +21,8 @@ class UserSerializer(UserBaseSerializer):
         fields = (
             'pk', 'email', 'phone', 'first_name', 'last_name',
             'age', 'photo', 'short_desc', 'is_phone_validated',
-            'paypal_account', 'rating', 'rides_statistics', 'timezone'
+            'paypal_account', 'rating', 'rides_statistics', 'timezone',
+            'sms_notifications'
         )
 
 
@@ -53,5 +54,6 @@ class UserUpdateSerializer(RegisterUserSerializer):
     class Meta(RegisterUserSerializer.Meta):
         fields = (
             'pk', 'phone', 'first_name', 'last_name',
-            'photo', 'short_desc', 'paypal_account', 'timezone'
+            'photo', 'short_desc', 'paypal_account', 'timezone',
+            'sms_notifications'
         )
