@@ -16,8 +16,7 @@ def load_mail_template(apps, schema_editor):
         </p>
         <p>
         The Cost Contribution for the ride includes<br>
-        Driver reward: {{ ride.price }} $
-        Service fee: {{ ride.fee_price }} $
+        Your reward: {{ ride.total_for_driver }} $
         </p>
         <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
         <p>Thanks for using our site!</p>
