@@ -63,11 +63,14 @@ class Ride(CreatedUpdatedMixin, models.Model):
         return self.get_booked_seats_count() * self.price
 
     @property
-    def price_with_fee(self):
-        ride_price = self.price
+    def fee_price(self):
         system_fee = Decimal(config.SYSTEM_FEE)
         coef = Decimal("0.01")
-        return ride_price + ride_price * (system_fee * coef)
+        return self.price * (system_fee * coef)
+
+    @property
+    def price_with_fee(self):
+        return self.price + self.fee_price
 
     @property
     def actual_bookings(self):
