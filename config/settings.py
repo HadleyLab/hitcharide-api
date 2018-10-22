@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'social_django',
     'dbmail',
     'django_extensions',
+    'ckeditor',
 
     'constance',
     'constance.backends.database',
