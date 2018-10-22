@@ -32,7 +32,9 @@ class CarViewSet(viewsets.GenericViewSet,
         rides = [ride for ride in instance.rides.filter(
             status=RideStatus.CREATED)]
         if rides:
-            raise PermissionDenied("This car has a rides. {0}".format(rides))
+            raise PermissionDenied(
+                'The car used for: {0}'.format(
+                    ', '.join(ride.get_printable_title() for ride in rides)))
 
         instance.is_deleted = True
         instance.save()
