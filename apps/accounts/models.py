@@ -73,6 +73,10 @@ class User(AbstractUser):
         else:
             return None
 
+    @property
+    def normalized_phone(self):
+        return '+{0}'.format(self.phone)
+
     def get_rating(self):
         return calc_rating(self.reviews.all())
 

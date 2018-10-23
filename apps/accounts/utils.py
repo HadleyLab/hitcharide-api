@@ -29,12 +29,6 @@ def check_user_code(user_pk, code):
     return cache.get(get_user_code_key(user_pk)) == code
 
 
-def check_twilio_enabled():
-    return settings.TWILIO_SID and \
-           settings.TWILIO_TOKEN and \
-           settings.TWILIO_PHONE
-
-
 @contextmanager
 def localize_for_user(user):
     """
