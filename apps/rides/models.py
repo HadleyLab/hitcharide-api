@@ -2,8 +2,8 @@ from decimal import Decimal
 
 from constance import config
 from django.db import models
-from django.db.models import Q
-from django.db.models import Case, When, BooleanField
+from django.db.models import Q, Case, When, BooleanField
+from django.core.validators import MinValueValidator
 from django.utils import timezone
 
 from apps.reviews.models import Review, ReviewAuthorType
@@ -29,7 +29,9 @@ class Ride(CreatedUpdatedMixin, models.Model):
         on_delete=models.PROTECT,
         related_name='rides')
     number_of_seats = models.PositiveSmallIntegerField(
-        verbose_name='Available number of seats during ride')
+        verbose_name='Available number of seats during ride',
+        validators=[MinValueValidator(1)]
+    )
     description = models.TextField(
         blank=True, null=True)
     city_from = models.ForeignKey(
@@ -43,7 +45,8 @@ class Ride(CreatedUpdatedMixin, models.Model):
     date_time = models.DateTimeField()
     price = models.DecimalField(
         decimal_places=2,
-        max_digits=10
+        max_digits=10,
+        validators=[MinValueValidator(Decimal('0.01'))]
     )
     status = models.CharField(
         max_length=10,

@@ -93,6 +93,21 @@ class RideWritableSerializer(WritableNestedModelSerializer):
             raise ValidationError('You need to fill profile and validate '
                                   'the phone to create a ride')
 
+        car = attrs['car']
+        number_of_seats = attrs['number_of_seats']
+        if number_of_seats > car.number_of_seats:
+            raise ValidationError({
+                'number_of_seats': 'Ensure this value is less than max number of seats '
+                                   'in the car ({0}).'.format(car.number_of_seats)
+            })
+
+        city_from = attrs['city_from']
+        city_to = attrs['city_to']
+        if city_to == city_from:
+            raise ValidationError({
+                'city_to': 'Choose another city which is not equal the `from` city'
+            })
+
         return super(RideWritableSerializer, self).validate(attrs)
 
     class Meta:
