@@ -17,12 +17,14 @@ def get_context():
     }
 
 
+# TODO: create high-level wrapper which receives User as recipient
 def send_mail(slug, recipient, context=None, *args, **kwargs):
     context = context or {}
     context.update(get_context())
     send_db_mail(slug, recipient, context, *args, **kwargs)
 
 
+# TODO: create high-level wrapper which receives User as recipient
 def send_sms(slug, recipient, context=None, *args, **kwargs):
     context = context or {}
     context.update(get_context())

@@ -40,7 +40,7 @@ class SendPhoneValidationCodeView(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
         code = generate_sms_code()
         send_sms(
-            'phone_validate',
+            'sms_user_phone_validation',
             user.normalized_phone,
             {'code': code}
         )
