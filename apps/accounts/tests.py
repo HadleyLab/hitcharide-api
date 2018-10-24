@@ -21,7 +21,7 @@ class RegistrationTestCase(APITestCase):
         self.assertSuccessResponse(resp)
         assert_mock_called_with(
             mock_send_mail,
-            'account_activate', ['test@test.test'],
+            'account_activation', ['test@test.test'],
             lambda value: self.assertEqual(
                 value['user'].email,
                 'test@test.test')
