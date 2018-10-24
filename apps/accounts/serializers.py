@@ -51,6 +51,12 @@ class UserUpdateSerializer(RegisterUserSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
 
+    def validate(self, attrs):
+        if not self.instance.is_phone_validated:
+            attrs['sms_notifications'] = False
+
+        return attrs
+
     class Meta(RegisterUserSerializer.Meta):
         fields = (
             'pk', 'phone', 'first_name', 'last_name',

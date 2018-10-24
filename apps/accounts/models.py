@@ -59,6 +59,7 @@ class User(AbstractUser):
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         if self.phone != self.__original_phone:
             self.is_phone_validated = False
+            self.sms_notifications = False
 
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_phone = self.phone
