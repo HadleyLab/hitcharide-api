@@ -133,6 +133,7 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 DB_MAILER_CELERY_QUEUE = None
+DB_MAILER_SMS_PROVIDER = 'apps.main.dbmail_providers.twilio.sms'
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
@@ -165,7 +166,6 @@ DJOSER = {
             'apps.dbmail_templates.email.PasswordResetDBMailEmail',
     },
 }
-
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
@@ -246,9 +246,9 @@ LOGIN_ERROR_URL = FRONTEND_URL + '/account/social-auth-error/'
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SA_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
 
-TWILIO_SID = os.environ.get('TWILIO_ACCOUNT_SID')
-TWILIO_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE = os.environ.get('TWILIO_PHONE_NUMBER')
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_FROM = os.environ.get('TWILIO_PHONE_NUMBER')
 
 
 AWS_S3_SECURE_URLS = True  # use https

@@ -1,12 +1,10 @@
-from constance import config
 from django.conf import settings
 from django.urls import reverse
 from django.utils.timezone import localtime
 from paypalrestsdk import Payment, Payout, Sale
 
-from apps.accounts.models import User
 from apps.accounts.utils import localize_for_user
-from apps.main.utils import send_mail
+from apps.main.utils import send_mail, send_sms
 from apps.rides.models import RideBookingStatus, RideStatus
 
 
@@ -51,7 +49,7 @@ def ride_booking_create_payment(ride_booking, request):
     ride_booking.paypal_payment_id = payment.id
     ride_booking.paypal_approval_link = approval_link
     ride_booking.save()
-    send_mail('ride_client_payment_created',
+    send_mail('email_passenger_ride_booking_created',
               [ride_booking.client.email],
               {'booking': ride_booking,
                'ride_detail': settings.RIDE_DETAIL_URL.format(
@@ -89,10 +87,16 @@ def ride_payout(ride):
     if not payout.create():
         raise Exception("Cannot create a payout:\n{0}".format(payout.error))
 
-    send_mail('ride_payout_to_owner',
+    send_mail('email_driver_ride_payout',
               [ride.car.owner.email],
               {'ride': ride,
                'ride_detail': settings.RIDE_DETAIL_URL.format(ride_pk=ride.pk)})
+
+    if ride.car.owner.sms_notifications:
+        send_sms('sms_driver_ride_payout',
+                 [ride.car.owner.normalized_phone],
+                 {'ride': ride,
+                  'ride_detail': settings.RIDE_DETAIL_URL.format(ride_pk=ride.pk)})
 
 
 def ride_booking_refund(ride_booking):
@@ -114,16 +118,18 @@ def ride_booking_refund(ride_booking):
 def cancel_ride_by_driver(ride):
     ride_bookings = ride.bookings.filter(status__in=RideBookingStatus.ACTUAL)
     for booking in ride_bookings:
-        if booking.status == RideBookingStatus.PAYED:
-            ride_booking_refund(booking)
-            send_mail('ride_has_been_deleted',
-                      [booking.client.email],
-                      {'ride': ride})
+        if booking.status in [RideBookingStatus.PAYED, RideBookingStatus.CREATED]:
+            if booking.status == RideBookingStatus.PAYED:
+                ride_booking_refund(booking)
 
-        if booking.status == RideBookingStatus.CREATED:
-            send_mail('ride_has_been_deleted',
+            send_mail('email_passenger_ride_canceled',
                       [booking.client.email],
                       {'ride': ride})
+            if booking.client.sms_notifications:
+                send_sms('sms_passenger_ride_canceled',
+                         [booking.client.normalized_phone],
+                         {'ride': ride})
+
         booking.status = RideBookingStatus.REVOKED
         booking.save()
     ride.status = RideStatus.CANCELED
@@ -138,16 +144,22 @@ def ride_booking_execute_payment(payer_id, ride_booking):
             ride_booking.status = RideBookingStatus.PAYED
             ride_booking.save()
             ride = ride_booking.ride
-            send_mail('ride_client_payment_executed',
+            send_mail('email_passenger_ride_booking_payed',
                       [ride_booking.client.email],
                       {'ride': ride,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=ride.pk)})
-            send_mail('ride_owner_payment_executed',
+            send_mail('email_driver_ride_booking_payed',
                       [ride_booking.ride.car.owner.email],
                       {'ride': ride,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=ride.pk)})
+            if ride_booking.ride.car.owner.sms_notifications:
+                send_sms('sms_driver_ride_booking_payed',
+                         [ride_booking.ride.car.owner.normalized_phone],
+                         {'ride': ride,
+                          'ride_detail': settings.RIDE_DETAIL_URL.format(
+                              ride_pk=ride.pk)})
 
             return True
 
@@ -157,14 +169,14 @@ def ride_booking_execute_payment(payer_id, ride_booking):
 def send_ride_need_review(ride):
     review_url = settings.RIDE_REVIEW_URL.format(ride_pk=ride.pk)
     driver = ride.car.owner
-    send_mail('ride_review_inform_driver',
+    send_mail('email_driver_rate_passengers',
               [driver.email],
               {'ride': ride, 'review_url': review_url})
-    for client_email in ride.get_clients_emails(RideBookingStatus.PAYED):
-        with localize_for_user(User.objects.get(email=client_email)):
+    for booking in ride.bookings.filter(status=RideBookingStatus.PAYED):
+        with localize_for_user(booking.client):
             send_mail(
-                'ride_review_inform_passenger',
-                client_email,
+                'email_passenger_rate_driver',
+                booking.client.email,
                 {
                     'ride': ride,
                     'ride_date_time': localtime(

@@ -20,12 +20,12 @@ class DBMailEmail(BaseEmailMessage):
 
 
 class ActivationDBMailEmail(DBMailEmail, ActivationEmail):
-    template_name = 'account_activate'
+    template_name = 'email_user_account_activation'
 
 
 class ConfirmationDBMailEmail(DBMailEmail, ConfirmationEmail):
-    template_name = 'account_confirmation'
+    template_name = 'email_user_account_confirmation'
 
 
 class PasswordResetDBMailEmail(DBMailEmail, PasswordResetEmail):
-    template_name = 'account_password_reset'
+    template_name = 'email_user_account_password_reset'

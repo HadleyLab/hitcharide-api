@@ -59,6 +59,7 @@ class User(AbstractUser):
     def save(self, force_insert=False, force_update=False, *args, **kwargs):
         if self.phone != self.__original_phone:
             self.is_phone_validated = False
+            self.sms_notifications = False
 
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_phone = self.phone
@@ -72,6 +73,10 @@ class User(AbstractUser):
             return today.year - self.birthday.year - months_diff
         else:
             return None
+
+    @property
+    def normalized_phone(self):
+        return '+{0}'.format(self.phone)
 
     def get_rating(self):
         return calc_rating(self.reviews.all())

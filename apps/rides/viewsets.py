@@ -9,7 +9,7 @@ from constance import config
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
-from apps.main.utils import send_mail
+from apps.main.utils import send_mail, send_sms
 from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
     IsRideBookingActual
 from apps.rides.utils import ride_booking_refund, \
@@ -30,8 +30,7 @@ from .serializers import RideBookingDetailSerializer, \
 class RideViewSet(ListFactoryMixin,
                   mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
-                  mixins.RetrieveModelMixin,
-                  mixins.DestroyModelMixin):
+                  mixins.RetrieveModelMixin):
     queryset = Ride.objects.all()
     serializer_class = RideDetailSerializer
     permission_classes = (IsAuthenticated,)
@@ -46,7 +45,7 @@ class RideViewSet(ListFactoryMixin,
     def get_permissions(self):
         if self.action == 'list':
             return [AllowAny()]
-        elif self.action in ['update', 'destroy', 'cancel']:
+        elif self.action in ['update', 'cancel']:
             return [IsRideOwner()]
         else:
             return super(RideViewSet, self).get_permissions()
@@ -97,29 +96,37 @@ class RideViewSet(ListFactoryMixin,
         instance = serializer.instance
         requests = instance.get_ride_requests()
         for request in requests:
-            send_mail('new_ride_for_ride_request',
+            send_mail('email_passenger_ride_request_ride_suggest',
                       [request.author.email],
                       {'ride': instance,
                        'ride_request': request,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=instance.pk)})
+            if request.author.sms_notifications:
+                send_sms('sms_passenger_ride_request_ride_suggest',
+                         [request.author.normalized_phone],
+                         {'ride': instance,
+                          'ride_request': request,
+                          'ride_detail': settings.RIDE_DETAIL_URL.format(
+                              ride_pk=instance.pk)})
 
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
         instance = serializer.instance
-        if instance.get_booked_seats_count():
-            send_mail('ride_has_been_edited',
-                      instance.get_clients_emails(),
-                      {'ride': instance,
-                       'ride_detail': settings.RIDE_DETAIL_URL.format(
-                           ride_pk=instance.pk)})
-
-    def perform_destroy(self, instance):
-        if instance.get_booked_seats_count():
-            send_mail('ride_has_been_deleted',
-                      instance.get_clients_emails(),
-                      {'ride': instance})
-        return super(RideViewSet, self).perform_destroy(instance)
+        for booking in instance.bookings.filter(status=RideBookingStatus.PAYED):
+            send_mail(
+                'email_passenger_ride_edited',
+                booking.client.email,
+                {'ride': instance,
+                 'ride_detail': settings.RIDE_DETAIL_URL.format(
+                     ride_pk=instance.pk)})
+            if booking.client.sms_notifications:
+                send_sms(
+                    'sms_passenger_ride_edited',
+                    booking.client.normalized_phone,
+                    {'ride': instance,
+                     'ride_detail': settings.RIDE_DETAIL_URL.format(
+                         ride_pk=instance.pk)})
 
 
 class RideBookingViewSet(mixins.ListModelMixin,
@@ -145,13 +152,6 @@ class RideBookingViewSet(mixins.ListModelMixin,
     @transaction.atomic
     def perform_create(self, serializer):
         ride_booking = serializer.save()
-        ride = ride_booking.ride
-
-        send_mail('client_booked_a_ride',
-                  [ride_booking.client.email],
-                  {'ride': ride,
-                   'ride_detail': settings.RIDE_DETAIL_URL.format(
-                       ride_pk=ride.pk)})
 
         ride_booking_create_payment(ride_booking, self.request)
         serializer.data['paypal_approval_link'] = \
@@ -181,16 +181,22 @@ class RideBookingViewSet(mixins.ListModelMixin,
         if ride_booking.status == RideBookingStatus.PAYED:
             ride = ride_booking.ride
             ride_booking_refund(ride_booking)
-            send_mail('client_ride_booking_refunded',
+            send_mail('email_passenger_ride_booking_canceled',
                       [ride_booking.client.email],
                       {'ride': ride,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=ride.pk)})
-            send_mail('owner_ride_booking_refunded',
+            send_mail('email_driver_ride_booking_canceled',
                       [ride_booking.ride.car.owner.email],
                       {'ride': ride,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
                            ride_pk=ride.pk)})
+            if ride_booking.ride.car.owner.sms_notifications:
+                send_sms('sms_driver_ride_booking_canceled',
+                         [ride_booking.ride.car.owner.normalized_phone],
+                         {'ride': ride,
+                          'ride_detail': settings.RIDE_DETAIL_URL.format(
+                              ride_pk=ride.pk)})
 
         ride_booking.status = RideBookingStatus.CANCELED
         ride_booking.save()
@@ -245,7 +251,7 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
         super(RideComplaintViewSet, self).perform_create(serializer)
         instance = serializer.instance
         if config.MANAGER_EMAIL:
-            send_mail('new_ride_complaint',
+            send_mail('email_manager_ride_complaint_created',
                       [config.MANAGER_EMAIL],
                       {'complaint': instance,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(

@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
 from social_django.utils import psa
 
+from apps.main.utils import send_sms
 from .serializers import UserSerializer, UserUpdateSerializer
 from .utils import generate_sms_code, save_user_code, check_user_code
-from .tasks import send_sms
 
 
 class MyView(APIView):
@@ -39,9 +39,11 @@ class SendPhoneValidationCodeView(APIView):
                 {'status': 'error', 'error': 'need to fill phone'},
                 status=status.HTTP_400_BAD_REQUEST)
         code = generate_sms_code()
-        send_sms.delay(
-            phone=user.phone,
-            message='Your Hitcharide activation code is: {0}'.format(code))
+        send_sms(
+            'sms_user_phone_validation',
+            user.normalized_phone,
+            {'code': code}
+        )
         save_user_code(user.pk, code)
         return Response({'status': 'success'})
 
