@@ -12,7 +12,7 @@ class Command(BaseCommand):
             message="""
             <p>You're receiving this email because you need to finish activation process on {{ site_name }}.</p>
             <p>Please go to the following page to activate account:</p>
-            <p><a href="{{ url }}">{{ url }}</a></p>
+            <p><a href="{{ url|safe }}">{{ url|safe }}</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_user_account_activation",
@@ -36,7 +36,7 @@ class Command(BaseCommand):
             message="""
             <p>You're receiving this email because you requested a password reset for your user account at {{ site_name }}.</p>
             <p>Please go to the following page and choose a new password:</p>
-            <a href="{{ url }}">{{ url }}</a>
+            <a href="{{ url|safe }}">{{ url|safe }}</a>
             <p>Your username, in case you've forgotten: <b>{{ user.get_username }}</b></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
@@ -48,7 +48,7 @@ class Command(BaseCommand):
             name="The ride has been canceled (to passenger)",
             subject="{{ site_name }} | The ride {{ ride }} has been deleted",
             message="""
-            <p>You're receiving this email because you booked ride has been deleted at {{ site_name }}.</p>
+            <p>You're receiving this email because your booked ride has been deleted at {{ site_name }}.</p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_passenger_ride_canceled",
@@ -59,13 +59,13 @@ class Command(BaseCommand):
             name="The ride has been edited (to passenger)",
             subject="{{ site_name }} | The ride {{ ride }} has been edited",
             message="""
-            <p>You're receiving this email because you booked ride has been edited at {{ site_name }}.</p>
+            <p>You're receiving this email because your booked ride has been edited at {{ site_name }}.</p>
             <p><b>There is an information about the ride:<b><br>
             <b>Car:</b> {{ ride.car }}<br>
             <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
             <b>Description:</b> {{ ride.description }}<br
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_passenger_ride_edited",
@@ -83,7 +83,7 @@ class Command(BaseCommand):
             <b>Number of seats:</b> {{ complaint.ride.number_of_seats }}<br>
             <b>Description:</b> {{ complaint.ride.description }}<br>
             </p>,
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             """,
             slug="email_manager_ride_complaint_created",
             is_html=True
@@ -93,8 +93,8 @@ class Command(BaseCommand):
             name="The ride booking has been created (to passenger)",
             subject="{{ site_name }} | The payment for the ride {{ booking.ride }} has been created",
             message="""
-            <p>You're receiving this email because you need to pay for booked ride.</p>
-            <p>You can pay by this link: <a href='{{ booking.paypal_approval_link }}'>{{ booking.paypal_approval_link }}</a>
+            <p>You're receiving this email because you need to pay for a booked ride.</p>
+            <p>You can pay by this link: <a href='{{ booking.paypal_approval_link|safe }}'>{{ booking.paypal_approval_link|safe }}</a>
             <p><b>There is an information about the ride:<b><br>
             <b>Car:</b> {{ booking.ride.car }}<br>
             <b>Number of seats:</b> {{ booking.ride.number_of_seats }}<br>
@@ -105,7 +105,7 @@ class Command(BaseCommand):
             Driver reward: {{ booking.ride.price }} $
             Service fee: {{ booking.ride.fee_price }} $
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_passenger_ride_booking_created",
@@ -118,7 +118,7 @@ class Command(BaseCommand):
             message="""
             <p>You created a ride request {{ ride_request }}</p>
             <p>There is a ride for you:</p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             """,
             slug="email_passenger_ride_request_ride_suggest",
             is_html=True
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             Driver reward: {{ ride.price }} $
             Service fee: {{ ride.fee_price }} $
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_driver_ride_booking_payed",
@@ -161,7 +161,7 @@ class Command(BaseCommand):
             Driver reward: {{ ride.price }} $
             Service fee: {{ ride.fee_price }} $
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_passenger_ride_booking_payed",
@@ -181,7 +181,7 @@ class Command(BaseCommand):
             <p>
             Your reward: {{ ride.total_for_driver }} $
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_driver_ride_payout",
@@ -198,7 +198,7 @@ class Command(BaseCommand):
             <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
             <b>Description:</b> {{ ride.description }}<br>
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>You payment will be refunded soon by PayPal.</p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
@@ -216,7 +216,7 @@ class Command(BaseCommand):
             <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
             <b>Description:</b> {{ ride.description }}<br>
             </p>
-            <p>You can see the ride details <a href='{{ ride_detail }}'>here</a></p>
+            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_driver_ride_booking_canceled",
@@ -229,7 +229,7 @@ class Command(BaseCommand):
             message="""
             <p></p>
             <p>You can rate passengers from your ride, 
-            by using this link: <a href='{{ review_url }}'>rate passengers.</a>
+            by using this link: <a href='{{ review_url|safe }}'>rate passengers.</a>
             </p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
@@ -248,7 +248,7 @@ class Command(BaseCommand):
                 <b>Car:</b> {{ ride.car }}<br>
                 <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
                 <b>Description:</b> {{ ride.description }}<br>
-                Using this link: <a href='{{ review_url }}'>rate a ride.</a>
+                Using this link: <a href='{{ review_url|safe }}'>rate a ride.</a>
                 </p>
                 <p>Thanks for using our site!</p>
                 <p>The {{ site_name }} team</p>""",
