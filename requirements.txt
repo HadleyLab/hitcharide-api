@@ -43,7 +43,7 @@ requests-oauthlib==1.0.0
 six==1.11.0
 text-unidecode==1.2
 urllib3==1.23
-twilio==6.16.3
+twilio==6.19.1
 celery==4.2.1
 -e git+https://github.com/LPgenerator/django-db-mailer.git@217a73c21ba5c6b68738f74b2c55a6dd2c1afe35#egg=django-db-mailer
 git+git://github.com/beda-software/djangorestframework-camel-case@a6a448360941130678b62aebed5d5d09ba1214bb#egg=djangorestframework-camel-case
