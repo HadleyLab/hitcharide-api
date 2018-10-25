@@ -76,6 +76,9 @@ class User(AbstractUser):
 
     @property
     def normalized_phone(self):
+        if not self.is_phone_validated:
+            return None
+
         return '+{0}'.format(self.phone)
 
     def get_rating(self):

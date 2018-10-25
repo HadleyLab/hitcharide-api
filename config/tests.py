@@ -47,3 +47,7 @@ class APITestCase(BaseAPITestCase):
 
     def assertNotFound(self, resp):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def assertInternalServerError(self, resp):
+        self.assertEqual(
+            resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)

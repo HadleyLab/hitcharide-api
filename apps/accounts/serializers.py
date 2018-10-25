@@ -47,7 +47,7 @@ class UserCreateSerializer(UserBaseSerializer):
         return user
 
     class Meta(UserBaseSerializer.Meta):
-        fields = UserBaseSerializer.Meta.fields + ('password',)
+        fields = ('pk', 'email', 'password', 'timezone',)
         extra_kwargs = {
             'password': {
                 'write_only': True,

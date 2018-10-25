@@ -11,9 +11,6 @@ class RegistrationTestCase(APITestCase):
     def test_registration(self, mock_send_mail):
         data = {
             'email': 'test@test.test',
-            'phone': '+7 933 000 00 00',
-            'first_name': 'first',
-            'last_name': 'last',
             'password': '123'
         }
 
@@ -28,8 +25,6 @@ class RegistrationTestCase(APITestCase):
         )
 
         user = User.objects.get(pk=resp.data['pk'])
-        self.assertEqual(user.first_name, 'first')
-        self.assertEqual(user.last_name, 'last')
         self.assertTrue(user.check_password('123'))
         self.assertEqual(user.email, 'test@test.test')
         self.assertEqual(user.username, 'test@test.test')
@@ -48,9 +43,6 @@ class RegistrationTestCase(APITestCase):
         user = UserFactory.create()
         data = {
             'email': user.email,
-            'phone': '+7 933 000 00 00',
-            'first_name': 'first',
-            'last_name': 'last',
             'password': '123'
         }
 
@@ -141,7 +133,7 @@ class RegistrationTestCase(APITestCase):
     def test_update(self):
         self.authenticate()
         self.user.phone = '+71111111111'
-        self.user.is_phone_validated == True
+        self.user.is_phone_validated = True
         self.user.save()
 
         self.client.put('/accounts/my/', {
@@ -149,3 +141,67 @@ class RegistrationTestCase(APITestCase):
         })
 
         self.assertEqual(self.user.is_phone_validated, False)
+
+
+class UserProfileTestCase(APITestCase):
+    def setUp(self):
+        super(UserProfileTestCase, self).setUp()
+        self.destination_user = UserFactory.create(phone='+72222222222')
+        self.user.phone = '+71111111111'
+        self.user.save()
+
+    @mock.patch('apps.accounts.viewsets.twilio_create_proxy_phone')
+    def test_create_proxy_phone_success(self, mock_twilio_create_proxy_phone):
+        mock_twilio_create_proxy_phone.return_value = '+10000000000'
+
+        self.authenticate()
+        self.user.is_phone_validated = True
+        self.user.save()
+        self.destination_user.is_phone_validated = True
+        self.destination_user.save()
+
+        resp = self.client.post('/accounts/{0}/create_proxy_phone/'.format(
+            self.destination_user.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(resp.data['proxy_phone'], '+10000000000')
+
+    @mock.patch('apps.accounts.viewsets.twilio_create_proxy_phone')
+    def test_create_proxy_phone_with_twilio_error_failed(
+            self, mock_twilio_create_proxy_phone):
+        mock_twilio_create_proxy_phone.return_value = None
+
+        self.authenticate()
+        self.user.is_phone_validated = True
+        self.user.save()
+        self.destination_user.is_phone_validated = True
+        self.destination_user.save()
+
+        resp = self.client.post('/accounts/{0}/create_proxy_phone/'.format(
+            self.destination_user.pk))
+        self.assertInternalServerError(resp)
+
+    @mock.patch('apps.accounts.viewsets.twilio_create_proxy_phone')
+    def test_create_proxy_phone_without_source_phone_failed(
+            self, mock_twilio_create_proxy_phone):
+        mock_twilio_create_proxy_phone.return_value = '+10000000000'
+
+        self.authenticate()
+        self.destination_user.is_phone_validated = True
+        self.destination_user.save()
+
+        resp = self.client.post('/accounts/{0}/create_proxy_phone/'.format(
+            self.destination_user.pk))
+        self.assertBadRequest(resp)
+
+    @mock.patch('apps.accounts.viewsets.twilio_create_proxy_phone')
+    def test_create_proxy_phone_without_destination_phone_failed(
+            self, mock_twilio_create_proxy_phone):
+        mock_twilio_create_proxy_phone.return_value = '+10000000000'
+
+        self.authenticate()
+        self.user.is_phone_validated = True
+        self.user.save()
+
+        resp = self.client.post('/accounts/{0}/create_proxy_phone/'.format(
+            self.destination_user.pk))
+        self.assertBadRequest(resp)

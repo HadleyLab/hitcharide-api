@@ -71,7 +71,7 @@ def set_twilio_proxy_session_id(source_phone, destination_phone, session_id):
         session_id, timeout=timeout)
 
 
-def twilio_create_proxy_number(source_phone, destination_phone):
+def twilio_create_proxy_phone(source_phone, destination_phone):
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     service = client.proxy.services(
         settings.TWILIO_PASSENGER_AND_DRIVER_SESSION_ID)
@@ -94,9 +94,9 @@ def twilio_create_proxy_number(source_phone, destination_phone):
     set_twilio_proxy_session_id(source_phone, destination_phone, session.sid)
 
     try:
-        session.participants.create(identifier=destination_phone)
+        session.participants.create(identifier=source_phone)
         return session.participants.create(
-            identifier=source_phone).proxy_identifier
+            identifier=destination_phone).proxy_identifier
     except TwilioException:
         session.delete()
         return None
