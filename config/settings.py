@@ -157,7 +157,7 @@ DJOSER = {
     'ACTIVATION_URL': FRONTEND_URL + '/account/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
-        'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
+        'user_create': 'apps.accounts.serializers.UserCreateSerializer',
     },
     'EMAIL': {
         'activation': 'apps.dbmail_templates.email.ActivationDBMailEmail',
