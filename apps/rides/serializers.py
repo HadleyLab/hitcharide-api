@@ -2,7 +2,7 @@ from rest_framework import serializers
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework.exceptions import ValidationError
 
-from apps.accounts.serializers import UserSerializer
+from apps.accounts.serializers import UserPublicSerializer
 from apps.cars.serializers import CarDetailSerializer
 from apps.places.serializers import CityWithStateSerializer
 from apps.reviews.models import Review, ReviewAuthorType
@@ -26,7 +26,7 @@ class RideStopWritableSerializer(serializers.ModelSerializer):
 
 
 class RidePassengerSerializer(serializers.ModelSerializer):
-    client = UserSerializer()
+    client = UserPublicSerializer()
 
     class Meta:
         model = RideBooking
@@ -97,15 +97,17 @@ class RideWritableSerializer(WritableNestedModelSerializer):
         number_of_seats = attrs['number_of_seats']
         if number_of_seats > car.number_of_seats:
             raise ValidationError({
-                'number_of_seats': 'Ensure this value is less than max number of seats '
-                                   'in the car ({0}).'.format(car.number_of_seats)
+                'number_of_seats': 'Ensure this value is less than max number '
+                                   'of seats in the car ({0}).'.format(
+                    car.number_of_seats)
             })
 
         city_from = attrs['city_from']
         city_to = attrs['city_to']
         if city_to == city_from:
             raise ValidationError({
-                'city_to': 'Choose another city which is not equal the `from` city'
+                'city_to': 'Choose another city which is not equal '
+                           'the `from` city'
             })
 
         return super(RideWritableSerializer, self).validate(attrs)

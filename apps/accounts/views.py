@@ -9,7 +9,7 @@ from rest_framework_jwt.utils import jwt_payload_handler, jwt_encode_handler
 from social_django.utils import psa
 
 from apps.main.utils import send_sms
-from .serializers import UserSerializer, UserUpdateSerializer
+from .serializers import UserDetailSerializer, UserUpdateSerializer
 from .utils import generate_sms_code, save_user_code, check_user_code
 
 
@@ -18,7 +18,8 @@ class MyView(APIView):
 
     def get(self, request):
         return Response(
-            UserSerializer(request.user, context={'request': request}).data)
+            UserDetailSerializer(
+                request.user, context={'request': request}).data)
 
     def put(self, request):
         serializer = UserUpdateSerializer(
@@ -26,7 +27,7 @@ class MyView(APIView):
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
         return Response(
-            UserSerializer(instance, context={'request': request}).data)
+            UserDetailSerializer(instance, context={'request': request}).data)
 
 
 class SendPhoneValidationCodeView(APIView):

@@ -1,41 +1,41 @@
 from rest_framework import serializers
 
-from apps.accounts.models import User
-from apps.accounts.serializers import UserSerializer
+from apps.accounts.serializers import UserPublicSerializer
 from apps.cars.models import Car
 from apps.cars.serializers.car_image import CarImageDetailSerializer
 
 
-class CarWritableSerializer(serializers.ModelSerializer):
+class CarBaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Car
+        fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
+                  'number_of_seats', 'production_year', 'is_deleted',)
+
+
+class CarWritableSerializer(CarBaseSerializer):
     owner = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
 
-    class Meta:
-        model = Car
-        fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'production_year',)
+    class Meta(CarBaseSerializer.Meta):
+        pass
 
 
-class CarListSerializer(CarWritableSerializer):
+class CarListSerializer(CarBaseSerializer):
     images = CarImageDetailSerializer(many=True)
 
-    class Meta(CarWritableSerializer.Meta):
+    class Meta(CarBaseSerializer.Meta):
         fields = CarWritableSerializer.Meta.fields + ('images',)
 
 
-class CarDetailSerializer(serializers.ModelSerializer):
-    owner = UserSerializer()
-    images = CarImageDetailSerializer(many=True)
+class CarDetailSerializer(CarListSerializer):
+    owner = UserPublicSerializer()
 
-    class Meta:
-        model = Car
-        fields = ('pk', 'owner', 'brand', 'model', 'color', 'license_plate',
-                  'number_of_seats', 'images', 'production_year', 'is_deleted')
+    class Meta(CarListSerializer.Meta):
+        pass
 
 
-class UserWithCarsSerializer(UserSerializer):
+class UserWithCarsPublicSerializer(UserPublicSerializer):
     cars = CarListSerializer(many=True)
 
-    class Meta:
-        model = User
-        fields = UserSerializer.Meta.fields + ('cars',)
+    class Meta(UserPublicSerializer.Meta):
+        fields = UserPublicSerializer.Meta.fields + ('cars',)

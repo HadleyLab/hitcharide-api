@@ -157,7 +157,7 @@ DJOSER = {
     'ACTIVATION_URL': FRONTEND_URL + '/account/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
-        'user_create': 'apps.accounts.serializers.RegisterUserSerializer',
+        'user_create': 'apps.accounts.serializers.UserCreateSerializer',
     },
     'EMAIL': {
         'activation': 'apps.dbmail_templates.email.ActivationDBMailEmail',
@@ -249,7 +249,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_FROM = os.environ.get('TWILIO_PHONE_NUMBER')
-
+TWILIO_PASSENGER_AND_DRIVER_SESSION_ID = os.environ.get('TWILIO_PASSENGER_AND_DRIVER_SESSION_ID')
+TWILIO_PASSENGER_AND_DRIVER_SESSION_TTL = int(os.environ.get('TWILIO_PASSENGER_AND_DRIVER_SESSION_TTL', '120'))
 
 AWS_S3_SECURE_URLS = True  # use https
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
