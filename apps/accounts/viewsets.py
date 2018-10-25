@@ -19,22 +19,20 @@ class UserDetailViewSet(mixins.RetrieveModelMixin,
         source_user = request.user
         destination_user = self.get_object()
 
+        if not source_user.is_phone_validated:
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data='Please specify and validate your phone number '
+                     'in the profile')
+
+        if not destination_user.is_phone_validated:
+            return response.Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data='The user you want to call did not specified or '
+                     'validated the phone number')
+
         source_phone = source_user.normalized_phone
         destination_phone = destination_user.normalized_phone
-
-        if not source_phone:
-            return response.Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={api_settings.NON_FIELD_ERRORS_KEY: [
-                    'Please specify and validate your phone number '
-                    'in the profile']})
-
-        if not destination_phone:
-            return response.Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={api_settings.NON_FIELD_ERRORS_KEY: [
-                    'The user you want to call did not specified or '
-                    'validated the phone number']})
 
         proxy_phone = twilio_create_proxy_phone(source_phone, destination_phone)
         if not proxy_phone:
@@ -42,8 +40,7 @@ class UserDetailViewSet(mixins.RetrieveModelMixin,
             # TODO: something went wrong with proxy number creation
             return response.Response(
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data={api_settings.NON_FIELD_ERRORS_KEY: [
-                    'Can not create temporary phones for you and user. '
-                    'Please repeat it again or ask our support for help']})
+                data='Can not create temporary phones for you and user. '
+                     'Please repeat it again or ask us for help')
 
         return response.Response(data={'proxy_phone': proxy_phone})
