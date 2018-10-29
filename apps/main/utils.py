@@ -109,6 +109,6 @@ def twilio_create_proxy_phone(source_phone, destination_phone):
         session, source_participant, destination_participant = \
             twilio_create_proxy_session(source_phone, destination_phone)
 
-        return destination_participant.proxy_identifier
+        return source_participant.proxy_identifier
     except TwilioException:
         return None
