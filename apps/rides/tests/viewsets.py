@@ -269,6 +269,18 @@ class RideViewSetTest(APITestCase):
             '/rides/ride/{0}/request_driver_phone/'.format(ride.pk))
         self.assertForbidden(resp)
 
+    def test_request_driver_phone_by_driver_for_not_actual_failed(self):
+        self.authenticate()
+        ride = RideFactory.create(car=self.car, status=RideStatus.COMPLETED)
+        RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.PAYED)
+
+        resp = self.client.post(
+            '/rides/ride/{0}/request_driver_phone/'.format(ride.pk))
+        self.assertForbidden(resp)
+
 
 class RideBookingViewSetTest(APITestCase):
     def setUp(self):
@@ -376,6 +388,19 @@ class RideBookingViewSetTest(APITestCase):
         booking = RideBookingFactory.create(
             ride=ride,
             client=self.user,
+            status=RideBookingStatus.CREATED)
+
+        resp = self.client.post(
+            '/rides/booking/{0}/request_passenger_phone/'.format(booking.pk))
+        self.assertForbidden(resp)
+
+    def test_request_passenger_phone_by_driver_for_not_actual_failed(self):
+        self.authenticate()
+        ride = RideFactory.create(car=self.car, status=RideStatus.COMPLETED)
+        client = UserFactory.create()
+        booking = RideBookingFactory.create(
+            ride=ride,
+            client=client,
             status=RideBookingStatus.CREATED)
 
         resp = self.client.post(

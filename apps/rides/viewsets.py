@@ -11,7 +11,8 @@ from rest_framework.response import Response
 
 from apps.main.utils import send_mail, send_sms
 from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
-    IsRideBookingActual, IsRideBookingDriver, IsRidePayedPassenger
+    IsRideBookingActual, RequestDriverPhonePermission, \
+    RequestPassengerPhonePermission
 from apps.rides.utils import ride_booking_refund, \
     ride_booking_execute_payment, ride_booking_create_payment, \
     cancel_ride_by_driver, create_proxy_phone_within_ride
@@ -46,7 +47,7 @@ class RideViewSet(ListFactoryMixin,
         # TODO: check is_phone_validated for create
         if self.action == 'list':
             return [AllowAny()]
-        elif self.action in ['update', 'cancel']:
+        elif self.action in ['update']:
             return [IsRideOwner()]
         else:
             return super(RideViewSet, self).get_permissions()
@@ -74,7 +75,8 @@ class RideViewSet(ListFactoryMixin,
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['POST'], detail=True,
-            serializer_class=RideCancelSerializer)
+            serializer_class=RideCancelSerializer,
+            permission_classes=(IsRideOwner,))
     def cancel(self, request, *args, **kwargs):
         ride = self.get_object()
         cancel_ride_by_driver(ride)
@@ -84,7 +86,7 @@ class RideViewSet(ListFactoryMixin,
         return Response({'status': 'success'})
 
     @action(methods=['POST'], detail=True,
-            permission_classes=(IsRidePayedPassenger,))
+            permission_classes=(RequestDriverPhonePermission,))
     def request_driver_phone(self, request, *args, **kwargs):
         ride = self.get_object()
         proxy_phone = create_proxy_phone_within_ride(
@@ -211,7 +213,7 @@ class RideBookingViewSet(ListFactoryMixin,
         return Response({'status': 'success'})
 
     @action(methods=['POST'], detail=True,
-            permission_classes=(IsRideBookingDriver,))
+            permission_classes=(RequestPassengerPhonePermission, ))
     def request_passenger_phone(self, request, *args, **kwargs):
         booking = self.get_object()
         proxy_phone = create_proxy_phone_within_ride(
