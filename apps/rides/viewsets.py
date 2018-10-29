@@ -283,4 +283,4 @@ class RideComplaintViewSet(mixins.CreateModelMixin,
                       [config.MANAGER_EMAIL],
                       {'complaint': instance,
                        'ride_detail': settings.RIDE_DETAIL_URL.format(
-                           ride_pk=instance.pk)})
+                           ride_pk=instance.ride.pk)})

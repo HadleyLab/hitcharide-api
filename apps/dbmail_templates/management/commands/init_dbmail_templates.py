@@ -78,12 +78,21 @@ class Command(BaseCommand):
             message="""
             <p>Complaint body:</p>
             <p>{{ complaint.description }}</p>
+            <p><b>Passenger info:</b><br>
+            <b>Full name:</b> {{ complaint.user.get_full_name }}<br>
+            <b>Phone:</b> +{{ complaint.user.phone }}<br>
+            <b>Email:</b> {{ complaint.user.email }}<br>
+            
             <p><b>There is an information about the ride:<b><br>
             <b>Car:</b> {{ complaint.ride.car }}<br>
+            <b>Driver full name:</b> {{ complaint.ride.car.owner.get_full_name }}<br>
+            <b>Driver phone:</b> +{{ complaint.ride.car.owner.phone }}<br>
+            <b>Driver email:</b> {{ complaint.ride.car.owner.email }}<br>
             <b>Number of seats:</b> {{ complaint.ride.number_of_seats }}<br>
             <b>Description:</b> {{ complaint.ride.description }}<br>
             </p>,
             <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
+            <p>Also you can see the complaint details in <a href='{{ backend_url}}/admin/rides/ridecomplaint/{{ complaint.pk }}/'>admin interface</a></p>
             """,
             slug="email_manager_ride_complaint_created",
             is_html=True
