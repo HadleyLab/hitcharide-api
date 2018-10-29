@@ -240,6 +240,35 @@ class RideViewSetTest(APITestCase):
         self.assertEqual(ride.status, RideStatus.CANCELED)
         self.assertEqual(ride.cancel_reason, reason_text)
 
+    @mock.patch('apps.rides.viewsets.create_proxy_phone_within_ride')
+    def test_request_driver_phone_by_driver_success(
+            self, mock_create_proxy_phone_within_ride):
+        mock_create_proxy_phone_within_ride.return_value = '+10000000000'
+
+        self.authenticate()
+        ride = RideFactory.create(car=self.car)
+        RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.PAYED)
+
+        resp = self.client.post(
+            '/rides/ride/{0}/request_driver_phone/'.format(ride.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(resp.data['proxy_phone'], '+10000000000')
+
+    def test_request_driver_phone_by_not_payed_passenger_failed(self):
+        self.authenticate()
+        ride = RideFactory.create(car=self.car)
+        RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.CREATED)
+
+        resp = self.client.post(
+            '/rides/ride/{0}/request_driver_phone/'.format(ride.pk))
+        self.assertForbidden(resp)
+
 
 class RideBookingViewSetTest(APITestCase):
     def setUp(self):
@@ -320,3 +349,35 @@ class RideBookingViewSetTest(APITestCase):
         booking.refresh_from_db()
         self.assertEqual(booking.status, RideBookingStatus.CANCELED)
         self.assertEqual(booking.cancel_reason, cancel_reason)
+
+    @mock.patch('apps.rides.viewsets.create_proxy_phone_within_ride')
+    def test_request_passenger_phone_by_driver_success(
+            self, mock_create_proxy_phone_within_ride):
+        mock_create_proxy_phone_within_ride.return_value = '+10000000000'
+
+        self.authenticate()
+        ride = RideFactory.create(car=self.car)
+        client = UserFactory.create()
+        booking = RideBookingFactory.create(
+            ride=ride,
+            client=client,
+            status=RideBookingStatus.CREATED)
+
+        resp = self.client.post(
+            '/rides/booking/{0}/request_passenger_phone/'.format(booking.pk))
+        self.assertSuccessResponse(resp)
+        self.assertEqual(resp.data['proxy_phone'], '+10000000000')
+
+    def test_request_passenger_phone_by_not_driver_failed(self):
+        self.authenticate()
+
+        another_car = CarFactory.create()
+        ride = RideFactory.create(car=another_car)
+        booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.CREATED)
+
+        resp = self.client.post(
+            '/rides/booking/{0}/request_passenger_phone/'.format(booking.pk))
+        self.assertForbidden(resp)
