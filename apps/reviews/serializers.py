@@ -28,9 +28,8 @@ class ReviewWritableSerializer(ReviewSerializer):
         author = attrs['author']
         subject = attrs['subject']
 
-        ride_passengers_pks = ride.bookings.filter(
-            status=RideBookingStatus.PAYED
-        ).values_list('client_id', flat=True)
+        ride_passengers_pks = ride.payed_bookings.values_list(
+            'client_id', flat=True)
         ride_driver = ride.car.owner
 
         if attrs['author_type'] == ReviewAuthorType.DRIVER:

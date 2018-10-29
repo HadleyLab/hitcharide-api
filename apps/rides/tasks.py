@@ -1,4 +1,5 @@
 from celery import shared_task
+from constance import config
 from django.db import transaction
 from django.utils import timezone
 
@@ -9,7 +10,8 @@ from apps.rides.utils import ride_payout, send_ride_need_review
 @shared_task()
 @transaction.atomic
 def create_payouts_for_rides():
-    ride_end_datetime = timezone.now() - timezone.timedelta(hours=24)
+    ride_end_datetime = timezone.now() - timezone.timedelta(
+        hours=config.RIDE_END_TIMEDELTA)
     finished_rides = Ride.objects.filter(
         status=RideStatus.CREATED,
         date_time__lte=ride_end_datetime,

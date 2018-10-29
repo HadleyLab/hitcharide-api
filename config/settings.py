@@ -249,8 +249,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get('SA_GOOGLE_OAUTH2_SECRET')
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
 TWILIO_FROM = os.environ.get('TWILIO_PHONE_NUMBER')
-TWILIO_PASSENGER_AND_DRIVER_SESSION_ID = os.environ.get('TWILIO_PASSENGER_AND_DRIVER_SESSION_ID')
-TWILIO_PASSENGER_AND_DRIVER_SESSION_TTL = int(os.environ.get('TWILIO_PASSENGER_AND_DRIVER_SESSION_TTL', '600'))
+TWILIO_PASSENGER_AND_DRIVER_SESSION_ID = os.environ.get(
+    'TWILIO_PASSENGER_AND_DRIVER_SESSION_ID')
 
 AWS_S3_SECURE_URLS = True  # use https
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
@@ -262,7 +262,8 @@ CONSTANCE_CONFIG = {
     'MANAGER_EMAIL': ('manager@hitcharide.com', 'Email for complaints'),
     'SELLER_EMAIL': (
         'seller@hitcharide.com', 'Email for the seller PayPal account'),
-    'SYSTEM_FEE': (15, 'default value (in percent) of ride\'s fee'),
+    'SYSTEM_FEE': (15, 'Ride\'s fee (in percent from 0 to 100)'),
+    'RIDE_END_TIMEDELTA': (24, 'Ride end timedelta (in hours)'),
 
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'

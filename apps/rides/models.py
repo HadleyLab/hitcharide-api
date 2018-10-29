@@ -77,13 +77,14 @@ class Ride(CreatedUpdatedMixin, models.Model):
 
     @property
     def actual_bookings(self):
-        return self.bookings.filter(
-            status__in=RideBookingStatus.ACTUAL
-        )
+        return self.bookings.filter(status__in=RideBookingStatus.ACTUAL)
+
+    @property
+    def payed_bookings(self):
+        return self.bookings.filter(status=RideBookingStatus.PAYED)
 
     def get_booked_seats_count(self):
-        return sum(self.bookings.filter(status=RideBookingStatus.PAYED).
-                   values_list('seats_count', flat=True))
+        return sum(self.payed_bookings.values_list('seats_count', flat=True))
 
     def get_ride_requests(self):
         stops_cities = self.stops.values_list('city', flat=True)

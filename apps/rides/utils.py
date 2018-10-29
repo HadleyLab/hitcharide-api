@@ -1,10 +1,12 @@
+import datetime
 from django.conf import settings
 from django.urls import reverse
 from django.utils.timezone import localtime
+from constance import config
 from paypalrestsdk import Payment, Payout, Sale
 
 from apps.accounts.utils import localize_for_user
-from apps.main.utils import send_mail, send_sms
+from apps.main.utils import send_mail, send_sms, twilio_create_proxy_phone
 from apps.rides.models import RideBookingStatus, RideStatus
 
 
@@ -172,7 +174,7 @@ def send_ride_need_review(ride):
     send_mail('email_driver_rate_passengers',
               [driver.email],
               {'ride': ride, 'review_url': review_url})
-    for booking in ride.bookings.filter(status=RideBookingStatus.PAYED):
+    for booking in ride.payed_bookings:
         with localize_for_user(booking.client):
             send_mail(
                 'email_passenger_rate_driver',
@@ -184,3 +186,14 @@ def send_ride_need_review(ride):
                     'driver': driver,
                     'review_url': review_url
                 })
+
+
+def create_proxy_phone_within_ride(src_user, dst_user, ride):
+    source_phone = src_user.normalized_phone
+    destination_phone = dst_user.normalized_phone
+
+    date_expired = ride.date_time + datetime.timedelta(
+        hours=config.RIDE_END_TIMEDELTA)
+    return twilio_create_proxy_phone(
+        source_phone, destination_phone,
+        'ride:{0}'.format(ride.pk), date_expired)

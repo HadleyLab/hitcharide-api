@@ -11,10 +11,10 @@ from rest_framework.response import Response
 
 from apps.main.utils import send_mail, send_sms
 from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
-    IsRideBookingActual
+    IsRideBookingActual, IsRideBookingDriver, IsRidePayedPassenger
 from apps.rides.utils import ride_booking_refund, \
     ride_booking_execute_payment, ride_booking_create_payment, \
-    cancel_ride_by_driver
+    cancel_ride_by_driver, create_proxy_phone_within_ride
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
     BookingsListFilter
 from .mixins import ListFactoryMixin
@@ -43,6 +43,7 @@ class RideViewSet(ListFactoryMixin,
         return self.serializer_class
 
     def get_permissions(self):
+        # TODO: check is_phone_validated for create
         if self.action == 'list':
             return [AllowAny()]
         elif self.action in ['update', 'cancel']:
@@ -82,6 +83,14 @@ class RideViewSet(ListFactoryMixin,
         serializer.save()
         return Response({'status': 'success'})
 
+    @action(methods=['POST'], detail=True,
+            permission_classes=(IsRidePayedPassenger,))
+    def request_driver_phone(self, request, *args, **kwargs):
+        ride = self.get_object()
+        proxy_phone = create_proxy_phone_within_ride(
+            request.user, ride.car.owner, ride)
+        return Response({'proxy_phone': proxy_phone})
+
     # Wrap with transaction.atomic to rollback on nested serializer error
     @transaction.atomic
     def create(self, request, *args, **kwargs):
@@ -113,7 +122,7 @@ class RideViewSet(ListFactoryMixin,
     def perform_update(self, serializer):
         super(RideViewSet, self).perform_update(serializer)
         instance = serializer.instance
-        for booking in instance.bookings.filter(status=RideBookingStatus.PAYED):
+        for booking in instance.payed_bookings:
             send_mail(
                 'email_passenger_ride_edited',
                 booking.client.email,
@@ -129,7 +138,8 @@ class RideViewSet(ListFactoryMixin,
                          ride_pk=instance.pk)})
 
 
-class RideBookingViewSet(mixins.ListModelMixin,
+class RideBookingViewSet(ListFactoryMixin,
+                         mixins.ListModelMixin,
                          mixins.CreateModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
@@ -139,6 +149,10 @@ class RideBookingViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated,)
     filter_backends = (BookingsListFilter,)
 
+    def get_permissions(self):
+        # TODO: check is_phone_validated for create
+        return super(RideBookingViewSet, self).get_permissions()
+
     def get_serializer_class(self):
         if self.action in ['create']:
             return RideBookingWritableSerializer
@@ -146,7 +160,6 @@ class RideBookingViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         return super(RideBookingViewSet, self).get_queryset().filter(
-            client=self.request.user,
             status__in=RideBookingStatus.ACTUAL)
 
     @transaction.atomic
@@ -157,20 +170,9 @@ class RideBookingViewSet(mixins.ListModelMixin,
         serializer.data['paypal_approval_link'] = \
             ride_booking.paypal_approval_link
 
-    @action(methods=['GET'], detail=True, permission_classes=())
-    def paypal_payment_execute(self, request, pk, *args, **kwargs):
-        payer_id = request.GET.get('PayerID')
-        ride_booking = RideBooking.objects.get(pk=pk)
-        ride_detail_url = settings.RIDE_DETAIL_URL.format(
-            ride_pk=ride_booking.ride.pk)
-        # TODO: catch exception instead of if
-        if ride_booking_execute_payment(payer_id, ride_booking):
-            success_url = '{0}?execution=success'.format(
-                ride_detail_url)
-            return HttpResponseRedirect(success_url)
-
-        fail_url = '{0}?execution=fail'.format(ride_detail_url)
-        return HttpResponseRedirect(fail_url)
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(client=request.user)
+        return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['POST'], detail=True,
             permission_classes=(IsRideBookingClient, IsRideBookingActual,),
@@ -207,6 +209,30 @@ class RideBookingViewSet(mixins.ListModelMixin,
         serializer.save()
 
         return Response({'status': 'success'})
+
+    @action(methods=['POST'], detail=True,
+            permission_classes=(IsRideBookingDriver,))
+    def request_passenger_phone(self, request, *args, **kwargs):
+        booking = self.get_object()
+        proxy_phone = create_proxy_phone_within_ride(
+            request.user, booking.client, booking.ride)
+        return Response({'proxy_phone': proxy_phone})
+
+    # This view is accessible by client without token
+    @action(methods=['GET'], detail=True, permission_classes=())
+    def paypal_payment_execute(self, request, *args, **kwargs):
+        payer_id = request.GET.get('PayerID')
+        booking = self.get_object()
+        ride_detail_url = settings.RIDE_DETAIL_URL.format(
+            ride_pk=booking.ride.pk)
+        # TODO: catch exception instead of if
+        if ride_booking_execute_payment(payer_id, booking):
+            success_url = '{0}?execution=success'.format(
+                ride_detail_url)
+            return HttpResponseRedirect(success_url)
+
+        fail_url = '{0}?execution=fail'.format(ride_detail_url)
+        return HttpResponseRedirect(fail_url)
 
 
 class RideRequestViewSet(mixins.ListModelMixin,

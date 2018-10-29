@@ -16,3 +16,14 @@ class IsRideBookingClient(IsAuthenticated):
 class IsRideBookingActual(BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.status in RideBookingStatus.ACTUAL
+
+
+class IsRideBookingDriver(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.ride.car.owner == request.user
+
+
+class IsRidePayedPassenger(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user.pk in obj.payed_bookings.values_list(
+            'client', flat=True)

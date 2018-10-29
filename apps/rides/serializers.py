@@ -51,9 +51,8 @@ class RideDetailSerializer(WritableNestedModelSerializer):
             return False
 
         user = self.context['request'].user
-        ride_passengers_pks = ride.bookings.filter(
-            status=RideBookingStatus.PAYED
-        ).values_list('client_id', flat=True)
+        ride_passengers_pks = ride.payed_bookings.values_list(
+            'client_id', flat=True)
         ride_driver = ride.car.owner
         if ride_driver == user:
             # I am driver
