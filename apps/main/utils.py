@@ -1,6 +1,7 @@
 import os
 import time
 
+from decimal import Decimal
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.cache import cache
@@ -31,6 +32,11 @@ def send_sms(slug, recipient, context=None, *args, **kwargs):
     context = context or {}
     context.update(get_context())
     send_db_sms(slug, recipient, context, *args, **kwargs)
+
+
+def round_decimal(num):
+    # Rounds `num` to 2 digital places
+    return num.quantize(Decimal('0.01'))
 
 
 def get_timestamp():

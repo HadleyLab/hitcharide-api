@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from apps.reviews.models import Review, ReviewAuthorType
 from apps.reviews.utils import calc_rating
+from apps.main.utils import round_decimal
 from .mixins import CreatedUpdatedMixin
 
 
@@ -68,8 +69,9 @@ class Ride(CreatedUpdatedMixin, models.Model):
     @property
     def fee_price(self):
         system_fee = Decimal(config.SYSTEM_FEE)
-        coef = Decimal("0.01")
-        return self.price * (system_fee * coef)
+        coef = Decimal('0.01')
+        fee_price = self.price * (system_fee * coef)
+        return round_decimal(fee_price)
 
     @property
     def price_with_fee(self):
