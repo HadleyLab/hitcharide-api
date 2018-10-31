@@ -1,6 +1,5 @@
 import os
 import csv
-import gzip
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -10,8 +9,7 @@ from django.db import transaction
 from apps.places.models import State, Place, PlaceCategory
 
 
-dataset_path = os.path.join(
-    settings.BASE_DIR, 'apps', 'places', 'management', 'commands', 'dataset')
+dataset_path = os.path.join(settings.BASE_DIR, 'dataset')
 
 
 class Command(BaseCommand):
@@ -26,7 +24,7 @@ class Command(BaseCommand):
 
     def import_category(self, category, filename):
         places = []
-        with gzip.open(os.path.join(dataset_path, filename), 'rt') as fd:
+        with open(os.path.join(dataset_path, filename)) as fd:
             for place_data in csv.DictReader(fd):
                 cities_mapping = self.states_mapping[place_data['state']]
                 city = cities_mapping.get(place_data['city'].lower())
@@ -53,10 +51,10 @@ class Command(BaseCommand):
         Place.objects.all().delete()
 
         files_by_category = [
-            (PlaceCategory.AIRPORT, 'airports.csv.gz'),
-            (PlaceCategory.BUS_STATION, 'bus_stations.csv.gz'),
-            (PlaceCategory.TRAIN_STATION, 'train_stations.csv.gz'),
-            (PlaceCategory.EDUCATIONAL_PLACE, 'educational_places.csv.gz'),
+            (PlaceCategory.AIRPORT, 'airports.csv'),
+            (PlaceCategory.BUS_STATION, 'bus_stations.csv'),
+            (PlaceCategory.TRAIN_STATION, 'train_stations.csv'),
+            (PlaceCategory.EDUCATIONAL_PLACE, 'educational_places.csv'),
         ]
         for category, filename in files_by_category:
             self.import_category(category, filename)

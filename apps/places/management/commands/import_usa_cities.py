@@ -1,6 +1,5 @@
 import csv
 import os
-import gzip
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -10,8 +9,7 @@ from django.db import transaction
 from apps.places.models import City, State
 
 
-dataset_path = os.path.join(
-    settings.BASE_DIR, 'apps', 'places', 'management', 'commands', 'dataset')
+dataset_path = os.path.join(settings.BASE_DIR, 'dataset')
 
 
 class Command(BaseCommand):
@@ -21,7 +19,7 @@ class Command(BaseCommand):
         State.objects.all().delete()
 
         states = []
-        with gzip.open(os.path.join(dataset_path, 'states.csv.gz'), 'rt') as fd:
+        with open(os.path.join(dataset_path, 'states.csv')) as fd:
             for state_data in csv.DictReader(fd):
                 states.append(State(
                     name=state_data['name'],
@@ -31,7 +29,7 @@ class Command(BaseCommand):
         states_mapping = {state.short_name: state.pk for state in states}
 
         cities = []
-        with gzip.open(os.path.join(dataset_path, 'cities.csv.gz'), 'rt') as fd:
+        with open(os.path.join(dataset_path, 'cities.csv')) as fd:
             for city_data in csv.DictReader(fd):
                 cities.append(City(
                     name=city_data['name'],
