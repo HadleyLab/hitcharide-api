@@ -9,10 +9,19 @@ class RidesListFilter(BaseFilterBackend):
         if city_from:
             queryset = queryset.filter(city_from=city_from)
 
+        place_from = int(request.query_params.get('place_from', 0))
+        if place_from:
+            queryset = queryset.filter(place_from=place_from)
+
         city_to = int(request.query_params.get('city_to', 0))
         if city_to:
             queryset = queryset.filter(
                 Q(city_to=city_to) | Q(stops__city=city_to))
+
+        place_to = int(request.query_params.get('place_to', 0))
+        if place_to:
+            queryset = queryset.filter(
+                Q(place_to=place_to) | Q(stops__place=place_to))
 
         date_time_from = request.query_params.get('date_time_from', '')
         if date_time_from:
@@ -41,9 +50,17 @@ class RequestsListFilter(BaseFilterBackend):
         if city_from:
             queryset = queryset.filter(city_from=city_from)
 
+        place_from = int(request.query_params.get('place_from', 0))
+        if place_from:
+            queryset = queryset.filter(place_from=place_from)
+
         city_to = int(request.query_params.get('city_to', 0))
         if city_to:
             queryset = queryset.filter(city_to=city_to)
+
+        place_to = int(request.query_params.get('place_to', 0))
+        if place_to:
+            queryset = queryset.filter(place_to=place_to)
 
         date_time_from = request.query_params.get('date_time_from', '')
         if date_time_from:

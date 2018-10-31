@@ -38,8 +38,18 @@ class Ride(CreatedUpdatedMixin, models.Model):
         'places.City',
         on_delete=models.PROTECT,
         related_name='+')
+    place_from = models.ForeignKey(
+        'places.Place',
+        blank=True, null=True,
+        on_delete=models.PROTECT,
+        related_name='+')
     city_to = models.ForeignKey(
         'places.City',
+        on_delete=models.PROTECT,
+        related_name='+')
+    place_to = models.ForeignKey(
+        'places.Place',
+        blank=True, null=True,
         on_delete=models.PROTECT,
         related_name='+')
     date_time = models.DateTimeField()
@@ -134,7 +144,16 @@ class RideStop(models.Model):
         related_name='stops')
     city = models.ForeignKey(
         'places.City',
-        on_delete=models.PROTECT)
+        on_delete=models.PROTECT,
+        related_name='+'
+    )
+    place = models.ForeignKey(
+        'places.Place',
+        blank=True, null=True,
+        on_delete=models.PROTECT,
+        related_name='+'
+    )
+
     order = models.IntegerField(default=0)
 
     def __str__(self):
@@ -203,8 +222,18 @@ class RideRequest(CreatedUpdatedMixin, models.Model):
         'places.City',
         on_delete=models.PROTECT,
         related_name='+')
+    place_from = models.ForeignKey(
+        'places.Place',
+        blank=True, null=True,
+        on_delete=models.PROTECT,
+        related_name='+')
     city_to = models.ForeignKey(
         'places.City',
+        on_delete=models.PROTECT,
+        related_name='+')
+    place_to = models.ForeignKey(
+        'places.Place',
+        blank=True, null=True,
         on_delete=models.PROTECT,
         related_name='+')
     date_time = models.DateTimeField()

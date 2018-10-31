@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 
 from apps.accounts.serializers import UserPublicSerializer
 from apps.cars.serializers import CarDetailSerializer
-from apps.places.serializers import CityWithStateSerializer
+from apps.places.serializers import CityWithStateSerializer, PlaceSerializer
 from apps.reviews.models import Review, ReviewAuthorType
 from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint, \
     RideBookingStatus, RideStatus
@@ -12,17 +12,18 @@ from .models import Ride, RideStop, RideBooking, RideRequest, RideComplaint, \
 
 class RideStopDetailSerializer(serializers.ModelSerializer):
     city = CityWithStateSerializer()
+    place = PlaceSerializer()
 
     class Meta:
         model = RideStop
-        fields = ('pk', 'city', 'order')
+        fields = ('pk', 'city', 'place', 'order')
 
 
 class RideStopWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideStop
-        fields = ('pk', 'city', 'order')
+        fields = ('pk', 'city', 'place', 'order')
 
 
 class RidePassengerSerializer(serializers.ModelSerializer):
@@ -38,7 +39,9 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     car = CarDetailSerializer()
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
+    place_from = PlaceSerializer()
     city_to = CityWithStateSerializer()
+    place_to = PlaceSerializer()
     bookings = RidePassengerSerializer(source='actual_bookings',
                                        many=True)
     has_my_reviews = serializers.SerializerMethodField()
@@ -77,10 +80,10 @@ class RideDetailSerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'city_to',
-                  'date_time', 'price', 'price_with_fee', 'number_of_seats',
-                  'available_number_of_seats', 'description', 'status',
-                  'has_my_reviews', 'rating')
+        fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'place_from',
+                  'city_to', 'place_to', 'date_time', 'price', 'price_with_fee',
+                  'number_of_seats', 'available_number_of_seats', 'description',
+                  'status', 'has_my_reviews', 'rating')
 
 
 class RideWritableSerializer(WritableNestedModelSerializer):
@@ -114,8 +117,9 @@ class RideWritableSerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = Ride
-        fields = ('pk', 'stops', 'car', 'city_from', 'city_to', 'date_time',
-                  'price', 'number_of_seats', 'description')
+        fields = ('pk', 'stops', 'car', 'city_from', 'place_from', 'city_to',
+                  'place_to',  'date_time', 'price', 'number_of_seats',
+                  'description')
 
 
 class RideCancelSerializer(serializers.ModelSerializer):
@@ -167,12 +171,14 @@ class RideBookingCancelSerializer(serializers.ModelSerializer):
 
 class RideRequestDetailSerializer(serializers.ModelSerializer):
     city_from = CityWithStateSerializer()
+    place_from = PlaceSerializer()
     city_to = CityWithStateSerializer()
+    place_to = PlaceSerializer()
 
     class Meta:
         model = RideRequest
-        fields = ('pk', 'author', 'city_from', 'city_to', 'is_expired',
-                  'date_time')
+        fields = ('pk', 'author', 'city_from', 'place_from', 'city_to',
+                  'place_to', 'is_expired', 'date_time')
 
 
 class RideRequestWritableSerializer(serializers.ModelSerializer):
@@ -181,7 +187,8 @@ class RideRequestWritableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RideRequest
-        fields = ('pk', 'author', 'city_from', 'city_to', 'date_time')
+        fields = ('pk', 'author', 'city_from', 'place_from', 'city_to',
+                  'place_to', 'date_time')
 
 
 class RideComplaintWritableSerializer(serializers.ModelSerializer):
