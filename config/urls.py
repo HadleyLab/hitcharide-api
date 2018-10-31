@@ -10,7 +10,7 @@ from rest_framework_nested.routers import SimpleRouter, NestedSimpleRouter
 
 from apps.accounts.viewsets import UserDetailViewSet
 from apps.cars.viewsets import CarViewSet, CarImageViewSet
-from apps.places.viewsets import StateViewSet, CityViewSet
+from apps.places.viewsets import StateViewSet, CityViewSet, PlaceViewSet
 from apps.accounts.views import MyView, SendPhoneValidationCodeView,\
     ValidatePhoneView, complete
 from apps.rides.viewsets import RideViewSet, \
@@ -32,6 +32,7 @@ car_router.register('images', CarImageViewSet)
 router = Router()
 router.register('places/state', StateViewSet)
 router.register('places/city', CityViewSet)
+router.register('places/place', PlaceViewSet)
 
 router.register('rides/ride', RideViewSet)
 router.register('rides/booking', RideBookingViewSet)
