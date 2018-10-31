@@ -11,6 +11,7 @@ class CityAdmin(admin.ModelAdmin):
 class PlaceAdmin(admin.ModelAdmin):
     list_filter = ('category', )
     search_fields = ('name', 'short_name', 'city', )
+    readonly_fields = ('city', )
 
 
 admin.site.register(State)
