@@ -334,29 +334,6 @@ class RideBookingViewSetTest(APITestCase):
             {'cancel_reason': cancel_reason})
         self.assertForbidden(resp)
 
-    @mock.patch('apps.rides.utils.ride_booking_refund', autospec=True)
-    def test_cancel_created_booking_by_passenger(self, mock_ride_booking_refund):
-        self.authenticate()
-        ride = RideFactory.create(
-            car=self.car,
-            date_time=timezone.now() + timedelta(hours=1))
-        booking = RideBookingFactory.create(
-            ride=ride,
-            client=self.user,
-            status=RideBookingStatus.CREATED)
-        cancel_reason = 'test reason'
-
-        resp = self.client.post(
-            '/rides/booking/{0}/cancel/'.format(
-                booking.pk),
-            {'cancel_reason': cancel_reason})
-        self.assertSuccessResponse(resp)
-        self.assertEqual(mock_ride_booking_refund.call_count, 0)
-
-        booking.refresh_from_db()
-        self.assertEqual(booking.status, RideBookingStatus.CANCELED)
-        self.assertEqual(booking.cancel_reason, cancel_reason)
-
     @mock.patch('apps.rides.viewsets.create_proxy_phone_within_ride')
     def test_request_passenger_phone_by_driver_success(
             self, mock_create_proxy_phone_within_ride):
