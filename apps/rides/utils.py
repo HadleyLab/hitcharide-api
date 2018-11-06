@@ -59,10 +59,6 @@ def ride_booking_create_payment(ride_booking, request):
 
 
 def ride_payout(ride):
-    total_for_driver = ride.total_for_driver
-    if not total_for_driver:
-        return
-
     payout = Payout({
         "sender_batch_header": {
             "sender_batch_id": "{0}_ride_{1}".format(
@@ -74,7 +70,7 @@ def ride_payout(ride):
             {
                 "recipient_type": "EMAIL",
                 "amount": {
-                    "value": '{0:.2f}'.format(total_for_driver),
+                    "value": '{0:.2f}'.format(ride.total_for_driver),
                     "currency": "USD"
                 },
                 "receiver": ride.car.owner.paypal_account,
@@ -98,7 +94,8 @@ def ride_payout(ride):
         send_sms('sms_driver_ride_payout',
                  [ride.car.owner.normalized_phone],
                  {'ride': ride,
-                  'ride_detail': settings.RIDE_DETAIL_URL.format(ride_pk=ride.pk)})
+                  'ride_detail': settings.RIDE_DETAIL_URL.format(
+                      ride_pk=ride.pk)})
 
 
 def ride_booking_refund(ride_booking):
@@ -120,22 +117,46 @@ def ride_booking_refund(ride_booking):
 def cancel_ride_by_driver(ride):
     ride_bookings = ride.bookings.filter(status__in=RideBookingStatus.ACTUAL)
     for booking in ride_bookings:
-        if booking.status in [RideBookingStatus.PAYED, RideBookingStatus.CREATED]:
-            if booking.status == RideBookingStatus.PAYED:
-                ride_booking_refund(booking)
+        if booking.status == RideBookingStatus.PAYED:
+            ride_booking_refund(booking)
 
-            send_mail('email_passenger_ride_canceled',
-                      [booking.client.email],
-                      {'ride': ride})
-            if booking.client.sms_notifications:
-                send_sms('sms_passenger_ride_canceled',
-                         [booking.client.normalized_phone],
-                         {'ride': ride})
+        send_mail('email_passenger_ride_canceled',
+                  [booking.client.email],
+                  {'ride': ride})
+        if booking.client.sms_notifications:
+            send_sms('sms_passenger_ride_canceled',
+                     [booking.client.normalized_phone],
+                     {'ride': ride})
 
         booking.status = RideBookingStatus.REVOKED
         booking.save()
     ride.status = RideStatus.CANCELED
     ride.save()
+
+
+def cancel_ride_booking_by_client(ride_booking):
+    if ride_booking.status == RideBookingStatus.PAYED:
+        ride = ride_booking.ride
+        ride_booking_refund(ride_booking)
+        send_mail('email_passenger_ride_booking_canceled',
+                  [ride_booking.client.email],
+                  {'ride': ride,
+                   'ride_detail': settings.RIDE_DETAIL_URL.format(
+                       ride_pk=ride.pk)})
+        send_mail('email_driver_ride_booking_canceled',
+                  [ride_booking.ride.car.owner.email],
+                  {'ride': ride,
+                   'ride_detail': settings.RIDE_DETAIL_URL.format(
+                       ride_pk=ride.pk)})
+        if ride_booking.ride.car.owner.sms_notifications:
+            send_sms('sms_driver_ride_booking_canceled',
+                     [ride_booking.ride.car.owner.normalized_phone],
+                     {'ride': ride,
+                      'ride_detail': settings.RIDE_DETAIL_URL.format(
+                          ride_pk=ride.pk)})
+
+    ride_booking.status = RideBookingStatus.CANCELED
+    ride_booking.save()
 
 
 def ride_booking_execute_payment(payer_id, ride_booking):

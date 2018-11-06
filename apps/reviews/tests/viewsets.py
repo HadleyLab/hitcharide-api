@@ -1,3 +1,6 @@
+import datetime
+from django.utils import timezone
+
 from config.tests import APITestCase
 from apps.accounts.factories import UserFactory
 from apps.places.factories import CityFactory
@@ -19,6 +22,7 @@ class ReviewViewSetTest(APITestCase):
             model='car',
             number_of_seats=5)
         self.ride = RideFactory.create(
+            date_time=timezone.now() - datetime.timedelta(hours=1),
             car=self.car,
             city_from=self.city1,
             city_to=self.city2,

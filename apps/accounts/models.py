@@ -91,6 +91,7 @@ class User(AbstractUser):
 
         completed_rides_passenger = RideBooking.objects.filter(
             client=self,
+            status=RideBookingStatus.PAYED,
             ride__status=RideStatus.COMPLETED).count()
         canceled_rides_passenger = RideBooking.objects.filter(
             client=self,

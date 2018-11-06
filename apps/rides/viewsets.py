@@ -10,12 +10,14 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from apps.main.utils import send_mail, send_sms
-from apps.rides.permissions import IsRideOwner, IsRideBookingClient, \
-    IsRideBookingActual, RequestDriverPhonePermission, \
-    RequestPassengerPhonePermission
-from apps.rides.utils import ride_booking_refund, \
+from apps.rides.permissions import \
+    RideRequestDriverPhonePermission, \
+    RideBookingRequestPassengerPhonePermission, \
+    RideBookingCancelPermission, RideCancelPermission
+from apps.rides.utils import \
     ride_booking_execute_payment, ride_booking_create_payment, \
-    cancel_ride_by_driver, create_proxy_phone_within_ride
+    cancel_ride_by_driver, create_proxy_phone_within_ride, \
+    cancel_ride_booking_by_client
 from .filters import RidesListFilter, MyRidesFilter, RequestsListFilter, \
     BookingsListFilter
 from .mixins import ListFactoryMixin
@@ -30,7 +32,6 @@ from .serializers import RideBookingDetailSerializer, \
 
 class RideViewSet(ListFactoryMixin,
                   mixins.CreateModelMixin,
-                  mixins.UpdateModelMixin,
                   mixins.RetrieveModelMixin):
     queryset = Ride.objects.all()
     serializer_class = RideDetailSerializer
@@ -47,15 +48,13 @@ class RideViewSet(ListFactoryMixin,
         # TODO: check is_phone_validated for create
         if self.action == 'list':
             return [AllowAny()]
-        elif self.action in ['update']:
-            return [IsRideOwner()]
         else:
             return super(RideViewSet, self).get_permissions()
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset().filter(
             date_time__gt=timezone.now(),
-            status=RideStatus.CREATED)
+            status=RideStatus.CREATED).order_by('date_time')
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
@@ -63,7 +62,9 @@ class RideViewSet(ListFactoryMixin,
     def my(self, request, *args, **kwargs):
         queryset = Ride.order_by_future(self.get_queryset()).filter(
             car__owner=self.request.user,
-            status__in=[RideStatus.CREATED, RideStatus.COMPLETED])
+            status__in=[RideStatus.CREATED,
+                        RideStatus.COMPLETED,
+                        RideStatus.OBSOLETE])
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False,
@@ -76,7 +77,7 @@ class RideViewSet(ListFactoryMixin,
 
     @action(methods=['POST'], detail=True,
             serializer_class=RideCancelSerializer,
-            permission_classes=(IsRideOwner,))
+            permission_classes=(RideCancelPermission, ))
     def cancel(self, request, *args, **kwargs):
         ride = self.get_object()
         cancel_ride_by_driver(ride)
@@ -86,21 +87,18 @@ class RideViewSet(ListFactoryMixin,
         return Response({'status': 'success'})
 
     @action(methods=['POST'], detail=True,
-            permission_classes=(RequestDriverPhonePermission,))
+            permission_classes=(RideRequestDriverPhonePermission,))
     def request_driver_phone(self, request, *args, **kwargs):
         ride = self.get_object()
         proxy_phone = create_proxy_phone_within_ride(
             request.user, ride.car.owner, ride)
         return Response({'proxy_phone': proxy_phone})
 
-    # Wrap with transaction.atomic to rollback on nested serializer error
+    # It is wrapped with transaction.atomic to rollback
+    # on nested serializer error
     @transaction.atomic
     def create(self, request, *args, **kwargs):
         return super(RideViewSet, self).create(request, *args, **kwargs)
-
-    @transaction.atomic
-    def update(self, request, *args, **kwargs):
-        return super(RideViewSet, self).update(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         super(RideViewSet, self).perform_create(serializer)
@@ -120,24 +118,6 @@ class RideViewSet(ListFactoryMixin,
                           'ride_request': request,
                           'ride_detail': settings.RIDE_DETAIL_URL.format(
                               ride_pk=instance.pk)})
-
-    def perform_update(self, serializer):
-        super(RideViewSet, self).perform_update(serializer)
-        instance = serializer.instance
-        for booking in instance.payed_bookings:
-            send_mail(
-                'email_passenger_ride_edited',
-                booking.client.email,
-                {'ride': instance,
-                 'ride_detail': settings.RIDE_DETAIL_URL.format(
-                     ride_pk=instance.pk)})
-            if booking.client.sms_notifications:
-                send_sms(
-                    'sms_passenger_ride_edited',
-                    booking.client.normalized_phone,
-                    {'ride': instance,
-                     'ride_detail': settings.RIDE_DETAIL_URL.format(
-                         ride_pk=instance.pk)})
 
 
 class RideBookingViewSet(ListFactoryMixin,
@@ -177,43 +157,19 @@ class RideBookingViewSet(ListFactoryMixin,
         return self.list_factory(queryset)(request, *args, **kwargs)
 
     @action(methods=['POST'], detail=True,
-            permission_classes=(IsRideBookingClient, IsRideBookingActual,),
+            permission_classes=(RideBookingCancelPermission,),
             serializer_class=RideBookingCancelSerializer)
     def cancel(self, request, *args, **kwargs):
         ride_booking = self.get_object()
-
-        if ride_booking.status == RideBookingStatus.PAYED:
-            ride = ride_booking.ride
-            ride_booking_refund(ride_booking)
-            send_mail('email_passenger_ride_booking_canceled',
-                      [ride_booking.client.email],
-                      {'ride': ride,
-                       'ride_detail': settings.RIDE_DETAIL_URL.format(
-                           ride_pk=ride.pk)})
-            send_mail('email_driver_ride_booking_canceled',
-                      [ride_booking.ride.car.owner.email],
-                      {'ride': ride,
-                       'ride_detail': settings.RIDE_DETAIL_URL.format(
-                           ride_pk=ride.pk)})
-            if ride_booking.ride.car.owner.sms_notifications:
-                send_sms('sms_driver_ride_booking_canceled',
-                         [ride_booking.ride.car.owner.normalized_phone],
-                         {'ride': ride,
-                          'ride_detail': settings.RIDE_DETAIL_URL.format(
-                              ride_pk=ride.pk)})
-
-        ride_booking.status = RideBookingStatus.CANCELED
-        ride_booking.save()
-
+        cancel_ride_booking_by_client(ride_booking)
         serializer = self.get_serializer(
             ride_booking, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
         return Response({'status': 'success'})
 
     @action(methods=['POST'], detail=True,
-            permission_classes=(RequestPassengerPhonePermission, ))
+            permission_classes=(RideBookingRequestPassengerPhonePermission, ))
     def request_passenger_phone(self, request, *args, **kwargs):
         booking = self.get_object()
         proxy_phone = create_proxy_phone_within_ride(

@@ -56,23 +56,6 @@ class Command(BaseCommand):
         )
 
         MailTemplate.objects.create(
-            name="The ride has been edited (to passenger)",
-            subject="{{ site_name }} | The ride {{ ride }} has been edited",
-            message="""
-            <p>You're receiving this email because your booked ride has been edited at {{ site_name }}.</p>
-            <p><b>There is an information about the ride:<b><br>
-            <b>Car:</b> {{ ride.car }}<br>
-            <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
-            <b>Description:</b> {{ ride.description }}<br
-            </p>
-            <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
-            <p>Thanks for using our site!</p>
-            <p>The {{ site_name }} team</p>""",
-            slug="email_passenger_ride_edited",
-            is_html=True
-        )
-
-        MailTemplate.objects.create(
             name="The ride has the new complaint (to manager)",
             subject="{{ site_name }} | The {{ complaint.ride }} has the new complaint",
             message="""
@@ -123,10 +106,10 @@ class Command(BaseCommand):
 
         MailTemplate.objects.create(
             name="New ride for ride request (to passenger)",
-            subject="{{ site_name }} | You have a new ride suggest: {{ ride }}",
+            subject="{{ site_name }} | You have a new suggested ride: {{ ride }}",
             message="""
             <p>You created a ride request {{ ride_request }}</p>
-            <p>There is a ride for you:</p>
+            <p>Your ride matched a driver. Book it!</p>
             <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             """,
             slug="email_passenger_ride_request_ride_suggest",
@@ -281,36 +264,33 @@ class Command(BaseCommand):
         )
 
         MailTemplate.objects.create(
-            name="SMS Ride has been edited (to passenger)",
-            message="Ride {{ ride }} has been changed",
-            slug="sms_passenger_ride_edited",
-            is_html=False
-        )
-
-        MailTemplate.objects.create(
             name="SMS New ride for ride request (to passenger)",
-            message="You have a new ride suggest: {{ ride }}",
+            message="Your ride matched a driver. Book it! {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_passenger_ride_request_ride_suggest",
             is_html=False
         )
 
         MailTemplate.objects.create(
             name="SMS Ride booking canceled (to driver)",
-            message="The client cancelled a payed booking for ride {{ ride }}",
+            message="The client cancelled a payed booking for ride {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_driver_ride_booking_canceled",
             is_html=False
         )
 
         MailTemplate.objects.create(
             name="SMS Ride booking payed (to driver)",
-            message="You have a new payed ride booking for ride {{ ride }}",
+            message="You have a new payed ride booking for ride {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_driver_ride_booking_payed",
             is_html=False
         )
 
         MailTemplate.objects.create(
             name="SMS Ride payout (to driver)",
-            message="You have a payout for ride {{ ride }}",
+            message="You have a payout for ride {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_driver_ride_payout",
             is_html=False
         )

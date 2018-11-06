@@ -154,6 +154,8 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
 class RideBookingWritableSerializer(serializers.ModelSerializer):
     client = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
+    ride = serializers.PrimaryKeyRelatedField(
+        queryset=Ride.objects.filter(status=RideBookingStatus.CREATED))
 
     class Meta:
         model = RideBooking

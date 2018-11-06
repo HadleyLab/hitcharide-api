@@ -1,3 +1,4 @@
+import datetime
 from django.utils import timezone
 from factory import DjangoModelFactory, fuzzy, SubFactory, Sequence, \
     post_generation
@@ -15,7 +16,9 @@ class RideFactory(DjangoModelFactory):
     city_to = SubFactory(CityFactory)
     number_of_seats = fuzzy.FuzzyInteger(low=2, high=7)
     price = fuzzy.FuzzyInteger(low=2, high=100)
-    date_time = fuzzy.FuzzyDateTime(start_dt=timezone.now().replace(year=2003))
+    date_time = fuzzy.FuzzyDateTime(
+        start_dt=timezone.now() + datetime.timedelta(days=1),
+        end_dt=timezone.now() + datetime.timedelta(days=10))
     description = fuzzy.FuzzyText()
 
     class Meta:
