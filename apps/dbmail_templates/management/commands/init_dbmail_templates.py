@@ -265,28 +265,32 @@ class Command(BaseCommand):
 
         MailTemplate.objects.create(
             name="SMS New ride for ride request (to passenger)",
-            message="You have a new ride suggest: {{ ride }}",
+            message="You have a new ride suggest: {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_passenger_ride_request_ride_suggest",
             is_html=False
         )
 
         MailTemplate.objects.create(
             name="SMS Ride booking canceled (to driver)",
-            message="The client cancelled a payed booking for ride {{ ride }}",
+            message="The client cancelled a payed booking for ride {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_driver_ride_booking_canceled",
             is_html=False
         )
 
         MailTemplate.objects.create(
             name="SMS Ride booking payed (to driver)",
-            message="You have a new payed ride booking for ride {{ ride }}",
+            message="You have a new payed ride booking for ride {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_driver_ride_booking_payed",
             is_html=False
         )
 
         MailTemplate.objects.create(
             name="SMS Ride payout (to driver)",
-            message="You have a payout for ride {{ ride }}",
+            message="You have a payout for ride {{ ride }}. "
+                    "{{ ride_detail|safe }}",
             slug="sms_driver_ride_payout",
             is_html=False
         )
