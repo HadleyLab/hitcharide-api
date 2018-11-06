@@ -199,7 +199,7 @@ class RideRequestViewSet(mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
-    queryset = RideRequest.objects.all().order_by('created')
+    queryset = RideRequest.objects.all().order_by('date_time')
     serializer_class = RideRequestDetailSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAuthenticated,)
