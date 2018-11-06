@@ -106,10 +106,10 @@ class Command(BaseCommand):
 
         MailTemplate.objects.create(
             name="New ride for ride request (to passenger)",
-            subject="{{ site_name }} | You have a new ride suggest: {{ ride }}",
+            subject="{{ site_name }} | You have a new suggested ride: {{ ride }}",
             message="""
             <p>You created a ride request {{ ride_request }}</p>
-            <p>There is a ride for you:</p>
+            <p>Your ride matched a driver. Book it!</p>
             <p>You can see the ride details <a href='{{ ride_detail|safe }}'>here</a></p>
             """,
             slug="email_passenger_ride_request_ride_suggest",
@@ -265,7 +265,7 @@ class Command(BaseCommand):
 
         MailTemplate.objects.create(
             name="SMS New ride for ride request (to passenger)",
-            message="You have a new ride suggest: {{ ride }}. "
+            message="Your ride matched a driver. Book it! {{ ride }}. "
                     "{{ ride_detail|safe }}",
             slug="sms_passenger_ride_request_ride_suggest",
             is_html=False
