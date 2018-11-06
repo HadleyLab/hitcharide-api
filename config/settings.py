@@ -262,9 +262,12 @@ CONSTANCE_CONFIG = {
     'SELLER_EMAIL': (
         'seller@hitcharide.com', 'Email for the seller PayPal account'),
     'SYSTEM_FEE': (15, 'Ride\'s fee (in percent from 0 to 100)'),
-    'RIDE_END_TIMEDELTA': (24, 'Ride end timedelta (in hours)'),
+    'RIDE_END_TIMEDELTA': (
+        24, 'Time delta (in hours) after the ride becomes completed '
+            'or obsolete'),
     'RIDE_BOOKING_CANCEL_END_TIMEDELTA': (
-        24, 'Ride booking cancel end timedelta (in hours)'),
+        24, 'Time delta (in hours) before the booking can be canceled'
+            ' (TODO: now it does not affect front end)'),
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
