@@ -16,10 +16,11 @@ class RideStatus(object):
     CREATED = 'created'
     COMPLETED = 'completed'
     CANCELED = 'canceled'
+    OBSOLETE = 'obsolete'
 
     CHOICES = tuple(
         (item, item.title()) for item in [
-            CREATED, COMPLETED, CANCELED
+            CREATED, COMPLETED, CANCELED, OBSOLETE
         ]
     )
 

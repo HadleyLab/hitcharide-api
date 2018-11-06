@@ -71,31 +71,6 @@ class RideViewSetTest(APITestCase):
         resp = self.client.post('/rides/ride/', data, format='json')
         self.assertBadRequest(resp)
 
-    def test_update(self):
-        self.authenticate()
-        data = self.get_ride_data()
-        data.update({'car': self.car.pk})
-        resp = self.client.post('/rides/ride/', data, format='json')
-        self.assertSuccessResponse(resp)
-
-        ride_pk = resp.data['pk']
-
-        city3 = CityFactory.create()
-        data['stops'].append({
-            'city': city3.pk,
-            'order': 1,
-        })
-        resp = self.client.put('/rides/ride/{0}/'.format(ride_pk), data,
-                               format='json')
-        self.assertSuccessResponse(resp)
-        self.assertEqual(len(resp.data['stops']), 1)
-        self.assertSetEqual(
-            set([(stop['city'], stop['order']) for stop in resp.data['stops']]),
-            {
-                (city3.pk, 1),
-            }
-        )
-
     def test_list(self):
         self.authenticate()
 
@@ -317,11 +292,13 @@ class RideBookingViewSetTest(APITestCase):
         self.assertListEqual([another_booking.pk],
                              [book['pk'] for book in resp.data])
 
-    @mock.patch('apps.rides.viewsets.ride_booking_refund', autospec=True)
-    def test_cancel_payed_booking_by_passenger(self, mock_ride_booking_refund):
+    @mock.patch('apps.rides.utils.ride_booking_refund', autospec=True)
+    def test_cancel_payed_booking_in_cancelable_period_by_passenger(
+            self, mock_ride_booking_refund):
         self.authenticate()
         ride = RideFactory.create(
-            car=self.car)
+            car=self.car,
+            date_time=timezone.now() + timedelta(hours=25))
         payed_booking = RideBookingFactory.create(
             ride=ride,
             client=self.user,
@@ -340,11 +317,29 @@ class RideBookingViewSetTest(APITestCase):
         self.assertEqual(payed_booking.status, RideBookingStatus.CANCELED)
         self.assertEqual(payed_booking.cancel_reason, cancel_reason)
 
-    @mock.patch('apps.rides.viewsets.ride_booking_refund', autospec=True)
+    def test_cancel_payed_booking_not_in_cancelable_period_by_passenger(self):
+        self.authenticate()
+        ride = RideFactory.create(
+            car=self.car,
+            date_time=timezone.now() + timedelta(hours=1))
+        payed_booking = RideBookingFactory.create(
+            ride=ride,
+            client=self.user,
+            status=RideBookingStatus.PAYED)
+        cancel_reason = 'test reason'
+
+        resp = self.client.post(
+            '/rides/booking/{0}/cancel/'.format(
+                payed_booking.pk),
+            {'cancel_reason': cancel_reason})
+        self.assertForbidden(resp)
+
+    @mock.patch('apps.rides.utils.ride_booking_refund', autospec=True)
     def test_cancel_created_booking_by_passenger(self, mock_ride_booking_refund):
         self.authenticate()
         ride = RideFactory.create(
-            car=self.car)
+            car=self.car,
+            date_time=timezone.now() + timedelta(hours=1))
         booking = RideBookingFactory.create(
             ride=ride,
             client=self.user,

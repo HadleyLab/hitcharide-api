@@ -122,8 +122,8 @@ CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_ACCEPT_CONTENT = ['pickle']
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_BEAT_SCHEDULE = {
-    'create-payouts-for-rides': {
-        'task': 'apps.rides.tasks.create_payouts_for_rides',
+    'complete-rides': {
+        'task': 'apps.rides.tasks.complete_rides',
         'schedule': crontab(hour='*', minute='0'),
     },
     'check-expired-time-of-ride-bookings': {
@@ -263,7 +263,8 @@ CONSTANCE_CONFIG = {
         'seller@hitcharide.com', 'Email for the seller PayPal account'),
     'SYSTEM_FEE': (15, 'Ride\'s fee (in percent from 0 to 100)'),
     'RIDE_END_TIMEDELTA': (24, 'Ride end timedelta (in hours)'),
-
+    'RIDE_BOOKING_CANCEL_END_TIMEDELTA': (
+        24, 'Ride booking cancel end timedelta (in hours)'),
 }
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 

@@ -9,7 +9,7 @@ from apps.rides.utils import ride_payout, send_ride_need_review
 
 @shared_task()
 @transaction.atomic
-def create_payouts_for_rides():
+def complete_rides():
     ride_end_datetime = timezone.now() - timezone.timedelta(
         hours=config.RIDE_END_TIMEDELTA)
     finished_rides = Ride.objects.filter(
@@ -17,10 +17,14 @@ def create_payouts_for_rides():
         date_time__lte=ride_end_datetime,
         complaints__isnull=True)
     for ride in finished_rides.all():
-        ride_payout(ride)
-        ride.status = RideStatus.COMPLETED
+        if ride.payed_bookings.exists():
+            ride_payout(ride)
+            send_ride_need_review(ride)
+            ride.status = RideStatus.COMPLETED
+        else:
+            ride.status = RideStatus.OBSOLETE
+
         ride.save()
-        send_ride_need_review(ride)
 
 
 @shared_task()
