@@ -2,13 +2,13 @@ from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from apps.accounts.serializers import UserBaseSerializer
+from apps.accounts.serializers import UserPublicSerializer
 from apps.rides.models import RideBookingStatus, RideStatus
 from .models import Review, ReviewAuthorType
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = UserBaseSerializer()
+    author = UserPublicSerializer()
 
     class Meta:
         model = Review

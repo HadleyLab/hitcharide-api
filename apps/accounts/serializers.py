@@ -6,10 +6,11 @@ from .models import User
 class UserBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('pk', 'first_name', 'last_name', 'photo', 'timezone',)
+        fields = ('pk', 'timezone',)
 
 
 class UserPublicSerializer(UserBaseSerializer):
+    display_name = serializers.CharField(source='get_public_name')
     rating = serializers.JSONField(
         read_only=True,
         source='get_rating')
@@ -19,17 +20,18 @@ class UserPublicSerializer(UserBaseSerializer):
 
     class Meta(UserBaseSerializer.Meta):
         fields = (
-            'pk', 'first_name', 'last_name',
-            'age', 'photo', 'short_desc', 'is_phone_validated',
-            'rating', 'rides_statistics', 'timezone',
+            'pk', 'display_name', 'nickname', 'age', 'photo', 'short_desc',
+            'is_phone_validated', 'rating', 'rides_statistics', 'timezone',
         )
 
 
 class UserDetailSerializer(UserPublicSerializer):
+    display_name = serializers.CharField(source='get_full_name')
+
     class Meta(UserPublicSerializer.Meta):
         fields = (
-            'pk', 'email', 'phone', 'first_name', 'last_name',
-            'age', 'photo', 'short_desc', 'is_phone_validated',
+            'pk', 'email', 'phone', 'display_name', 'first_name', 'last_name',
+            'nickname', 'age', 'photo', 'short_desc', 'is_phone_validated',
             'paypal_account', 'rating', 'rides_statistics', 'timezone',
             'sms_notifications'
         )
@@ -68,7 +70,7 @@ class UserUpdateSerializer(UserBaseSerializer):
 
     class Meta(UserBaseSerializer.Meta):
         fields = (
-            'pk', 'phone', 'first_name', 'last_name',
+            'pk', 'phone', 'first_name', 'last_name', 'nickname',
             'photo', 'short_desc', 'paypal_account', 'timezone',
             'sms_notifications'
         )

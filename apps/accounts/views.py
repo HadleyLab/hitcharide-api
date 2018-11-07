@@ -69,6 +69,9 @@ class ValidatePhoneView(APIView):
 @psa('complete')
 def complete(request, backend, *args, **kwargs):
     """Authentication complete view"""
+    data = request.backend.strategy.request_data()
+    redirect_value = request.backend.strategy.session_get('next', '') or \
+                     data.get('next', '')
 
     # TODO: think about inactive users
     user = request.backend.complete(*args, **kwargs)
@@ -76,7 +79,8 @@ def complete(request, backend, *args, **kwargs):
     if user:
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
-        url = "{0}?token={1}".format(settings.LOGIN_REDIRECT_URL, token)
+        url = "{0}?token={1}&next={2}".format(
+            settings.LOGIN_REDIRECT_URL, token, redirect_value)
     else:
         url = settings.LOGIN_ERROR_URL
 
