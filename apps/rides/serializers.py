@@ -27,27 +27,53 @@ class RideStopWritableSerializer(serializers.ModelSerializer):
 
 
 class RidePassengerSerializer(serializers.ModelSerializer):
+    passenger_display_name = serializers.SerializerMethodField()
     client = UserPublicSerializer()
+
+    def get_passenger_display_name(self, booking):
+        user = self.context['request'].user
+        driver = booking.ride.car.owner
+        passenger = booking.client
+        has_payed_booking = booking.ride.payed_bookings.filter(
+            client=user.pk).exists()
+
+        if user == driver and booking.status == RideBookingStatus.PAYED:
+            return passenger.get_full_name()
+
+        if user == passenger or has_payed_booking:
+            return passenger.get_full_name()
+
+        return passenger.get_public_name()
 
     class Meta:
         model = RideBooking
         fields = ('pk', 'client', 'seats_count', 'status', 'paypal_payment_id',
-                  'paypal_approval_link', 'created',)
+                  'paypal_approval_link', 'created', 'passenger_display_name', )
 
 
 class RideDetailSerializer(WritableNestedModelSerializer):
+    driver_display_name = serializers.SerializerMethodField()
     car = CarDetailSerializer()
     stops = RideStopDetailSerializer(many=True)
     city_from = CityWithStateSerializer()
     place_from = PlaceSerializer()
     city_to = CityWithStateSerializer()
     place_to = PlaceSerializer()
-    bookings = RidePassengerSerializer(source='actual_bookings',
-                                       many=True)
+    bookings = RidePassengerSerializer(
+        source='actual_bookings', many=True)
     has_my_reviews = serializers.SerializerMethodField()
     rating = serializers.JSONField(
         read_only=True,
         source='get_rating')
+
+    def get_driver_display_name(self, ride):
+        user = self.context['request'].user
+        driver = ride.car.owner
+        has_payed_booking = ride.payed_bookings.filter(client=user.pk).exists()
+        if driver == user or has_payed_booking:
+            return driver.get_full_name()
+
+        return driver.get_public_name()
 
     def get_has_my_reviews(self, ride):
         if ride.status != RideStatus.COMPLETED:
@@ -82,7 +108,7 @@ class RideDetailSerializer(WritableNestedModelSerializer):
         fields = ('pk', 'stops', 'car', 'bookings', 'city_from', 'place_from',
                   'city_to', 'place_to', 'date_time', 'price', 'price_with_fee',
                   'number_of_seats', 'available_number_of_seats', 'description',
-                  'status', 'has_my_reviews', 'rating')
+                  'status', 'has_my_reviews', 'rating', 'driver_display_name',)
 
 
 class RideWritableSerializer(WritableNestedModelSerializer):
@@ -148,7 +174,7 @@ class RideBookingDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = RideBooking
         fields = ('pk', 'client', 'ride', 'seats_count', 'status',
-                  'paypal_approval_link', 'has_my_reviews', 'rating')
+                  'paypal_approval_link', 'has_my_reviews', 'rating', )
 
 
 class RideBookingWritableSerializer(serializers.ModelSerializer):

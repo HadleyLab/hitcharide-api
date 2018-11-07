@@ -223,6 +223,11 @@ class Command(BaseCommand):
             <p>You can rate passengers from your ride, 
             by using this link: <a href='{{ review_url|safe }}'>rate passengers.</a>
             </p>
+            <p><b>There is an information about the ride:<b><br>
+            <b>Car:</b> {{ ride.car }}<br>
+            <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
+            <b>Description:</b> {{ ride.description }}<br>
+            </p>
             <p>Thanks for using our site!</p>
             <p>The {{ site_name }} team</p>""",
             slug="email_driver_rate_passengers",
@@ -235,12 +240,15 @@ class Command(BaseCommand):
             message="""
                 <p></p>
                 <p>You can rate the ride {{ ride }} and driver 
-                {{ driver.first_name }} {{ driver.last_name }}<br>
+                {{ driver.get_full_name }}
+                <br>
+                Using this link: <a href='{{ review_url|safe }}'>rate a ride.</a>
+                <br>
+                <p><b>There is an information about the ride:<b><br>
                 <b>Date:</b> {{ ride_date_time }}<br>
                 <b>Car:</b> {{ ride.car }}<br>
                 <b>Number of seats:</b> {{ ride.number_of_seats }}<br>
-                <b>Description:</b> {{ ride.description }}<br>
-                Using this link: <a href='{{ review_url|safe }}'>rate a ride.</a>
+                <b>Description:</b> {{ ride.description }}
                 </p>
                 <p>Thanks for using our site!</p>
                 <p>The {{ site_name }} team</p>""",

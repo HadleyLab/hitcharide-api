@@ -25,4 +25,4 @@ class Car(models.Model):
         return '{0} {1} - {2}'.format(
             self.brand,
             self.model,
-            self.owner.get_full_name())
+            self.owner.get_public_name())

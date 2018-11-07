@@ -25,6 +25,9 @@ class User(AbstractUser):
     email = models.EmailField(
         'email address',
         unique=True)
+    nickname = models.CharField(
+        'nickname', max_length=30,
+        blank=True, null=False)
     phone = PhoneField(
         blank=True, null=True)
     is_phone_validated = models.BooleanField(
@@ -63,6 +66,12 @@ class User(AbstractUser):
 
         super(User, self).save(force_insert, force_update, *args, **kwargs)
         self.__original_phone = self.phone
+
+    def get_public_name(self):
+        if self.nickname:
+            return self.nickname
+
+        return self.get_full_name()
 
     @property
     def age(self):
