@@ -205,6 +205,12 @@ class RideRequestViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated,)
     filter_backends = (RequestsListFilter, )
 
+    def get_permissions(self):
+        if self.action == 'list':
+            return [AllowAny()]
+        else:
+            return super(RideRequestViewSet, self).get_permissions()
+
     def get_serializer_class(self):
         if self.action in ['create', 'update']:
             return RideRequestWritableSerializer

@@ -81,12 +81,28 @@ def set_twilio_proxy_session_id(src_phone, dst_phone, context,
         session_id, timeout=timeout)
 
 
-def twilio_create_proxy_session(src_phone, dst_phone, context, date_expired):
+def _twilio_add_new_number_to_proxy_pool():
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     service = client.proxy.services(
         settings.TWILIO_PASSENGER_AND_DRIVER_SESSION_ID)
 
-    # Try to get a previous opened session
+    available_numbers = client.available_phone_numbers('US').local
+    available_number = available_numbers.list(
+        sms_enabled=True,
+        voice_enabled=True,
+        exclude_all_address_required=True,
+        limit=1
+    )[0]
+    new_number = client.incoming_phone_numbers.create(
+        phone_number=available_number.phone_number)
+    service.phone_numbers.create(phone_number=new_number.phone_number)
+
+
+def _twilio_get_existing_proxy_session(src_phone, dst_phone, context):
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+    service = client.proxy.services(
+        settings.TWILIO_PASSENGER_AND_DRIVER_SESSION_ID)
+
     existing_session_id = get_twilio_proxy_sesssion_id(
         src_phone, dst_phone, context)
     if existing_session_id:
@@ -102,7 +118,15 @@ def twilio_create_proxy_session(src_phone, dst_phone, context, date_expired):
         except TwilioException:
             pass
 
-    # Create a new session
+    return None
+
+
+def _twilio_create_new_proxy_session(
+        src_phone, dst_phone, context, date_expired, after_exception=False):
+    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+    service = client.proxy.services(
+        settings.TWILIO_PASSENGER_AND_DRIVER_SESSION_ID)
+
     session = service.sessions.create(date_expiry=to_iso(date_expired))
 
     try:
@@ -111,9 +135,27 @@ def twilio_create_proxy_session(src_phone, dst_phone, context, date_expired):
         set_twilio_proxy_session_id(
             src_phone, dst_phone, context, session.sid, date_expired)
         return session, src_participant, dst_participant
-    except TwilioException:
+    except TwilioException as exc:
         session.delete()
+
+        # No available proxy - buy new number and try again
+        if exc.code == 80206 and not after_exception:
+            _twilio_add_new_number_to_proxy_pool()
+            return _twilio_create_new_proxy_session(
+                src_phone, dst_phone, context, date_expired,
+                after_exception=True)
+
         raise
+
+
+def twilio_create_proxy_session(src_phone, dst_phone, context, date_expired):
+    existing_session = _twilio_get_existing_proxy_session(
+        src_phone, dst_phone, context)
+    if existing_session:
+        return existing_session
+
+    return _twilio_create_new_proxy_session(
+        src_phone, dst_phone, context, date_expired)
 
 
 def twilio_create_proxy_phone(src_phone, dst_phone, context, date_expired):
