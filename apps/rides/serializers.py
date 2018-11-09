@@ -65,6 +65,7 @@ class RideDetailSerializer(WritableNestedModelSerializer):
     rating = serializers.JSONField(
         read_only=True,
         source='get_rating')
+    price_with_fee = serializers.DecimalField(decimal_places=2, max_digits=10)
 
     def get_driver_display_name(self, ride):
         user = self.context['request'].user
